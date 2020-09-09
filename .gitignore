@@ -25,6 +25,9 @@
 *.mtc1
 *.out
 *.synctex.gz
+*.fdb_latexmk
+*.fls
+*Notes.bib
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
