@@ -31,7 +31,7 @@ def FrankeFunction(x, y):
 def part_1a():
     # Sample the franke function n times at randomly chosen points
     n = 100
-    deg = 4
+    deg = 5
     x = np.random.uniform(0, 1, n)
     y = np.random.uniform(0, 1, n)
     z = FrankeFunction(x, y)
@@ -70,7 +70,7 @@ def part_1a():
     surf = ax.plot_surface(X, Y, z_fit, cmap=cm.coolwarm)
 
     plt.show()
-    
+
     return
 
 

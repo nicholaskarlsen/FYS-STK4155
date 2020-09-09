@@ -38,7 +38,7 @@ def evaluate_poly_2D(x, y, beta, n):
         n (int): degree of polynomial
 
     Returns:
-        Float (or Array, depending on input): Polynomial evaluated at (x, y) 
+        Float (or Array, depending on input): Polynomial evaluated at (x, y)
     """
 
     z = np.zeros(x.shape)
@@ -46,6 +46,6 @@ def evaluate_poly_2D(x, y, beta, n):
     for i in range(1, n + 1):
         q = int(i * (i + 1) / 2)
         for k in range(i + 1):
-            z += beta[q + k]  * x ** (i - 1) * y**k
+            z += beta[q + k]  * x ** (i - k) * y**k
 
     return z
