@@ -24,26 +24,28 @@ def design_matrix_2D(x, y, n):
         for k in range(i + 1):
             X[:, q + k] = x ** (i - k) * y ** k
 
+            print(q+k, ":", "x^%i" %(i-k), "* y^%i" % k)
+
     return X
 
 
-def evaluate_poly_2D(x, y, beta):
+def evaluate_poly_2D(x, y, beta, n):
     """Evaluates a polynomial constructed by OLS_2D at (x,y) given an array containing betas
     Args:
         x (Int): x-coordinate to evaluate polynomial (Can be array)
         y (Int): y-coordinate to evaluate polynomial (Can be array)
         betas (Array): Free parameters in polynomial.
+        n (int): degree of polynomial
 
     Returns:
         Float (or Array, depending on input): Polynomial evaluated at (x, y) 
     """
-    n = len(beta) - 1  # Degree of the polynomial
 
-    # Construct the polynomial in a way corresponding to design_matrix_2D(...)
-    z = beta[0]  # initiate result
+    z = np.zeros(x.shape)
+    z += beta[0]
     for i in range(1, n + 1):
         q = int(i * (i + 1) / 2)
         for k in range(i + 1):
-            z += x ** (i - k) * y ** k
-    
+            z += beta[q + k]  * x ** (i - 1) * y**k
+
     return z
