@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
-import OLS
 import linear_regression
 import utils
 
@@ -36,7 +35,7 @@ def part_1a():
     y = np.random.uniform(0, 1, n)
     z = FrankeFunction(x, y)
     # Find the least-squares solution
-    beta = OLS.OLS_2D(x, y, z, n=deg)
+    beta = linear_regression.OLS_2D(x, y, z, n=deg)
 
     # Check MSE
     print("MSE = %.3f" % MSE(FrankeFunction(x, y), linear_regression.evaluate_poly_2D(x, y, beta, deg)))
