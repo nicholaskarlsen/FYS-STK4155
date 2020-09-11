@@ -31,15 +31,21 @@ def part_1a():
     # Sample the franke function n times at randomly chosen points
     n = 100
     deg = 5
+    noise_scale = 0.2
     x = np.random.uniform(0, 1, n)
     y = np.random.uniform(0, 1, n)
     z = FrankeFunction(x, y)
+    # Adding standard normal noise:
+    z_noisy = z + noise_scale*np.random.normal(0,1,len(z))
     # Find the least-squares solution
-    beta = linear_regression.OLS_2D(x, y, z, n=deg)
+    beta = linear_regression.OLS_2D(x, y, z, deg)
+    beta_noisy = linear_regression.OLS_2D(x, y, z_noisy, deg)
 
     # Check MSE
-    print("MSE = %.3f" % MSE(FrankeFunction(x, y), linear_regression.evaluate_poly_2D(x, y, beta, deg)))
-
+    print("MSE = %.3f" % MSE(z, linear_regression.evaluate_poly_2D(x, y, beta, deg)))
+    # And with noise
+    print("Including standard normal noise scaled by {}, MSE = {:.3f}".format(
+        noise_scale, MSE(z_noisy, linear_regression.evaluate_poly_2D(x, y, beta_noisy, deg))))
     # Evaluate the Franke function & least-squares
     x = np.linspace(0, 1, 30)
     y = np.linspace(0, 1, 30)
@@ -47,11 +53,12 @@ def part_1a():
 
     z_analytic = FrankeFunction(X, Y)
     z_fit = linear_regression.evaluate_poly_2D(X, Y, beta, deg)
+    z_fit_noisy = linear_regression.evaluate_poly_2D(X, Y, beta_noisy, deg)
 
     fig = plt.figure()
 
     # Plot the analytic curve
-    ax = fig.add_subplot(1, 2, 1, projection="3d")
+    ax = fig.add_subplot(1, 3, 1, projection="3d")
     ax.set_title("Franke Function")
     ax.view_init(azim=45)
     ax.set_xlabel("x")
@@ -60,13 +67,22 @@ def part_1a():
     surf = ax.plot_surface(X, Y, z_analytic, cmap=cm.coolwarm)
 
     # Plot the fitted curve
-    ax = fig.add_subplot(1, 2, 2, projection="3d")
+    ax = fig.add_subplot(1, 3, 2, projection="3d")
     ax.set_title("OLS")
     ax.view_init(azim=45)
     ax.set_xlabel("x")
     ax.set_ylabel("y")
     ax.set_zlabel("z")
     surf = ax.plot_surface(X, Y, z_fit, cmap=cm.coolwarm)
+
+    # Plot fitted curve, with noisy beta estimates
+    ax = fig.add_subplot(1, 3, 3, projection="3d")
+    ax.set_title("OLS with noise")
+    ax.view_init(azim=45)
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+    surf = ax.plot_surface(X, Y, z_fit_noisy, cmap=cm.coolwarm)
 
     plt.show()
 
