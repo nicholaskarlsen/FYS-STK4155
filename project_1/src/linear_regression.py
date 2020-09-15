@@ -55,12 +55,46 @@ def OLS_2D(X, z):
     """Computes the ordinary least squares solution of X -> (z) where X is the design
         matrix for an n-th degree polynomial fitting.
     Args:
+        X (Array): Design matrix from design_matrix_2D
         z (Array): z data points, i.e [z0,z1,...,zn]
-        n (Int): Degree of polynomial to model
 
     Returns:
-        [type]: [description]
+        beta (Array): The beta vector
     """
     beta = np.linalg.inv(X.T @ X) @ X.T @ z
+
+    return beta
+
+def OLS_SVD_2D(X, z):
+    """Computes the ordinary least squares solution of X -> (z) where X is the design
+        matrix for an n-th degree polynomial fitting, using the SVD-inversion.
+    Args:
+        X (Array): Design matrix from design_matrix_2D
+        z (Array): z data points, i.e [z0,z1,...,zn]
+    Returns:
+        beta (Array): The beta vector
+    """
+    U, s, VT = np.linalg.svd(X)
+    UT = U.T
+    V = V.T
+    D = np.eye(len(U),len(VT) * s
+    pseudo_inv = V@np.inv(D)@UT
+    beta =  pseud_inv @ X.T @ z
+
+    return beta
+
+def Ridge_2D(X, z, lambda):
+    """Computes the ordinary least squares solution of X -> (z) where X is the design
+        matrix for an n-th degree polynomial fitting.
+    Args:
+        X (Array): Design matrix from design_matrix_2D
+        z (Array): z data points, i.e [z0,z1,...,zn]
+        lambda (float)
+    Returns:
+        beta (Array): The beta vector
+    """
+    p_feat = len(X[0,:]) #number of columns/features in X
+    I = np.eye(p_feat,p_feat)
+    beta = np.linalg.inv(X.T @ X + lambda * I) @ X.T @ z
 
     return beta

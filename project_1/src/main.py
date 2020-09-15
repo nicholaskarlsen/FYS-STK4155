@@ -6,6 +6,7 @@ import linear_regression
 import utils
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+import sklearn.linear_model as skl
 
 utils.plot_settings() # LaTeX fonts in Plots!
 
@@ -52,7 +53,12 @@ def part_1a():
     X_train_scaled = scaler.transform(X_train)
     X_test_scaled = scaler.transform(X_test)
 
-    
+    # For ridge and lasso, lasso directly from sklearn.
+    n_lambdas = 100
+    lambdas = np.logspace(-3,0,n_lambdas)
+    clf_Lasso = skl.Lasso(alpha=lamb).fit(X_train,z_train)
+    y_Lasso = clf_Lasso.predict(X_test)
+
 
     # Check MSE
     print("MSE = %.3f" % MSE(z, linear_regression.evaluate_poly_2D(x, y, beta, deg)))
