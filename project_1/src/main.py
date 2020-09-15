@@ -4,7 +4,8 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import linear_regression
 import utils
-
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 utils.plot_settings() # LaTeX fonts in Plots!
 
@@ -37,9 +38,21 @@ def part_1a():
     z = FrankeFunction(x, y)
     # Adding standard normal noise:
     z_noisy = z + noise_scale*np.random.normal(0,1,len(z))
+    # Making the design matrix
+    X = design_matrix_2D(x,y,deg)
     # Find the least-squares solution
-    beta = linear_regression.OLS_2D(x, y, z, deg)
-    beta_noisy = linear_regression.OLS_2D(x, y, z_noisy, deg)
+    beta = linear_regression.OLS_2D(X, z)
+    beta_noisy = linear_regression.OLS_2D(X, z_noisy)
+
+    # Split into training and test data with ratio 0.2
+    X_train, X_test, z_train, z_test = train_test_split(X, z, test_size = 0.2)
+    # Scale data according to sklearn, beware possible problems with intercept and std.
+    scaler = StandardScaler()
+    scaler.fit(X_train)
+    X_train_scaled = scaler.transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+
+    
 
     # Check MSE
     print("MSE = %.3f" % MSE(z, linear_regression.evaluate_poly_2D(x, y, beta, deg)))
