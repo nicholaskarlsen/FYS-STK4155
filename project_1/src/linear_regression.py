@@ -24,8 +24,6 @@ def design_matrix_2D(x, y, n):
         for k in range(i + 1):
             X[:, q + k] = x ** (i - k) * y ** k
 
-            print(q+k, ":", "x^%i" %(i-k), "* y^%i" % k)
-
     return X
 
 
