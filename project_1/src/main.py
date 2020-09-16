@@ -56,8 +56,9 @@ def part_1a():
     # For ridge and lasso, lasso directly from sklearn.
     n_lambdas = 100
     lambdas = np.logspace(-3,0,n_lambdas)
-    clf_Lasso = skl.Lasso(alpha=lamb).fit(X_train,z_train)
-    y_Lasso = clf_Lasso.predict(X_test)
+    for lamb in lamdas:
+        clf_Lasso = skl.Lasso(alpha=lamb).fit(X_train,z_train)
+        y_Lasso = clf_Lasso.predict(X_test)
 
     # Bootstrap skeleton
 
@@ -81,6 +82,17 @@ def part_1a():
         z_folded = z_train[np.logical_not(test_index)]
 
         #do whatever
+
+    #Alternatively for k-fold
+
+    k_folds = 5
+    elements_per_bin = int(len(z_train)/k_folds)
+    permutations = np.random.permutation(np.arange(len(z_train)))
+    for k in range(k_folds):
+        test_mask = np.ones(len(z_train), bool)
+        test_mask[k*elements_per_bin:(k+1)*elements_per_bin] = False
+        z_folded_test = z_train[permutations[np.logical_not(test_mask)]]
+        z_folded_train = z_train[permutations[test_mask]]
 
     # Check MSE
     print("MSE = %.3f" % MSE(z, linear_regression.evaluate_poly_2D(x, y, beta, deg)))
