@@ -76,9 +76,9 @@ def OLS_SVD_2D(X, z):
     """
     U, s, VT = np.linalg.svd(X)
     UT = U.T
-    V = V.T
+    V = VT.T
     D = np.eye(len(U),len(VT)) / s
-    pseudo_inv = V @ D @ UT
+    pseudo_inv = V @ D.T @ UT
     beta =  pseudo_inv @ z
 
     return beta
