@@ -59,6 +59,28 @@ def part_1a():
     clf_Lasso = skl.Lasso(alpha=lamb).fit(X_train,z_train)
     y_Lasso = clf_Lasso.predict(X_test)
 
+    # Bootstrap skeleton
+
+    n_bootstraps = 100
+    for bootstrap_number in range(n_bootstraps):
+        # For the number of data value points (len_z) in the training set, pick a random
+        # data value (z_train[random]) and its corresponding row in the design matrix
+        shuffle = np.random.randint(0,len(z_train),len(z_train))
+        X_boot, z_boot = X_train[shuffle] , z_train[shuffle]
+        # Do whatever
+
+
+    # k-fold CV skeleton
+    k_folds = 5
+    fold_number = np.random.randint(0,k_folds,len(z_train))
+    for k in range(k_folds):
+        test_index = np.where(fold_number = k)
+        z_folded_test = z_train[test_index]
+        x_folded_test = X_train[test_index]
+        x_folded = X_train[np.logical_not(test_index)]
+        z_folded = z_train[np.logical_not(test_index)]
+
+        #do whatever
 
     # Check MSE
     print("MSE = %.3f" % MSE(z, linear_regression.evaluate_poly_2D(x, y, beta, deg)))
