@@ -40,7 +40,7 @@ def part_1a():
     # Adding standard normal noise:
     z_noisy = z + noise_scale*np.random.normal(0,1,len(z))
     # Making the design matrix
-    X = design_matrix_2D(x,y,deg)
+    X = linear_regression.design_matrix_2D(x,y,deg)
     # Find the least-squares solution
     beta = linear_regression.OLS_2D(X, z)
     beta_noisy = linear_regression.OLS_2D(X, z_noisy)

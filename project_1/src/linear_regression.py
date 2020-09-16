@@ -77,13 +77,13 @@ def OLS_SVD_2D(X, z):
     U, s, VT = np.linalg.svd(X)
     UT = U.T
     V = V.T
-    D = np.eye(len(U),len(VT) / s
+    D = np.eye(len(U),len(VT)) / s
     pseudo_inv = V @ D @ UT
     beta =  pseudo_inv @ z
 
     return beta
 
-def Ridge_2D(X, z, lambda):
+def Ridge_2D(X, z, lambd):
     """Computes the ordinary least squares solution of X -> (z) where X is the design
         matrix for an n-th degree polynomial fitting.
     Args:
@@ -95,6 +95,6 @@ def Ridge_2D(X, z, lambda):
     """
     p_feat = len(X[0,:]) #number of columns/features in X
     I = np.eye(p_feat,p_feat)
-    beta = np.linalg.inv(X.T @ X + lambda * I) @ X.T @ z
+    beta = np.linalg.inv(X.T @ X + lambd * I) @ X.T @ z
 
     return beta
