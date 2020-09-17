@@ -72,11 +72,10 @@ def OLS_SVD_2D(X, z):
     Returns:
         beta (Array): The beta vector
     """
-    U, s, VT = np.linalg.svd(X)
-    UT = U.T
-    V = VT.T
-    D = np.eye(len(U),len(VT)) / s
-    pseudo_inv = V @ D.T @ UT
+    U, s, V = np.linalg.svd(X)
+
+    D = np.eye(len(U),len(V)) / s
+    pseudo_inv = V.T @ D.T @ U.T
     beta =  pseudo_inv @ z
 
     return beta
