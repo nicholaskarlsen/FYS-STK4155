@@ -20,6 +20,17 @@ def MSE(y_data, y_model):
     # Computes the mean squared error
     return np.sum((y_data - y_model)**2) / np.size(y_model)
 
+def var_beta(y_data, X):
+    """ Computes the covariance matrix
+    Args:
+        y_data (Array): Data points.
+        X (Array): Design matrix corresponding to y_data
+
+    Returns:
+        Array: Covariance Matrix
+    """
+    return np.sqrt(np.var(y_data) * np.linalg.inv(X.T @ X).diagonal())
+
 
 def FrankeFunction(x, y):
     term1 = 0.75*np.exp(-(0.25*(9*x-2)**2) - 0.25*((9*y-2)**2))
