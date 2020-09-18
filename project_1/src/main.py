@@ -86,11 +86,12 @@ def part_1a():
     k_folds = 5
     fold_number = np.random.randint(0,k_folds,len(z))
     for k in range(k_folds):
-        test_index = np.where(fold_number = k)
+        test_index = np.where(fold_number == k)
+        train_index = np.where(fold_number != k)
         z_folded_test = z[test_index]
         x_folded_test = X[test_index]
-        x_folded = X[np.logical_not(test_index)]
-        z_folded = z[np.logical_not(test_index)]
+        x_folded = X[test_index]
+        z_folded = z[train_index]
 
         #do whatever
 
@@ -109,6 +110,8 @@ def part_1a():
         X_folded_test = X[permutations[np.logical_not(test_mask)]]
         z_folded_train = z[permutations[test_mask]]
         X_folded_train = X[permutations[test_mask]]
+
+        # Do whatever.
 
     # Check MSE
     print("MSE = %.3f" % MSE(z, linear_regression.evaluate_poly_2D(x, y, beta, deg)))
