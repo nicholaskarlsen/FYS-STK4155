@@ -82,28 +82,33 @@ def part_1a():
         # Do whatever
 
 
-    # k-fold CV skeleton
+    # k-fold CV skeleton, simple but bad when k approaches len(z)
     k_folds = 5
-    fold_number = np.random.randint(0,k_folds,len(z_train))
+    fold_number = np.random.randint(0,k_folds,len(z))
     for k in range(k_folds):
         test_index = np.where(fold_number = k)
-        z_folded_test = z_train[test_index]
-        x_folded_test = X_train[test_index]
-        x_folded = X_train[np.logical_not(test_index)]
-        z_folded = z_train[np.logical_not(test_index)]
+        z_folded_test = z[test_index]
+        x_folded_test = X[test_index]
+        x_folded = X[np.logical_not(test_index)]
+        z_folded = z[np.logical_not(test_index)]
 
         #do whatever
 
     #Alternatively for k-fold
 
     k_folds = 5
-    elements_per_bin = int(len(z_train)/k_folds)
-    permutations = np.random.permutation(np.arange(len(z_train)))
+    elements_per_bin = int(len(z)/k_folds)
+    permutations = np.random.permutation(np.arange(len(z)))
     for k in range(k_folds):
-        test_mask = np.ones(len(z_train), bool)
+        # Create a mask which is True/False for respectively train/test
+        # Moves along the permutation vector picking elements_per_bin as False
+        # for each k. Essentially a fancy way to slice and exclude on the permutations
+        test_mask = np.ones(len(z), bool)
         test_mask[k*elements_per_bin:(k+1)*elements_per_bin] = False
-        z_folded_test = z_train[permutations[np.logical_not(test_mask)]]
-        z_folded_train = z_train[permutations[test_mask]]
+        z_folded_test = z[permutations[np.logical_not(test_mask)]]
+        X_folded_test = X[permutations[np.logical_not(test_mask)]]
+        z_folded_train = z[permutations[test_mask]]
+        X_folded_train = X[permutations[test_mask]]
 
     # Check MSE
     print("MSE = %.3f" % MSE(z, linear_regression.evaluate_poly_2D(x, y, beta, deg)))
