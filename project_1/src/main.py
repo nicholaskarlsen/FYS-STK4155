@@ -98,21 +98,36 @@ def part_1a():
     #Alternatively for k-fold
 
     k_folds = 5
-    elements_per_bin = int(len(z)/k_folds)
-    permutations = np.random.permutation(np.arange(len(z)))
-    for k in range(k_folds):
 
-        # Create a mask which is True/False for respectively train/test
-        # Moves along the permutation vector picking elements_per_bin as False
-        # for each k. Essentially a fancy way to slice and exclude on the permutations
-        test_mask = np.ones(len(z), bool)
-        test_mask[k*elements_per_bin:(k+1)*elements_per_bin] = False
-        if k == k_folds-1:
-            test_mask[(k+1)*elements_per_bin:] = False
-        z_folded_test = z[permutations[np.logical_not(test_mask)]]
-        X_folded_test = X[permutations[np.logical_not(test_mask)]]
-        z_folded_train = z[permutations[test_mask]]
-        X_folded_train = X[permutations[test_mask]]
+    def k_fold_selection(z,k):
+        """ Takes a vector z, retunrs two lists of k elements, each element
+            being an array of indices for a permutated selection of z. The second
+            list being the complimentary set (i.e. excluding) of the test indices
+            from the first list.
+        """
+
+
+        test_indices = []
+        train_indices = []
+        elements_per_bin = int(len(z)/k_folds)
+        permutations = np.random.permutation(np.arange(len(z)))
+        for k in range(k_folds):
+
+            # Create a mask which is True/False for respectively train/test
+            # Moves along the permutation vector picking elements_per_bin as False
+            # for each k. Essentially a fancy way to slice and exclude on the permutations
+            test_mask = np.ones(len(z), bool)
+            test_mask[k*elements_per_bin:(k+1)*elements_per_bin] = False
+            if k == k_folds-1:
+                test_mask[(k+1)*elements_per_bin:] = False
+            test_indices.append(permutations[np.logical_not(test_mask)])
+            train_indices.appen(permutations[test_mask])
+            # z_folded_test = z[permutations[np.logical_not(test_mask)]]
+            # X_folded_test = X[permutations[np.logical_not(test_mask)]]
+            # z_folded_train = z[permutations[test_mask]]
+            # X_folded_train = X[permutations[test_mask]]
+
+        return test_indices, train_indices
 
         # Do whatever.
 
