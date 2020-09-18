@@ -121,7 +121,7 @@ def part_1a():
             if k == k_folds-1:
                 test_mask[(k+1)*elements_per_bin:] = False
             test_indices.append(permutations[np.logical_not(test_mask)])
-            train_indices.appen(permutations[test_mask])
+            train_indices.append(permutations[test_mask])
             # z_folded_test = z[permutations[np.logical_not(test_mask)]]
             # X_folded_test = X[permutations[np.logical_not(test_mask)]]
             # z_folded_train = z[permutations[test_mask]]
