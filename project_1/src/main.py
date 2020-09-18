@@ -101,11 +101,14 @@ def part_1a():
     elements_per_bin = int(len(z)/k_folds)
     permutations = np.random.permutation(np.arange(len(z)))
     for k in range(k_folds):
+
         # Create a mask which is True/False for respectively train/test
         # Moves along the permutation vector picking elements_per_bin as False
         # for each k. Essentially a fancy way to slice and exclude on the permutations
         test_mask = np.ones(len(z), bool)
         test_mask[k*elements_per_bin:(k+1)*elements_per_bin] = False
+        if k == k_folds-1:
+            test_mask[(k+1)*elements_per_bin:] = False
         z_folded_test = z[permutations[np.logical_not(test_mask)]]
         X_folded_test = X[permutations[np.logical_not(test_mask)]]
         z_folded_train = z[permutations[test_mask]]
