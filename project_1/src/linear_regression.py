@@ -87,18 +87,18 @@ def OLS_SVD_2D(X, z):
 
     return beta
 
-def Ridge_2D(X, z, lambd):
+def Ridge_2D(X, z, lamb):
     """Computes the ordinary least squares solution of X -> (z) where X is the design
         matrix for an n-th degree polynomial fitting.
     Args:
         X (Array): Design matrix from design_matrix_2D
         z (Array): z data points, i.e [z0,z1,...,zn]
-        lambda (float)
+        lamb (float): the hyper-parameter lambda.
     Returns:
         beta (Array): The beta vector
     """
     p_feat = len(X[0,:]) #number of columns/features in X
     I = np.eye(p_feat,p_feat)
-    beta = np.linalg.inv(X.T @ X + lambd * I) @ X.T @ z
+    beta = np.linalg.inv(X.T @ X + lamb * I) @ X.T @ z
 
     return beta

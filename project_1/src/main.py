@@ -4,6 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import linear_regression
 import utils
+import stat_tools
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import sklearn.linear_model as skl
@@ -69,7 +70,9 @@ def part_1a():
     lambdas = np.logspace(-3,0,n_lambdas)
     for lamb in lamdas:
         clf_Lasso = skl.Lasso(alpha=lamb).fit(X_train,z_train)
-        y_Lasso = clf_Lasso.predict(X_test)
+        y_Lasso_test = clf_Lasso.predict(X_test)
+        ridge_betas = Ridge_2D(X_train, z_train, lamb)
+        y_ridge_test = X_test @ ridge_betas
 
     # Bootstrap skeleton
 
@@ -79,57 +82,7 @@ def part_1a():
         # data value (z_train[random]) and its corresponding row in the design matrix
         shuffle = np.random.randint(0,len(z_train),len(z_train))
         X_boot, z_boot = X_train[shuffle] , z_train[shuffle]
-        # Do whatever
 
-
-    # k-fold CV skeleton, simple but bad when k approaches len(z)
-    k_folds = 5
-    fold_number = np.random.randint(0,k_folds,len(z))
-    for k in range(k_folds):
-        test_index = np.where(fold_number == k)
-        train_index = np.where(fold_number != k)
-        z_folded_test = z[test_index]
-        x_folded_test = X[test_index]
-        x_folded = X[test_index]
-        z_folded = z[train_index]
-
-        #do whatever
-
-    #Alternatively for k-fold
-
-    k_folds = 5
-
-    def k_fold_selection(z,k):
-        """ Takes a vector z, retunrs two lists of k elements, each element
-            being an array of indices for a permutated selection of z. The second
-            list being the complimentary set (i.e. excluding) of the test indices
-            from the first list.
-        """
-
-
-        test_indices = []
-        train_indices = []
-        elements_per_bin = int(len(z)/k_folds)
-        permutations = np.random.permutation(np.arange(len(z)))
-        for k in range(k_folds):
-
-            # Create a mask which is True/False for respectively train/test
-            # Moves along the permutation vector picking elements_per_bin as False
-            # for each k. Essentially a fancy way to slice and exclude on the permutations
-            test_mask = np.ones(len(z), bool)
-            test_mask[k*elements_per_bin:(k+1)*elements_per_bin] = False
-            if k == k_folds-1:
-                test_mask[(k+1)*elements_per_bin:] = False
-            test_indices.append(permutations[np.logical_not(test_mask)])
-            train_indices.append(permutations[test_mask])
-            # z_folded_test = z[permutations[np.logical_not(test_mask)]]
-            # X_folded_test = X[permutations[np.logical_not(test_mask)]]
-            # z_folded_train = z[permutations[test_mask]]
-            # X_folded_train = X[permutations[test_mask]]
-
-        return test_indices, train_indices
-
-        # Do whatever.
 
     # Check MSE
     print("MSE = %.3f" % MSE(z, linear_regression.evaluate_poly_2D(x, y, beta, deg)))
@@ -177,6 +130,28 @@ def part_1a():
     plt.show()
 
     return
+
+########## Strategic overview:
+
+#Setup Franke for n_datapoints, add noise to the z-values.
+
+#Do OLS for degree 5. Test/train-split and scale.
+#Compute variance of betas, get confidence interval from those values.
+#Get MSE and R2. For both training and test?
+
+# Make a Hastie-like plot of test and train MSEs as function of degree.
+# Do bias-variance analysis using bootstrap.
+
+# Do CV. Compare MSE from CV with MSE from bootstrap.
+
+# Do Ridge. Do same analysis as before, but for different lambdas.
+# Do Lasso. Do same analysis as before, but for different lambdas.
+# So, CV for MSE; bootstrap for bias variance. 
+
+# Load terrain data.
+
+# Use OLS, Ridge, Lasso and CV. Find best model for the data.
+
 
 
 if __name__ == "__main__":
