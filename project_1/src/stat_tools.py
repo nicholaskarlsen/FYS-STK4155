@@ -25,7 +25,7 @@ def var_beta(y_data, X):
 def compute_mse_bias_variance(y_data, y_model):
     """ Computes MSE, bias and variance for a given set of y_data and y_model, where
         each column of y_model comes from a particular realization of the model.
-        The averages are first taken over the models, then over the data points. 
+        The averages are first taken over the models, then over the data points.
     Args:
         y_data (Array): the data-values for the test set.
         y_model (Array): the model values corresponding to the test values. 2d-
