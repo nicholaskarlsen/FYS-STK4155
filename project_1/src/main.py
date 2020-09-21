@@ -188,17 +188,23 @@ def terrain_analysis():
     # Quantities of interest:
     mse_ols_test = np.zeros(max_degree)
     mse_ols_train = np.zeros(max_degree)
+
+    ols_boot_mse = np.zeros(max_degree)
     ols_boot_bias = np.zeros(max_degree)
     ols_boot_variance = np.zeros(max_degree)
+
     best_ridge_lambda = np.zeros(max_degree)
     best_ridge_mse = np.zeros(max_degree)
-    lasso_best_lambda_boot_mse = np.zeros(max_degree)
+    ridge_best_lambda_boot_mse = np.zeros(max_degree)
     ridge_best_lambda_boot_bias = np.zeros(max_degree)
     ridge_best_lambda_boot_variance = np.zeros(max_degree)
+
     best_lasso_lambda = np.zeros(max_degree)
+    best_lasso_mse = np.zeros(max_degree)
     lasso_best_lambda_boot_mse = np.zeros(max_degree)
     lasso_best_lambda_boot_bias = np.zeros(max_degree)
     lasso_best_lambda_boot_variance = np.zeros(max_degree)
+
     ridge_lamb_deg_mse = np.zeros(max_degree, n_lambdas)
     lasso_lamb_deg_mse = np.zeros(max_degree, n_lambdas)
 
@@ -209,8 +215,8 @@ def terrain_analysis():
         X_train, X_test, z_train, z_test = train_test_split(X_terrain_design, z_terrain, test_size = 0.2)
 
         # Scaling and feeding to CV.
-        z = z_terrain.copy()
-        X = X_terrain_design.copy()
+        z = z_terrain
+        X = X_terrain_design
         scaler = StandardScaler()
         scaler.fit(X)
         X = scaler.transform(X)
@@ -239,7 +245,7 @@ def terrain_analysis():
         lasso_fold_score = np.zeros(n_lambda, k_folds)
         test_list, train_list = k_fold_selection(z, k_folds)
         for i in range(n_lambdas):
-
+            lamb = lambdas[i]
             for j in range(k_folds):
                 test_ind_cv = test_list[j]
                 train_ind_cv = train_list[j]
@@ -254,10 +260,14 @@ def terrain_analysis():
                 ridge_fold_score[i,j] = stat_tools.MSE(z,z_ridge_test)
                 lasso_fold_score[i,j] = stat_tools.MSE(z,z_lasso_test)
 
-        lasso_lamb_deg_mse[degree] = np.mean(lasso_fold_score, axis=1, keepdims=True)
-        ridge_lamb_deg_mse[degree] = np.mean(ridge_fold_score, axis=1, keepdims =True)
+        lasso_cv_mse = np.mean(lasso_fold_score, axis=1, keepdims=True)
+        ridge_cv_mse = np.mean(ridge_fold_score, axis=1, keepdims =True)
         best_lasso_lambda[degree] = lambdas[np.argmin(lasso_cv_mse)]
         best_ridge_lambda[degree] = lambdas[np.argmin(ridge_cv_mse)]
+        best_lasso_mse[degree] = np.min(lasso_cv_mse)
+        best_ridge_mse[degree] = np.min(ridge_cv_mse)
+        lasso_lamb_deg_mse[degree] = lasso_cv_mse
+        ridge_lamb_deg_mse[degree] = ridge_cv_mse
 
 
         # OLS bootstap, get bootstrapped mse, bias and variance for given degree.
@@ -271,11 +281,12 @@ def terrain_analysis():
             #z_boot_model[:,i] = clf_Lasso_predict(X_test) #Lasso, given lambda
             z_boot_model[:,i] = X_test_scaled @ betas_boot
         mse, bias, variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_model)
+        ols_boot_mse[degree] = mse
         ols_boot_bias[degree] = bias
         ols_boot_variance[degree] = variance
 
         # Ridge bootstrap, get bootstrapped mse, bias and variance for given degree and lambda
-        lamb = best_lambda_ridge
+        lamb = best_ridge_lambda[degree]
         z_boot_model = np.zeros(len(z_test),n_bootstraps)
         for bootstrap_number in range(n_bootstraps):
             shuffle = np.random.randint(0,len(z_train),len(z_train))
@@ -286,9 +297,12 @@ def terrain_analysis():
             #z_boot_model[:,i] = clf_Lasso_predict(X_test) #Lasso, given lambda
             z_boot_model[:,i] = X_test_scaled @ betas_boot
         mse, bias, variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_model)
+        ridge_best_lambda_boot_mse[degree] = mse
+        ridge_best_lambda_boot_bias[degree] = bias
+        ridge_best_lambda_boot_variance[degree] = variance
 
         # Lasso bootstrap, get bootstrapped mse, bias and variance for given degree and lambda.
-        lamb = best_lambda_lasso
+        lamb = best_lasso_lambda[degree]
         z_boot_model = np.zeros(len(z_test),n_bootstraps)
         for bootstrap_number in range(n_bootstraps):
             shuffle = np.random.randint(0,len(z_train),len(z_train))
@@ -296,9 +310,18 @@ def terrain_analysis():
             #betas_boot = linear_regression.OLS_SVD_2D(X_boot, z_boot)
             #betas_boot = linear_regression.Ridge_2D(X_boot, z_boot, lamb) #Ridge, given lambda
             clf_Lasso = skl.Lasso(alpha=lamb).fit(X_boot,z_boot)
-            z_boot_model[:,i] = clf_Lasso_predict(X_test) #Lasso, given lambda
+            z_boot_model[:,i] = clf_Lasso_predict(X_test_scaled) #Lasso, given lambda
             #z_boot_model[:,i] = X_test_scaled @ betas_boot
         mse, bias, variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_model)
+        lasso_best_lambda_boot_mse[degree] = mse
+        lasso_best_lambda_boot_bias[degree] = bias
+        lasso_best_lambda_boot_variance[degree] = variance
+
+################ All necessary computations should have been done above. Below follows
+################ the plotting part.
+
+
+
 
         return
 
