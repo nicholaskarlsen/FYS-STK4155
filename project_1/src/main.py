@@ -190,10 +190,13 @@ def terrain_analysis():
     mse_ols_train = np.zeros(max_degree)
     ols_boot_bias = np.zeros(max_degree)
     ols_boot_variance = np.zeros(max_degree)
+    best_ridge_lambda = np.zeros(max_degree)
     best_ridge_mse = np.zeros(max_degree)
+    lasso_best_lambda_boot_mse = np.zeros(max_degree)
     ridge_best_lambda_boot_bias = np.zeros(max_degree)
     ridge_best_lambda_boot_variance = np.zeros(max_degree)
-    best_lasso_mse = np.zeros(max_degree)
+    best_lasso_lambda = np.zeros(max_degree)
+    lasso_best_lambda_boot_mse = np.zeros(max_degree)
     lasso_best_lambda_boot_bias = np.zeros(max_degree)
     lasso_best_lambda_boot_variance = np.zeros(max_degree)
     ridge_lamb_deg_mse = np.zeros(max_degree, n_lambdas)
@@ -251,10 +254,10 @@ def terrain_analysis():
                 ridge_fold_score[i,j] = stat_tools.MSE(z,z_ridge_test)
                 lasso_fold_score[i,j] = stat_tools.MSE(z,z_lasso_test)
 
-        lasso_cv_mse = np.mean(lasso_fold_score, axis=1, keepdims=True)
-        ridge_cv_mse = np.mean(ridge_fold_score, axis=1, keepdims =True)
-        best_lambda_lasso = lambdas[np.argmin(lasso_cv_mse)]
-        best_lambda_ridge = lambdas[np.argmin(ridge_cv_mse)]
+        lasso_lamb_deg_mse[degree] = np.mean(lasso_fold_score, axis=1, keepdims=True)
+        ridge_lamb_deg_mse[degree] = np.mean(ridge_fold_score, axis=1, keepdims =True)
+        best_lasso_lambda[degree] = lambdas[np.argmin(lasso_cv_mse)]
+        best_ridge_lambda[degree] = lambdas[np.argmin(ridge_cv_mse)]
 
 
         # OLS bootstap, get bootstrapped mse, bias and variance for given degree.
@@ -269,7 +272,7 @@ def terrain_analysis():
             z_boot_model[:,i] = X_test_scaled @ betas_boot
         mse, bias, variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_model)
         ols_boot_bias[degree] = bias
-        ols_boot_variance[degree] = variance 
+        ols_boot_variance[degree] = variance
 
         # Ridge bootstrap, get bootstrapped mse, bias and variance for given degree and lambda
         lamb = best_lambda_ridge

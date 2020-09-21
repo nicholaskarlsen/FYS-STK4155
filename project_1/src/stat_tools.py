@@ -40,7 +40,7 @@ def compute_mse_bias_variance(y_data, y_model):
         mean_variance (float): the mean model variance for the given inputs
     """
     mse = np.mean(np.mean((y_data[:,np.newaxis] - y_model)**2,axis=1,keepdims=True))
-    mean_squared_bias = np.mean((y_data-np.mean(y_model,axis=1,keepdims=True))**2)
+    mean_squared_bias = np.mean((y_data[:,np.newaxis]-np.mean(y_model,axis=1,keepdims=True))**2)
     mean_variance = np.mean(np.var(y_model,axis=1,keepdims=True))
 
     return mse, mean_squared_bias, mean_variance
