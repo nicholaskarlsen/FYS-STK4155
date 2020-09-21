@@ -48,7 +48,7 @@ def compute_mse_bias_variance(y_data, y_model):
 def bootstrap_selection(z, n_bootstraps):
     """ Performs n_bootstraps, returning a list of arrays where each array
     contains the selection indices of z for that particular bootstrap-iteration.
-
+    Deprecated
     Args:
             z (array): The training data to bootstrap.
             n_bootstraps (int): Number of bootstrap-iterations

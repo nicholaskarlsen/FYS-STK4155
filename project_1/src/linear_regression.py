@@ -70,7 +70,7 @@ def OLS_SVD_2D(X, z, use_np_pinv = True):
         X (Array): Design matrix from design_matrix_2D
         z (Array): z data points, i.e [z0,z1,...,zn]
         use_np_pinv (bool): Set to True in order to use np.linalg.pinv instead.
-            Default is to use the manually written version.
+            
     Returns:
         beta (Array): The beta vector
     """
