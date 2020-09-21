@@ -84,14 +84,17 @@ def part_1a():
             X_test_cv = X[test_ind_cv]
             z_test_cv = z[test_ind_cv]
             clf_Lasso = skl.Lasso(alpha=lamb).fit(X_train_cv,z_train_cv)
-            z_lasso_test = clf_Lasso.predict(X_test)
+            z_lasso_test = clf_Lasso.predict(X_test_cv)
             ridge_betas = linear_regression.Ridge_2D(X_train_cv, z_train_cv, lamb)
-            z_ridge_test = X_test @ ridge_betas
+            z_ridge_test = X_test_cv @ ridge_betas
             ridge_fold_score[i,j] = stat_tools.MSE(z,z_ridge_test)
             lasso_fold_score[i,j] = stat_tools.MSE(z,z_lasso_test)
 
     lasso_cv_mse = np.mean(lasso_fold_score, axis=1, keepdims=True)
     ridge_cv_mse = np.mean(ridge_fold_score, axis=1, keepdims =True)
+    best_lambda_lasso = lambdas[np.argmin(lasso_cv_mse)]
+    best_lambda_ridge = lambdas[np.argmin(ridge_cv_mse)]
+
 
 
     # Bootstrap skeleton
@@ -105,6 +108,9 @@ def part_1a():
         shuffle = np.random.randint(0,len(z_train),len(z_train))
         X_boot, z_boot = X_train[shuffle] , z_train[shuffle]
         betas_boot = linear_regression.OLS_SVD_2D(X_boot, z_boot)
+        #betas_boot = linear_regression.Ridge_2D(X_boot, z_boot, lamb) #Ridge, given lambda
+        #clf_Lasso = skl.Lasso(alpha=lamb).fit(X_boot,z_boot)
+        #z_boot_model[:,i] = clf_Lasso_predict(X_test) #Lasso, given lambda
         z_boot_model[:,i] = X_test @ betas_boot
     mse, bias, variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_model)
 
