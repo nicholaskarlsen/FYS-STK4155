@@ -108,6 +108,9 @@ def part_1a():
         shuffle = np.random.randint(0,len(z_train),len(z_train))
         X_boot, z_boot = X_train[shuffle] , z_train[shuffle]
         betas_boot = linear_regression.OLS_SVD_2D(X_boot, z_boot)
+        #betas_boot = linear_regression.Ridge_2D(X_boot, z_boot, lamb) #Ridge, given lambda
+        #clf_Lasso = skl.Lasso(alpha=lamb).fit(X_boot,z_boot)
+        #z_boot_model[:,i] = clf_Lasso_predict(X_test) #Lasso, given lambda
         z_boot_model[:,i] = X_test @ betas_boot
     mse, bias, variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_model)
 
