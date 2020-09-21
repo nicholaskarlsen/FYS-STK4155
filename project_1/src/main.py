@@ -66,22 +66,47 @@ def part_1a():
     X_test_scaled = scaler.transform(X_test)
 
     # For ridge and lasso, lasso directly from sklearn.
+    # For given polynomial degree, input X and z. X should be prescaled.
+
     n_lambdas = 100
     lambdas = np.logspace(-3,0,n_lambdas)
-    for lamb in lamdas:
-        clf_Lasso = skl.Lasso(alpha=lamb).fit(X_train,z_train)
-        y_Lasso_test = clf_Lasso.predict(X_test)
-        ridge_betas = Ridge_2D(X_train, z_train, lamb)
-        y_ridge_test = X_test @ ridge_betas
+    k_folds = 5
+    ridge_fold_score = np.zeros(n_lambda, k_folds)
+    lasso_fold_score = np.zeros(n_lambda, k_folds)
+    test_list, train_list = k_fold_selection(z, k_folds)
+    for i in range(n_lambdas):
+
+        for j in range(k_folds):
+            test_ind_cv = test_list[j]
+            train_ind_cv = train_list[j]
+            X_train_cv = X[train_ind_cv]
+            z_train_cv = z[train_ind_cv]
+            X_test_cv = X[test_ind_cv]
+            z_test_cv = z[test_ind_cv]
+            clf_Lasso = skl.Lasso(alpha=lamb).fit(X_train_cv,z_train_cv)
+            z_lasso_test = clf_Lasso.predict(X_test)
+            ridge_betas = linear_regression.Ridge_2D(X_train_cv, z_train_cv, lamb)
+            z_ridge_test = X_test @ ridge_betas
+            ridge_fold_score[i,j] = stat_tools.MSE(z,z_ridge_test)
+            lasso_fold_score[i,j] = stat_tools.MSE(z,z_lasso_test)
+
+    lasso_cv_mse = np.mean(lasso_fold_score, axis=1, keepdims=True)
+    ridge_cv_mse = np.mean(ridge_fold_score, axis=1, keepdims =True)
+
 
     # Bootstrap skeleton
-
+    # For given polynomial degree, input X_train, z_train, X_test and z_test.
+    # X_train and X_test should be scaled?
     n_bootstraps = 100
+    z_boot_model = np.zeros(len(z_test),n_bootstraps)
     for bootstrap_number in range(n_bootstraps):
         # For the number of data value points (len_z) in the training set, pick a random
         # data value (z_train[random]) and its corresponding row in the design matrix
         shuffle = np.random.randint(0,len(z_train),len(z_train))
         X_boot, z_boot = X_train[shuffle] , z_train[shuffle]
+        betas_boot = linear_regression.OLS_SVD_2D(X_boot, z_boot)
+        z_boot_model[:,i] = X_test @ betas_boot
+    mse, bias, variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_model)
 
 
     # Check MSE
@@ -146,7 +171,7 @@ def part_1a():
 
 # Do Ridge. Do same analysis as before, but for different lambdas.
 # Do Lasso. Do same analysis as before, but for different lambdas.
-# So, CV for MSE; bootstrap for bias variance. 
+# So, CV for MSE; bootstrap for bias variance.
 
 # Load terrain data.
 
