@@ -5,9 +5,11 @@ def plot_settings():
     """ Changes matplot font to something more LaTeX friendly. """
     plt.rcParams.update({
         "text.usetex": True,
-        "font.family": "sans-serif",
-        "font.sans-serif": ["Helvetica"]
+        "font.family": "serif",
+        #"font.sans-serif": ["Helvetica"]
     })
+    plt.rc('xtick', labelsize='x-small')
+    plt.rc('ytick', labelsize='x-small')
     return
 
 
