@@ -213,13 +213,24 @@ def terrain_analysis():
         X = scaler.transform(X)
         X[:,0] = 1
 
-        # Scaling and feeding to bootstrap
+        # Scaling and feeding to bootstrap and OLS
         scaler_boot = StandardScaler()
         scaler_boot.fit(X_train)
         X_train_scaled = scaler_boot.transform(X_train)
         X_test_scaled = scaler_boot.transform(X_test)
         X_train_scaled[:,0] = 1
         X_test_scaled[:,0] = 1
+
+        # OLS, get MSE for test and train set.
+
+        betas = linear_regression.OLS_SVD_2D(X_train_scaled, z_train)
+        z_test_model = X_test_scaled @ betas
+        z_train_model = X_train_scaled @ betas
+        mse_train = stat_tools.MSE(z_train, z_train_model)
+        mse_test = stat_tools.MSE(z_test, z_test_model)
+
+
+        # CV, find best lambdas and get mse vs lambda for given degree.
 
         ridge_fold_score = np.zeros(n_lambda, k_folds)
         lasso_fold_score = np.zeros(n_lambda, k_folds)
@@ -245,6 +256,9 @@ def terrain_analysis():
         best_lambda_lasso = lambdas[np.argmin(lasso_cv_mse)]
         best_lambda_ridge = lambdas[np.argmin(ridge_cv_mse)]
 
+
+        # OLS bootstap, get bootstrapped mse, bias and variance for given degree.
+        z_boot_model = np.zeros(len(z_test),n_bootstraps)
         for bootstrap_number in range(n_bootstraps):
             shuffle = np.random.randint(0,len(z_train),len(z_train))
             X_boot, z_boot = X_train_scaled[shuffle] , z_train[shuffle]
@@ -255,6 +269,31 @@ def terrain_analysis():
             z_boot_model[:,i] = X_test_scaled @ betas_boot
         mse, bias, variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_model)
 
+        # Ridge bootstrap, get bootstrapped mse, bias and variance for given degree and lambda
+        lamb = best_lambda_ridge
+        z_boot_model = np.zeros(len(z_test),n_bootstraps)
+        for bootstrap_number in range(n_bootstraps):
+            shuffle = np.random.randint(0,len(z_train),len(z_train))
+            X_boot, z_boot = X_train_scaled[shuffle] , z_train[shuffle]
+            #betas_boot = linear_regression.OLS_SVD_2D(X_boot, z_boot)
+            betas_boot = linear_regression.Ridge_2D(X_boot, z_boot, lamb) #Ridge, given lambda
+            #clf_Lasso = skl.Lasso(alpha=lamb).fit(X_boot,z_boot)
+            #z_boot_model[:,i] = clf_Lasso_predict(X_test) #Lasso, given lambda
+            z_boot_model[:,i] = X_test_scaled @ betas_boot
+        mse, bias, variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_model)
+
+        # Lasso bootstrap, get bootstrapped mse, bias and variance for given degree and lambda.
+        lamb = best_lambda_lasso
+        z_boot_model = np.zeros(len(z_test),n_bootstraps)
+        for bootstrap_number in range(n_bootstraps):
+            shuffle = np.random.randint(0,len(z_train),len(z_train))
+            X_boot, z_boot = X_train_scaled[shuffle] , z_train[shuffle]
+            #betas_boot = linear_regression.OLS_SVD_2D(X_boot, z_boot)
+            #betas_boot = linear_regression.Ridge_2D(X_boot, z_boot, lamb) #Ridge, given lambda
+            clf_Lasso = skl.Lasso(alpha=lamb).fit(X_boot,z_boot)
+            z_boot_model[:,i] = clf_Lasso_predict(X_test) #Lasso, given lambda
+            #z_boot_model[:,i] = X_test_scaled @ betas_boot
+        mse, bias, variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_model)
 
         return
 
