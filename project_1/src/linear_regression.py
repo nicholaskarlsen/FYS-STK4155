@@ -63,14 +63,14 @@ def OLS_2D(X, z):
 
     return beta
 
-def OLS_SVD_2D(X, z, use_np_pinv = False):
+def OLS_SVD_2D(X, z, use_np_pinv = True):
     """Computes the ordinary least squares solution of X -> (z) where X is the design
         matrix for an p-th degree polynomial fitting, using the SVD-inversion.
     Args:
         X (Array): Design matrix from design_matrix_2D
         z (Array): z data points, i.e [z0,z1,...,zn]
         use_np_pinv (bool): Set to True in order to use np.linalg.pinv instead.
-            Default is to use the manually written version. 
+            Default is to use the manually written version.
     Returns:
         beta (Array): The beta vector
     """
