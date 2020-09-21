@@ -51,7 +51,7 @@ def evaluate_poly_2D(x, y, beta, n):
 
 def OLS_2D(X, z):
     """Computes the ordinary least squares solution of X -> (z) where X is the design
-        matrix for an n-th degree polynomial fitting.
+        matrix for an p-th degree polynomial fitting.
     Args:
         X (Array): Design matrix from design_matrix_2D
         z (Array): z data points, i.e [z0,z1,...,zn]
@@ -63,27 +63,34 @@ def OLS_2D(X, z):
 
     return beta
 
-def OLS_SVD_2D(X, z):
+def OLS_SVD_2D(X, z, use_np_pinv = False):
     """Computes the ordinary least squares solution of X -> (z) where X is the design
-        matrix for an n-th degree polynomial fitting, using the SVD-inversion.
+        matrix for an p-th degree polynomial fitting, using the SVD-inversion.
     Args:
         X (Array): Design matrix from design_matrix_2D
         z (Array): z data points, i.e [z0,z1,...,zn]
+        use_np_pinv (bool): Set to True in order to use np.linalg.pinv instead.
+            Default is to use the manually written version. 
     Returns:
         beta (Array): The beta vector
     """
-    U, s, V = np.linalg.svd(X)
-    tolerance = s[0]*1e-14 # Simple limit for detecting zero-valued singular values.
-    reciprocal_s = np.where(s>tolerance,1/s,0) # Setting zero-values to actual zero
-                                               # instead of machine-epsilon
-                                               # Could just as well have used
-                                               # np.linalg.pinv(X), they are
-                                               # more clever with implementing
-                                               # the tolerance.
-    D = np.eye(len(U),len(V)) * reciprocal_s
+    if use_np_pinv:
+        beta = np.linalg.pinv(X) @ z
 
-    pseudo_inv = V.T @ D.T @ U.T
-    beta =  pseudo_inv @ z
+    else:
+
+        U, s, V = np.linalg.svd(X)
+        tolerance = s[0]*1e-14 # Simple limit for detecting zero-valued singular values.
+        reciprocal_s = np.where(s>tolerance,1/s,0) # Setting zero-values to actual zero
+                                                   # instead of machine-epsilon
+                                                   # Could just as well have used
+                                                   # np.linalg.pinv(X), they are
+                                                   # more clever with implementing
+                                                   # the tolerance.
+        D = np.eye(len(U),len(V)) * reciprocal_s
+
+        pseudo_inv = V.T @ D.T @ U.T
+        beta =  pseudo_inv @ z
 
     return beta
 
