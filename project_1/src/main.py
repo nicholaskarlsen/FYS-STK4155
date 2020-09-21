@@ -226,8 +226,8 @@ def terrain_analysis():
         betas = linear_regression.OLS_SVD_2D(X_train_scaled, z_train)
         z_test_model = X_test_scaled @ betas
         z_train_model = X_train_scaled @ betas
-        mse_train = stat_tools.MSE(z_train, z_train_model)
-        mse_test = stat_tools.MSE(z_test, z_test_model)
+        mse_ols_train[degree] = stat_tools.MSE(z_train, z_train_model)
+        mse_ols_test[degree] = stat_tools.MSE(z_test, z_test_model)
 
 
         # CV, find best lambdas and get mse vs lambda for given degree.
@@ -268,6 +268,8 @@ def terrain_analysis():
             #z_boot_model[:,i] = clf_Lasso_predict(X_test) #Lasso, given lambda
             z_boot_model[:,i] = X_test_scaled @ betas_boot
         mse, bias, variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_model)
+        ols_boot_bias[degree] = bias
+        ols_boot_variance[degree] = variance 
 
         # Ridge bootstrap, get bootstrapped mse, bias and variance for given degree and lambda
         lamb = best_lambda_ridge
