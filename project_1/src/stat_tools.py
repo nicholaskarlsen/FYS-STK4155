@@ -10,22 +10,25 @@ def MSE(y_data, y_model):
     return np.sum((y_data - y_model)**2) / np.size(y_model)
 
 def var_beta(y_data, X):
-    """ Computes the covariance matrix
+    """ Computes the covariance matrix (only diagonal elements)
     Args:
         y_data (Array): Data points.
         X (Array): Design matrix corresponding to y_data
 
     Returns:
-        Array: Covariance Matrix
+        Array: Covariance Matrix (diagonal elements)
     """
     return np.sqrt(np.var(y_data) * np.linalg.inv(X.T @ X).diagonal())
 
 
 
 def compute_mse_bias_variance(y_data, y_model):
-    """ Computes MSE, bias and variance for a given set of y_data and y_model, where
+    """ Computes MSE, mean (squared) bias and mean variance for a given set of y_data and y_model, where
         each column of y_model comes from a particular realization of the model.
         The averages are first taken over the models, then over the data points.
+        To be clear, error bias and variance are computed as the ensemble averages
+        over the training set ensembles seperately for each test point. Only then
+        are the means over the number of test points of those quantities computed and returned.
     Args:
         y_data (Array): the data-values for the test set.
         y_model (Array): the model values corresponding to the test values. 2d-
@@ -33,14 +36,14 @@ def compute_mse_bias_variance(y_data, y_model):
             iterations. E.g. the number of bootstraps.
 
     Returns:
-        bias (float): the bias for the given inputs
-        variance (float): the variance for the given inputs
+        mean_squared_bias (float): the mean (squared) model bias for the given inputs
+        mean_variance (float): the mean model variance for the given inputs
     """
     mse = np.mean(np.mean((y_data - y_model)**2,axis=1,keepdims=True))
-    bias = np.mean((y_data-np.mean(y_model,axis=1,keepdims=True))**2)
-    variance = np.mean(np.var(y_model,axis=1,keepdims=True))
+    mean_squared_bias = np.mean((y_data-np.mean(y_model,axis=1,keepdims=True))**2)
+    mean_variance = np.mean(np.var(y_model,axis=1,keepdims=True))
 
-    return mse, bias, variance
+    return mse, mean_squared_bias, mean_variance
 
 def bootstrap_selection(z, n_bootstraps):
     """ Performs n_bootstraps, returning a list of arrays where each array
