@@ -8,6 +8,7 @@ import stat_tools
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import sklearn.linear_model as skl
+from imageio import imread
 
 utils.plot_settings() # LaTeX fonts in Plots!
 
@@ -115,6 +116,8 @@ def part_1a():
     mse, bias, variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_model)
 
 
+
+
     # Check MSE
     print("MSE = %.3f" % MSE(z, linear_regression.evaluate_poly_2D(x, y, beta, deg)))
     # And with noise
@@ -162,28 +165,48 @@ def part_1a():
 
     return
 
-########## Strategic overview:
+def franke_analysis():
+    # Structure what we are doing
 
-#Setup Franke for n_datapoints, add noise to the z-values.
+    return
 
-#Do OLS for degree 5. Test/train-split and scale.
-#Compute variance of betas, get confidence interval from those values.
-#Get MSE and R2. For both training and test?
+def terrain_analysis():
+    # Setting up the terrain data:
+    terrain_data = imread('path_to_data')
+    x_terrain = np.arange(terrain_data.shape[1]) #apparently, from the problem description.
+    y_terrain = np.arange(terrain_data.shape[0])
+    X, Y = np.meshgrid(x_terrain,y_terrain)
+    z_terrain = terrain_data.flatten() # the response values
+    x_terrain_flat = X.flatten() # the first degree feature variables
+    y_terrain_flat = Y.flatten() # the first degree feature variables
+    max_degree = 10
+    n_lambdas = 100
+    n_bootstraps = 100
+    k_folds = 5
+    lambdas = np.logspace(-3,0,n_lambdas)
 
-# Make a Hastie-like plot of test and train MSEs as function of degree.
-# Do bias-variance analysis using bootstrap.
+    # Quantities of interest:
+    mse_ols_test = np.zeros(max_degree)
+    mse_ols_train = np.zeros(max_degree)
+    ols_boot_bias = np.zeros(max_degree)
+    ols_boot_variance = np.zeros(max_degree)
+    best_ridge_mse = np.zeros(max_degree)
+    ridge_best_lambda_boot_bias = np.zeros(max_degree)
+    ridge_best_lambda_boot_variance = np.zeros(max_degree)
+    best_lasso_mse = np.zeros(max_degree)
+    lasso_best_lambda_boot_bias = np.zeros(max_degree)
+    lasso_best_lambda_boot_variance = np.zeros(max_degree)
+    ridge_lamb_deg_mse = np.zeros(max_degree, n_lambdas)
+    lasso_lamb_deg_mse = np.zeros(max_degree, n_lambdas)
 
-# Do CV. Compare MSE from CV with MSE from bootstrap.
 
-# Do Ridge. Do same analysis as before, but for different lambdas.
-# Do Lasso. Do same analysis as before, but for different lambdas.
-# So, CV for MSE; bootstrap for bias variance.
+    # Actual computations
+    for degree in range(max_degree):
+        X_terrain_design = linear_regression.design_matrix_2D(x,y,degree)
 
-# Load terrain data.
-
-# Use OLS, Ridge, Lasso and CV. Find best model for the data.
-
-
+        return
 
 if __name__ == "__main__":
     part_1a()
+    franke_analysis()
+    terrain_analysis()
