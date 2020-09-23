@@ -1,4 +1,3 @@
-import numpy as np
 
 def R2(y_data, y_model):
     # Computes the confidence number
@@ -145,3 +144,144 @@ def k_fold_selection(z,k):
         # X_folded_train = X[permutations[test_mask]]
 
     return test_indices, train_indices
+
+
+def bootstrap_all(X_train, X_test, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge):
+    """ Performs the bootstrapped bias variance analysis for OLS, Ridge and Lasso, given input
+        training and test data, the number of bootstrap iterations and the lambda values for
+        Ridge and Lasso.
+
+        Returns MSE, mean squared bias and mean variance for Ridge, Lasso and OLS in that order.
+    """
+
+    z_boot_ols = np.zeros((len(z_test),n_bootstraps))
+    z_boot_ridge = np.zeros((len(z_test),n_bootstraps))
+    z_boot_lasso= np.zeros((len(z_test),n_bootstraps))
+    for i in range(n_bootstraps):
+        shuffle = np.random.randint(0,len(z_train),len(z_train))
+        X_boot, z_boot = X_train[shuffle] , z_train[shuffle]
+        betas_boot_ols = linear_regression.OLS_SVD_2D(X_boot, z_boot)
+        betas_boot_ridge = linear_regression.Ridge_2D(X_boot, z_boot, lamb_ridge) #Ridge, given lambda
+        clf_Lasso = skl.Lasso(alpha=lamb_lasso,fit_intercept=False).fit(X_boot,z_boot)
+        z_boot_lasso[:,i] = clf_Lasso.predict(X_test) #Lasso, given lambda
+        z_boot_ridge[:,i] = X_test @ betas_boot_ridge
+        z_boot_ols[:,i] = X_test @ betas_boot_ols
+
+    ridge_mse, ridge_bias, ridge_variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_ridge)
+
+    lasso_mse, lasso_bias, lasso_variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_lasso)
+
+    ols_mse, ols_bias, ols_variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_ols)
+
+    return ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance, ols_mse, ols_bias, ols_variance
+
+def bootstrap_ridge_lasso(X_train, X_test, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge):
+    """ Performs the bootstrapped bias variance analysis for only Ridge and Lasso, given input
+        training and test data, the number of bootstrap iterations and the lambda values for
+        Ridge and Lasso. Intended for studying bias/variance dependency as a function of lambda-values.
+
+        Returns MSE, mean squared bias and mean variance for Ridge and Lasso, in that order
+    """
+
+    z_boot_ridge = np.zeros((len(z_test),n_bootstraps))
+    z_boot_lasso= np.zeros((len(z_test),n_bootstraps))
+    for i in range(n_bootstraps):
+        shuffle = np.random.randint(0,len(z_train),len(z_train))
+        X_boot, z_boot = X_train[shuffle] , z_train[shuffle]
+        betas_boot_ridge = linear_regression.Ridge_2D(X_boot, z_boot, lamb_ridge) #Ridge, given lambda
+        clf_Lasso = skl.Lasso(alpha=lamb_lasso,fit_intercept=False).fit(X_boot,z_boot)
+        z_boot_lasso[:,i] = clf_Lasso.predict(X_test) #Lasso, given lambda
+        z_boot_ridge[:,i] = X_test @ betas_boot_ridge
+
+    ridge_mse, ridge_bias, ridge_variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_ridge)
+
+    lasso_mse, lasso_bias, lasso_variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_lasso)
+
+    return ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance
+
+
+
+def k_fold_cv_all(X,z,n_lambdas,lambdas,k_folds):
+    """ Performs k-fold cross validation for Ridge, Lasso and OLS. The Lasso and Ridge
+        MSE-values are computed for a number of n_lambdas, with the lambda values given
+        by the lambdas array. OLS is done only once for each of the k_folds folds.
+
+        Args:
+            X (array): Design matrix
+            z (array): Data-values/response-values/whatever-they-are-called-in-your-field-values
+            n_lambdas (int): number of lambda values to use for Lasso and Ridge.
+            lambdas (array): The actual lambda-values to try.
+            k_folds (int): The number of folds.
+
+        Return:
+            lasso_cv_mse (array): array containing the computed MSE for each lambda in Lasso
+            ridge_cv_mse (array): array containing the computed MSE for each lambda in Ridge
+            ols_cv_mse (float): computed MSE for OLS.
+    """
+
+
+
+    ridge_fold_score = np.zeros((n_lambdas, k_folds))
+    lasso_fold_score = np.zeros((n_lambdas, k_folds))
+    test_list, train_list = stat_tools.k_fold_selection(z, k_folds)
+    for i in range(n_lambdas):
+        lamb = lambdas[i]
+        for j in range(k_folds):
+            test_ind_cv = test_list[j]
+            train_ind_cv = train_list[j]
+            X_train_cv = X[train_ind_cv]
+            z_train_cv = z[train_ind_cv]
+            X_test_cv = X[test_ind_cv]
+            z_test_cv = z[test_ind_cv]
+            clf_Lasso = skl.Lasso(alpha=lamb,fit_intercept=False).fit(X_train_cv,z_train_cv)
+            z_lasso_test = clf_Lasso.predict(X_test_cv)
+            ridge_betas = linear_regression.Ridge_2D(X_train_cv, z_train_cv, lamb)
+            z_ridge_test = X_test_cv @ ridge_betas
+            ridge_fold_score[i,j] = stat_tools.MSE(z_test_cv, z_ridge_test)
+            lasso_fold_score[i,j] = stat_tools.MSE(z_test_cv, z_lasso_test)
+
+    lasso_cv_mse = np.mean(lasso_fold_score, axis=1)
+    ridge_cv_mse = np.mean(ridge_fold_score, axis=1)
+
+    # Get ols_mse for cv.
+    ols_fold_score = np.zeros(k_folds)
+    for i in range(k_folds):
+        test_ind_cv = test_list[j]
+        train_ind_cv = train_list[j]
+        X_train_cv = X[train_ind_cv]
+        z_train_cv = z[train_ind_cv]
+        X_test_cv = X[test_ind_cv]
+        z_test_cv = z[test_ind_cv]
+        ols_cv_betas = linear_regression.OLS_SVD_2D(X_train_cv, z_train_cv)
+        z_ols_test = X_test_cv @ ols_cv_betas
+        ols_fold_score[i] = stat_tools.MSE(z_test_cv, z_ols_test)
+
+    ols_cv_mse = np.mean(ols_fold_score)
+
+
+    return lasso_cv_mse, ridge_cv_mse, ols_cv_mse
+
+
+def k_folds_cv_OLS_only(X,z,k_folds):
+    """ As could be guessed, computes the k-fold cross-validation MSE for OLS, given
+        input X, y as data; k_folds as number of folds. Returns the computed MSE.
+
+    """
+
+
+    ols_fold_score = np.zeros(k_folds)
+    test_list, train_list = stat_tools.k_fold_selection(z, k_folds)
+    for i in range(k_folds):
+        test_ind_cv = test_list[j]
+        train_ind_cv = train_list[j]
+        X_train_cv = X[train_ind_cv]
+        z_train_cv = z[train_ind_cv]
+        X_test_cv = X[test_ind_cv]
+        z_test_cv = z[test_ind_cv]
+        ols_cv_betas = linear_regression.OLS_SVD_2D(X_train_cv, z_train_cv)
+        z_ols_test = X_test_cv @ ols_cv_betas
+        ols_fold_score[i] = stat_tools.MSE(z_test_cv, z_ols_test)
+
+    ols_cv_mse = np.mean(ols_fold_score)
+
+    return ols_cv_mse
