@@ -1,3 +1,7 @@
+import numpy as np
+import sklearn.linear_model as skl
+
+import linear_regression
 
 def R2(y_data, y_model):
     # Computes the confidence number
@@ -167,11 +171,11 @@ def bootstrap_all(X_train, X_test, z_train, z_test, n_bootstraps, lamb_lasso, la
         z_boot_ridge[:,i] = X_test @ betas_boot_ridge
         z_boot_ols[:,i] = X_test @ betas_boot_ols
 
-    ridge_mse, ridge_bias, ridge_variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_ridge)
+    ridge_mse, ridge_bias, ridge_variance = compute_mse_bias_variance(z_test, z_boot_ridge)
 
-    lasso_mse, lasso_bias, lasso_variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_lasso)
+    lasso_mse, lasso_bias, lasso_variance = compute_mse_bias_variance(z_test, z_boot_lasso)
 
-    ols_mse, ols_bias, ols_variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_ols)
+    ols_mse, ols_bias, ols_variance = compute_mse_bias_variance(z_test, z_boot_ols)
 
     return ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance, ols_mse, ols_bias, ols_variance
 
@@ -193,9 +197,9 @@ def bootstrap_ridge_lasso(X_train, X_test, z_train, z_test, n_bootstraps, lamb_l
         z_boot_lasso[:,i] = clf_Lasso.predict(X_test) #Lasso, given lambda
         z_boot_ridge[:,i] = X_test @ betas_boot_ridge
 
-    ridge_mse, ridge_bias, ridge_variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_ridge)
+    ridge_mse, ridge_bias, ridge_variance = compute_mse_bias_variance(z_test, z_boot_ridge)
 
-    lasso_mse, lasso_bias, lasso_variance = stat_tools.compute_mse_bias_variance(z_test, z_boot_lasso)
+    lasso_mse, lasso_bias, lasso_variance = compute_mse_bias_variance(z_test, z_boot_lasso)
 
     return ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance
 
@@ -223,7 +227,7 @@ def k_fold_cv_all(X,z,n_lambdas,lambdas,k_folds):
 
     ridge_fold_score = np.zeros((n_lambdas, k_folds))
     lasso_fold_score = np.zeros((n_lambdas, k_folds))
-    test_list, train_list = stat_tools.k_fold_selection(z, k_folds)
+    test_list, train_list = k_fold_selection(z, k_folds)
     for i in range(n_lambdas):
         lamb = lambdas[i]
         for j in range(k_folds):
@@ -237,8 +241,8 @@ def k_fold_cv_all(X,z,n_lambdas,lambdas,k_folds):
             z_lasso_test = clf_Lasso.predict(X_test_cv)
             ridge_betas = linear_regression.Ridge_2D(X_train_cv, z_train_cv, lamb)
             z_ridge_test = X_test_cv @ ridge_betas
-            ridge_fold_score[i,j] = stat_tools.MSE(z_test_cv, z_ridge_test)
-            lasso_fold_score[i,j] = stat_tools.MSE(z_test_cv, z_lasso_test)
+            ridge_fold_score[i,j] = MSE(z_test_cv, z_ridge_test)
+            lasso_fold_score[i,j] = MSE(z_test_cv, z_lasso_test)
 
     lasso_cv_mse = np.mean(lasso_fold_score, axis=1)
     ridge_cv_mse = np.mean(ridge_fold_score, axis=1)
@@ -254,7 +258,7 @@ def k_fold_cv_all(X,z,n_lambdas,lambdas,k_folds):
         z_test_cv = z[test_ind_cv]
         ols_cv_betas = linear_regression.OLS_SVD_2D(X_train_cv, z_train_cv)
         z_ols_test = X_test_cv @ ols_cv_betas
-        ols_fold_score[i] = stat_tools.MSE(z_test_cv, z_ols_test)
+        ols_fold_score[i] = MSE(z_test_cv, z_ols_test)
 
     ols_cv_mse = np.mean(ols_fold_score)
 
@@ -270,7 +274,7 @@ def k_folds_cv_OLS_only(X,z,k_folds):
 
 
     ols_fold_score = np.zeros(k_folds)
-    test_list, train_list = stat_tools.k_fold_selection(z, k_folds)
+    test_list, train_list = k_fold_selection(z, k_folds)
     for i in range(k_folds):
         test_ind_cv = test_list[j]
         train_ind_cv = train_list[j]

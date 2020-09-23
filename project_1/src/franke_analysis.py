@@ -10,6 +10,8 @@ from sklearn.preprocessing import StandardScaler
 import sklearn.linear_model as skl
 from imageio import imread
 
+import stat_tools
+
 utils.plot_settings() # LaTeX fonts in Plots!
 
 def FrankeFunction(x, y):
@@ -138,5 +140,6 @@ def franke_analysis():
 
             subset_lambda_index  += 1
 
+    # Plots goes here
 
-###### Plotting below!
+    return
