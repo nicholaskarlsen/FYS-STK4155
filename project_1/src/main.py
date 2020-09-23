@@ -722,6 +722,9 @@ y = np.exp(-x**2) + 1.5 * np.exp(-(x-2)**2)+ np.random.normal(0, 0.1, x.shape)
 z = y
 y = np.zeros(n)
 
+
+x_train, x_test, y_train, y_test, z_train, z_test = train_test_split(x, y, z, test_size = 0.2)
+
 # Quantities of interest:
 mse_ols_test = np.zeros(max_degree)
 mse_ols_train = np.zeros(max_degree)
@@ -734,8 +737,11 @@ ols_boot_variance = np.zeros(max_degree)
 
 # Actual computations
 for degree in range(max_degree):
+    # X = linear_regression.design_matrix_2D(x,y,degree)
+    # X_train, X_test, z_train, z_test = train_test_split(X, z, test_size = 0.2)
     X = linear_regression.design_matrix_2D(x,y,degree)
-    X_train, X_test, z_train, z_test = train_test_split(X, z, test_size = 0.2)
+    X_train = linear_regression.design_matrix_2D(x_train,y_train,degree)
+    X_test = linear_regression.design_matrix_2D(x_test,y_test,degree)
     # Scaling and feeding to CV.
     scaler = StandardScaler()
     scaler.fit(X)
