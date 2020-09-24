@@ -6,6 +6,7 @@
 \usepackage{physics}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{amsbsy}
 
 \usepackage{blindtext}
 \usepackage{tikzducks}
@@ -27,14 +28,37 @@
 \maketitle
 
 \section{Introduction}
-    \blindtext
-
+    \noindent
+    In essence, Linear Regression is the process of taking points from a function, or a set of measurements and mapping them to coordinates in a choosen basis in order to create an approximation, or model of your original dataset.
 \section{Theory}
     See \textcite{hastie}
     \subsection{Linear Regression}
+        \begin{itemize}
+            \item describe the general problem
+            \item brief description of design matrix
+            \item introduce the cost function
+        \end{itemize}
+
         \subsubsection{Ordinary Least Squares}
+            \noindent
+            In ordinary least squares, we aim to find an optimal set of parameters $\pmb{\hat\beta} = [\hat\beta_0, \dots, \hat\beta_n]^T$ such that the $L^2$ norm $\norm{\mathbf y - \textup{X}\pmb{\beta}}_2$ is minimal. This defines the cost function for OLS, which may be written as
+            \begin{equation}
+                C_{OLS}(\pmb \beta)
+                = \norm{{\mathbf y}
+                - \textup{X}\pmb{\beta}}^2_2
+            \end{equation}
         \subsubsection{Ridge Regression}
+            \begin{equation}
+                C_{R}(\pmb \beta)
+                = \norm{\mathbf y - \textup{X}\pmb{\beta}}_2^2
+                + \lambda \norm{\pmb{\beta}}_2^2
+            \end{equation}
         \subsubsection{Lasso Regression}
+            \begin{equation}
+                C_L(\pmb \beta) =
+                \norm{\mathbf y - \textup{X}\pmb{\beta}}_2^2
+                + \lambda\norm{\pmb{\beta}}_1
+            \end{equation}
     \subsection{Resampling}
         \subsubsection{Cross Validation}
         \subsubsection{Bootstrap}
