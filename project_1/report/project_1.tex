@@ -10,8 +10,9 @@
 
 \usepackage{blindtext}
 \usepackage{tikzducks}
-
 \usepackage{listings}
+
+\graphicspath{{../figs/}}
 
 \begin{document}
 \title{Regression analysis and resampling methods}
@@ -22,7 +23,7 @@
 \date{\today}
 
 \begin{abstract}
-    \blindtext % Placeholder to get an idea of the formatting.
+    An abstract abstract.
 \end{abstract}
 
 \maketitle
@@ -36,16 +37,35 @@
         \begin{itemize}
             \item describe the general problem
             \item brief description of design matrix
-            \item introduce the cost function
+            \item brief introduction to the cost function
+            \item discuss different choices of bases. explain why $\mathbb P_n$ is often a good choice. Perhaps also touch on overfitting.
         \end{itemize}
+
 
         \subsubsection{Ordinary Least Squares}
             \noindent
-            In ordinary least squares, we aim to find an optimal set of parameters $\pmb{\hat\beta} = [\hat\beta_0, \dots, \hat\beta_n]^T$ such that the $L^2$ norm $\norm{\mathbf y - \textup{X}\pmb{\beta}}_2$ is minimal. This defines the cost function for OLS, which may be written as
+            In ordinary least squares, we aim to find an optimal set of parameters $\pmb{\hat\beta} = [\hat\beta_0, \dots, \hat\beta_n]^T$ such that the $L^2$ norm $\norm{\mathbf y - \textup{X}\pmb{\beta}}_2$ is minimal, where the $L^2$ norm is induced by the inner product
+            \begin{equation}
+                \norm{\mathbf u}_2^2 = \sum_i u_i^2 = \mathbf u^T \mathbf u
+            \end{equation}
+            This defines the cost function for OLS, which may be written as
             \begin{equation}
                 C_{OLS}(\pmb \beta)
-                = \norm{{\mathbf y}
-                - \textup{X}\pmb{\beta}}^2_2
+                = \qty(\mathbf y - \textup{X}\pmb \beta)^T(\mathbf y - \textup{X}\pmb \beta)
+            \end{equation}
+            In order to find its minima, we differentiate wrt to $\pmb\beta$ and assert that $\partial_{\pmb\beta}C_{OLS} = 0$ for the optimal predictor. Taking the partial derivative yields
+            \begin{align}
+                \begin{split}
+                \pdv{\pmb\beta}C_{OLS}(\pmb\beta) = -2\textup{X}^T\qty(\mathbf y - \textup X\pmb \beta)
+                \end{split}
+            \end{align}
+            Which we then set to $0$
+            \begin{equation}
+                \textup{X}^T\mathbf y = \textup{X}^T\textup{X}\pmb\beta
+            \end{equation}
+            taking the inverse of $\textup{X}^T\textup{X}$ on both sides then yields the optimal $\pmb\beta$ as
+            \begin{equation}
+                \hat{\pmb \beta} = (\textup{X}^T\textup{X})^{-1}\textup{X}^T\mathbf y
             \end{equation}
         \subsubsection{Ridge Regression}
             \begin{equation}
@@ -59,17 +79,46 @@
                 \norm{\mathbf y - \textup{X}\pmb{\beta}}_2^2
                 + \lambda\norm{\pmb{\beta}}_1
             \end{equation}
+    \subsection{Singular Value Decomposition}
+        \begin{itemize}
+            \item Discuss problems of $X^T X$ becoming singular in OLS, and how we use SVD to work around it.
+        \end{itemize}
+
     \subsection{Resampling}
+        \noindent
+        Resampling methods are ways in which we can generate new statistics from our existing data, which as the name suggests implies sampling new data sets from our already existing data. By doing so, we may gain new insigts about our data which may not be available through regular analysis, particularly in situations where we are limited by the number of data points.
+
+        Here, we will focus on two of many such techniques.
+
         \subsubsection{Cross Validation}
+            \noindent
+            In the cross-validation resampling method, we split our data set $S$ into $k$ equally sized subsets $s_1, \dots, s_k$.
+            We then for each $i = 1,\dots, k$ assign the $i$-th subset as the test set and the remaining $k-1$ subsets as the training set and compute the statistics in the usual way. Then at the end, we compute the mean value of the $k$ sets of statistics. A visual representation of this process can be seen in Fig.~\ref{fig: Cross Validation}.
+            \begin{figure}[h!tb]
+                \center
+                \input{../figs/cross_validation_fig.tex}
+                \caption{\label{fig: Cross Validation}Visual representation of $k$-fold cross-sampling for $k=5$}
+            \end{figure}
+            When doing cross-validation, typical choices of $k$ are $5$ and $10$ \cite{hastie}. Which one is better will depend on how the error scales with the size of the training set, as such, choosing a suitable $k$ requires some analysis.
+            The cross-validation resampling provides a good estimate for the mean error of our estimates.
+            \begin{itemize}
+                \item Discuss this in more detail $\rightarrow\Delta Err$ wrt to number of data points
+            \end{itemize}
         \subsubsection{Bootstrap}
+            \noindent
+            In the bootstrap resampling method, we sample our data set $S = \{s_1, \dots s_N\}$ $N$-number of times, in particular, we allow sampling the same $s_i$ multiple times. In this way, we generate new datasets in which some points are underweighted and others overweighted with respect to the original dataset $S$. So we effectively are generating small pertubations of the original dataset, which we may then use to compute new statistics.
+            In particular, this technique enables us to investivate the variance of our model wrt small pertubations of the predictors. \textbf{This may be worded more elegantly}
+            \begin{itemize}
+                \item touch on rates of convergence
+            \end{itemize}
+
+    \subsection{The Bias-Variance Tradeoff}
+
 \section{Results}
-    \blindtext
 
 \section{Discussion}
-    \blindtext
 
 \section{Conclusion}
-    \blindtext
 
 \onecolumngrid
 \bibliography{bibfile}
