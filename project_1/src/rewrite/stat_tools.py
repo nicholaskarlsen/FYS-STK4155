@@ -25,6 +25,18 @@ def mean_squared_bias(y_data, y_model):
     return np.mean((y_data - np.mean(y_model, axis=0, keepdims=True)) ** 2)
 
 
+def var_beta(y_data, X):
+    """ Computes the covariance matrix (only diagonal elements)
+    Args:
+        y_data (Array): Data points.
+        X (Array): Design matrix corresponding to y_data
+
+    Returns:
+        Array: Covariance Matrix (diagonal elements)
+    """
+    return np.var(y_data) * np.linalg.inv(X.T @ X).diagonal()
+
+
 def k_fold_selection(z, k_folds):
     """Takes a vector z, retunrs two lists of k elements, each element
     being an array of indices for a permuted selection of z. The second
