@@ -111,8 +111,10 @@
             \end{itemize}
         \subsubsection{Bootstrap}
             \noindent
-            In the bootstrap resampling method, we sample our data set $S = \{s_1, \dots s_N\}$ $N$-number of times, in particular, we allow sampling the same $s_i$ multiple times. In this way, we generate new datasets in which some points are underweighted and others overweighted with respect to the original dataset $S$. So we effectively are generating small pertubations of the original dataset, which we may then use to compute new statistics.
-            In particular, this technique enables us to investivate the variance of our model wrt small pertubations of the predictors. \textbf{This may be worded more elegantly}
+            In the bootstrap resampling method, we sample our data set $S = \{s_1, \dots s_N\}$ $N$-number of times, in particular, we allow sampling the same $s_i$ multiple times. In this way, we generate new datasets in which some points are underweighted and others overweighted with respect to the original dataset $S$. Loosely speaking, the concept corresponds to evenly sampling the ensemble of all possible input data sets to our regression method, in order to estimate the variance and expectation values of our model predictions over the ensemble. The idea is that if our training set representatively covers the domain of inputs, each resampled regression computation will give a certain prediction $\tilde{Y_{B}}$ and these $\tilde{Y_{B}}$ will appear with a frequency corresponding to underlying probability distribution 
+            
+%            So we effectively are generating small pertubations of the original dataset, which we may then use to compute new statistics.
+%            In particular, this technique enables us to investivate the variance of our model wrt small pertubations of the predictors. \textbf{This may be worded more elegantly}
             \begin{itemize}
                 \item touch on rates of convergence
             \end{itemize}
