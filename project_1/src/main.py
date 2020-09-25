@@ -222,8 +222,8 @@ def franke_analysis():
         # Scaling and feeding to CV.
         scaler = StandardScaler()
         scaler.fit(X)
-        X = scaler.transform(X)
-        X[:,0] = 1 # Maybe not for ridge+lasso. Don't want to penalize constants...
+        X_scaled = scaler.transform(X)
+        X_scaled[:,0] = 1 # Maybe not for ridge+lasso. Don't want to penalize constants...
 
         # Scaling and feeding to bootstrap and OLS
         scaler_boot = StandardScaler()
@@ -245,7 +245,7 @@ def franke_analysis():
         # CV, find best lambdas and get mse vs lambda for given degree. Also, gets
         # ols_CV_MSE
 
-        lasso_cv_mse, ridge_cv_mse, ols_cv_mse = stat_tools.k_fold_cv_all(X,z,n_lambdas,lambdas,k_folds)
+        lasso_cv_mse, ridge_cv_mse, ols_cv_mse = stat_tools.k_fold_cv_all(X_scaled,z,n_lambdas,lambdas,k_folds)
         best_lasso_lambda[degree] = lambdas[np.argmin(lasso_cv_mse)]
         best_ridge_lambda[degree] = lambdas[np.argmin(ridge_cv_mse)]
         best_lasso_mse[degree] = np.min(lasso_cv_mse)
@@ -258,7 +258,7 @@ def franke_analysis():
         lamb_lasso = best_lasso_lambda[degree]
 
         ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance, ols_mse, ols_bias, ols_variance = \
-        stat_tools.bootstrap_all(X_train, X_test, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
+        stat_tools.bootstrap_all(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
 
         ridge_best_lambda_boot_mse[degree], ridge_best_lambda_boot_bias[degree], \
         ridge_best_lambda_boot_variance[degree] = ridge_mse, ridge_bias, ridge_variance
@@ -274,7 +274,7 @@ def franke_analysis():
         for lamb in subset_lambdas:
 
             ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance = \
-            stat_tools.bootstrap_ridge_lasso(X_train, X_test, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
+            stat_tools.bootstrap_ridge_lasso(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
 
             ridge_subset_lambda_boot_mse[degree, subset_lambda_index ], ridge_subset_lambda_boot_bias[degree, subset_lambda_index ], \
             ridge_subset_lambda_boot_variance[degree, subset_lambda_index ] = ridge_mse, ridge_bias, ridge_variance
@@ -360,8 +360,8 @@ def terrain_analysis():
 
         scaler = StandardScaler()
         scaler.fit(X)
-        X = scaler.transform(X)
-        X[:,0] = 1 # Probably should not have this.
+        X_scaled = scaler.transform(X)
+        X_scaled[:,0] = 1 # Probably should not have this.
 
         # Scaling and feeding to bootstrap and OLS
         scaler_boot = StandardScaler()
@@ -382,7 +382,7 @@ def terrain_analysis():
 
         # CV, find best lambdas and get mse vs lambda for given degree.
 
-        lasso_cv_mse, ridge_cv_mse, ols_cv_mse = stat_tools.k_fold_cv_all(X,z,n_lambdas,lambdas,k_folds)
+        lasso_cv_mse, ridge_cv_mse, ols_cv_mse = stat_tools.k_fold_cv_all(X_scaled,z,n_lambdas,lambdas,k_folds)
         best_lasso_lambda[degree] = lambdas[np.argmin(lasso_cv_mse)]
         best_ridge_lambda[degree] = lambdas[np.argmin(ridge_cv_mse)]
         best_lasso_mse[degree] = np.min(lasso_cv_mse)
@@ -397,7 +397,7 @@ def terrain_analysis():
         lamb_lasso = best_lasso_lambda[degree]
 
         ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance, ols_mse, ols_bias, ols_variance = \
-        stat_tools.bootstrap_all(X_train, X_test, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
+        stat_tools.bootstrap_all(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
 
         ridge_best_lambda_boot_mse[degree], ridge_best_lambda_boot_bias[degree], \
         ridge_best_lambda_boot_variance[degree] = ridge_mse, ridge_bias, ridge_variance
@@ -413,7 +413,7 @@ def terrain_analysis():
         for lamb in subset_lambdas:
 
             ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance = \
-            stat_tools.bootstrap_ridge_lasso(X_train, X_test, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
+            stat_tools.bootstrap_ridge_lasso(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
 
             ridge_subset_lambda_boot_mse[degree, subset_lambda_index ], ridge_subset_lambda_boot_bias[degree, subset_lambda_index ], \
             ridge_subset_lambda_boot_variance[degree, subset_lambda_index ] = ridge_mse, ridge_bias, ridge_variance

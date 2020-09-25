@@ -23,7 +23,7 @@
 \date{\today}
 
 \begin{abstract}
-    An abstract abstract.
+   In this paper we aim to explore the application of three distinct regression methods to both a sampling of the Franke function, as well as a set of terrain data. We utilize the ordinary-least-square (OLS) regression, Ridge regression and LASSO regression along with bootstrap and k-fold cross-validation resampling techniques in order to create and asses predictive polynomial models. We analyze the performance of the different regression models on the two data sets, with the ultimate goal of determining the best regression method and the best predictive polynomial model for each data set.
 \end{abstract}
 
 \maketitle
@@ -76,6 +76,9 @@
                 = (\mathbf y - \textup{X}\pmb\beta)^T(\mathbf y - \textup{X}\pmb\beta)
                 + \lambda \pmb\beta^T\pmb\beta
             \end{equation}
+			
+			The only difference between the cost function for OLS and Ridge regression is the addition of the "penalty" parameter $\lambda$ to the $L^2$ norm of the coefficients $\pmb{\beta}$. The main point of introducing this parameter is to reduce the variance of the regression coefficients $\pmb{\beta}$. It introduces a constraint on the allowable values of $\pmb{\beta}$, which means that the method no longer is unbiased. The aim is that the reduction of the variance outweighs the increase of the method's bias, leading to an overall lower test error, cf. the later discussion of the Bias-Variance Tradeoff.
+            
         \subsubsection{Lasso Regression}
             \begin{equation}
                 C_L(\pmb \beta) =
@@ -86,6 +89,8 @@
         \begin{itemize}
             \item Discuss problems of $X^T X$ becoming singular in OLS, and how we use SVD to work around it.
         \end{itemize}
+
+	The Lasso method is distinguished from the Ridge regression by which norm of $\pmb{\beta}$ is penalized. While the Ridge regression applies the penalty to the $L^2$ norm, the Lasso aims to shrink the $L^1$ norm. Two important consequences arise from this: firstly, it is no longer possible to obtain a closed-form solution to the minimization problem; secondly, the regression coefficients may be shrunk far more unevenly. In contrast to the Ridge regression, Lasso regression may shrink individual $\beta_{i}$ toward zero. This is an extremely useful property of the method, since it allows unimportant predictors to be identified and discarded. The drawback, of course, is that the bias of the Lasso method is expected to exceed the bias of the Ridge method.
 
     \subsection{Resampling}
         \noindent
