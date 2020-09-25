@@ -70,7 +70,7 @@ def OLS_SVD_2D(X, z, use_np_pinv = True):
         X (Array): Design matrix from design_matrix_2D
         z (Array): z data points, i.e [z0,z1,...,zn]
         use_np_pinv (bool): Set to True in order to use np.linalg.pinv instead.
-            
+
     Returns:
         beta (Array): The beta vector
     """
@@ -80,13 +80,12 @@ def OLS_SVD_2D(X, z, use_np_pinv = True):
     else:
 
         U, s, V = np.linalg.svd(X)
-        tolerance = s[0]*1e-14 # Simple limit for detecting zero-valued singular values.
-        reciprocal_s = np.where(s>tolerance,1/s,0) # Setting zero-values to actual zero
-                                                   # instead of machine-epsilon
-                                                   # Could just as well have used
-                                                   # np.linalg.pinv(X), they are
-                                                   # more clever with implementing
-                                                   # the tolerance.
+        tolerance = s[0]*1e-14
+        if U.shape[0] >= V.shape[0]:
+            reciprocal_s = np.where(s>tolerance,1/s,0)
+        else:
+            reciprocal_s = np.where(s>tolerance,1/s,0).reshape(-1,1) 
+
         D = np.eye(len(U),len(V)) * reciprocal_s
 
         pseudo_inv = V.T @ D.T @ U.T
