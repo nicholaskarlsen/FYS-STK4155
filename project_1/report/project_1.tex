@@ -34,6 +34,7 @@
 \section{Theory}
     See \textcite{hastie}
     \subsection{Linear Regression}
+        Consider a set of data points $\{(x_1, y_n), \dots, (x_N, y_N)\}$ which we wish to fit to some linear model $\mathbf y()$
         \begin{itemize}
             \item describe the general problem
             \item brief description of design matrix
@@ -44,7 +45,7 @@
 
         \subsubsection{Ordinary Least Squares}
             \noindent
-            In ordinary least squares, we aim to find an optimal set of parameters $\pmb{\hat\beta} = [\hat\beta_0, \dots, \hat\beta_n]^T$ such that the $L^2$ norm $\norm{\mathbf y - \textup{X}\pmb{\beta}}_2$ is minimal, where the $L^2$ norm is induced by the inner product
+            In ordinary least squares (OLS), we aim to find an optimal set of parameters $\pmb{\hat\beta} = [\hat\beta_0, \dots, \hat\beta_n]^T$ such that the $L^2$ norm $\norm{\mathbf y - \textup{X}\pmb{\beta}}_2$ is minimal, with the $L^2$ norm being induced by the inner product
             \begin{equation}
                 \norm{\mathbf u}_2^2 = \sum_i u_i^2 = \mathbf u^T \mathbf u
             \end{equation}
@@ -59,19 +60,21 @@
                 \pdv{\pmb\beta}C_{OLS}(\pmb\beta) = -2\textup{X}^T\qty(\mathbf y - \textup X\pmb \beta)
                 \end{split}
             \end{align}
-            Which we then set to $0$
+            We assert this is zero at the minima, which yields
             \begin{equation}
                 \textup{X}^T\mathbf y = \textup{X}^T\textup{X}\pmb\beta
             \end{equation}
-            taking the inverse of $\textup{X}^T\textup{X}$ on both sides then yields the optimal $\pmb\beta$ as
+            then taking the inverse of $\textup{X}^T\textup{X}$ on both sides then gives the optimal $\pmb\beta$ as
             \begin{equation}
                 \hat{\pmb \beta} = (\textup{X}^T\textup{X})^{-1}\textup{X}^T\mathbf y
             \end{equation}
+            which mathematically is the best projection of the datapoints to our model. However, this may not actually yield the best fit in a qualitative sense, even if one disregards the risk of overfitting due to a poorly choosen basis\footnote{i.e an excessively high degree polynomial.}. Consider the case where we may have very high variance in certain regions of our dataset, OLS will then weight these regions in such a way that yields a poor fit in a qualitative sense. In order to deal with such situations, we apply alternate regression methods, which introduce additional tuning parameters that accounts for, and punishes the variance in the data sets as to yield a better model.
         \subsubsection{Ridge Regression}
+            One such method is the Ridge regression, where the cost function is given as
             \begin{equation}
                 C_{R}(\pmb \beta)
-                = \norm{\mathbf y - \textup{X}\pmb{\beta}}_2^2
-                + \lambda \norm{\pmb{\beta}}_2^2
+                = (\mathbf y - \textup{X}\pmb\beta)^T(\mathbf y - \textup{X}\pmb\beta)
+                + \lambda \pmb\beta^T\pmb\beta
             \end{equation}
         \subsubsection{Lasso Regression}
             \begin{equation}

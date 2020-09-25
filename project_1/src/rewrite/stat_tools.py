@@ -6,8 +6,8 @@ def R2(y_data, y_model):
     # Computes the confidence number
     return np.mean(
         1
-        - np.sum((y_data - y_model) ** 2, axis=0)
-        / np.sum((y_data - np.mean(y_data, axis=0)) ** 2, axis=0)
+        - np.sum((y_data - y_model) ** 2, axis=0, keepdims=True)
+        / np.sum((y_data - np.mean(y_data, axis=0, keepdims=True)) ** 2, axis=0)
     )
 
 
@@ -18,11 +18,11 @@ def MSE(y_data, y_model):
 
 def mean_variance(y_data, y_model):
     # Computes the variance of a particular data point in bootstrap
-    return np.mean(np.var(y_model, axis=1), axis=0)
+    return np.mean(np.var(y_model, axis=0))
 
 
 def mean_squared_bias(y_data, y_model):
-    return np.mean((y_data - np.mean(y_model, axis=0)) ** 2)
+    return np.mean((y_data - np.mean(y_model, axis=0, keepdims=True)) ** 2)
 
 
 def k_fold_selection(z, k_folds):
