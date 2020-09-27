@@ -4,25 +4,33 @@ import sklearn.linear_model as skl
 
 def R2(y_data, y_model):
     # Computes the confidence number
+    return 1 - np.mean((y_data - y_model)**2) / np.mean((y_data - np.mean(y_data))**2)
+    """ Multidim case (if we ever want to study R2 for in bootstrap.. probably not)
     return np.mean(
         1
-        - np.sum((y_data - y_model) ** 2, axis=0, keepdims=True)
-        / np.sum((y_data - np.mean(y_data, axis=0, keepdims=True)) ** 2, axis=0)
+        - np.sum((y_data - y_model) ** 2, axis=1, keepdims=True)
+        / np.sum((y_data - np.mean(y_data, axis=1, keepdims=True)) ** 2, axis=1, keepdims=True)
     )
+    """
 
 
 def MSE(y_data, y_model):
     # Computes the mean squared error (Works for both "normal" situations & bootstrap!)
-    return np.mean(np.mean((y_data - y_model) ** 2, axis=0))
+    # If y_model is a bootstrap set.
+    if len(y_model.shape) > 1:
+        return np.mean(np.mean((y_data - y_model) ** 2, axis=1, keepdims=True))
+    else:
+        return np.mean((y_data - y_model) ** 2)
 
 
 def mean_variance(y_data, y_model):
     # Computes the variance of a particular data point in bootstrap
-    return np.mean(np.var(y_model, axis=0))
+    return np.mean(np.var(y_model, axis=1, keepdims=True))
 
 
 def mean_squared_bias(y_data, y_model):
-    return np.mean((y_data - np.mean(y_model, axis=0, keepdims=True)) ** 2)
+    #return np.mean((y_data - np.mean(y_model, axis=1, keepdims=True)) ** 2)
+    return np.mean(np.sum((y_data - np.mean(y_model, axis=1, keepdims=True)) ** 2, axis=1) / len(y_data))
 
 
 def var_beta(y_data, X):

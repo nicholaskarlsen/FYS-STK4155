@@ -21,7 +21,7 @@ X_coord, Y_coord = np.meshgrid(x_terrain,y_terrain)
 z_terrain = terrain_data.flatten() # the response values
 x_terrain_flat = X_coord.flatten() # the first degree feature variables
 y_terrain_flat = Y_coord.flatten() # the first degree feature variables
-
+# Would take ~ 90 hours to run on my PC with these parameters. (didnt estimate untill ~6 hours in...)
 max_degree = 20
 n_lambdas = 30
 n_bootstraps = 50
