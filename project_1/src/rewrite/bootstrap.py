@@ -6,8 +6,8 @@ import stat_tools
 
 def bootstrap(X_train, X_test, z_train, z_test, bootstraps, regression):
     """
-        Assumes regression(X, z), but can take different parameters like
-        bootstrap(..., regression = lambda X, y : regression_method(X, y, lamb)):
+    Assumes regression(X, z), but can take different parameters like
+    bootstrap(..., regression = lambda X, y : regression_method(X, y, lamb)):
     """
 
     N = len(z_train)  # Number of data points in training set

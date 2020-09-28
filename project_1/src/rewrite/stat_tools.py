@@ -4,7 +4,7 @@ import sklearn.linear_model as skl
 
 def R2(y_data, y_model):
     # Computes the confidence number
-    return 1 - np.mean((y_data - y_model)**2) / np.mean((y_data - np.mean(y_data))**2)
+    return 1 - np.mean((y_data - y_model) ** 2) / np.mean((y_data - np.mean(y_data)) ** 2)
     """ Multidim case (if we ever want to study R2 for in bootstrap.. probably not)
     return np.mean(
         1
@@ -29,12 +29,14 @@ def mean_variance(y_data, y_model):
 
 
 def mean_squared_bias(y_data, y_model):
-    #return np.mean((y_data - np.mean(y_model, axis=1, keepdims=True)) ** 2)
-    return np.mean(np.sum((y_data - np.mean(y_model, axis=1, keepdims=True)) ** 2, axis=1) / len(y_data))
+    # return np.mean((y_data - np.mean(y_model, axis=1, keepdims=True)) ** 2)
+    return np.mean(
+        np.sum((y_data - np.mean(y_model, axis=1, keepdims=True)) ** 2, axis=1) / len(y_data)
+    )
 
 
-def var_beta(y_data, X):
-    """ Computes the covariance matrix (only diagonal elements)
+def var_beta(X, y_data):
+    """Computes the covariance matrix (only diagonal elements)
     Args:
         y_data (Array): Data points.
         X (Array): Design matrix corresponding to y_data

@@ -65,7 +65,11 @@
             \begin{equation}
                 \mathbf{\tilde y} = \textup{X}\pmb \beta
             \end{equation}
-            leaving us with a linear algebra problem to solve in finding the $\pmd\beta$ which optimizes $\mathbf{\tilde y}$.
+            leaving us with a linear algebra problem to solve in finding the $\pmb\beta$ which optimizes $\mathbf{\tilde y}$.
+
+            \begin{itemize}
+                \item Scaling
+            \end{itemize}
 
         \subsubsection{Model assessment}
 
@@ -208,16 +212,22 @@
 
     \subsection{The Bias-Variance Trade-off}
         \noindent
-        Consider a set of data $S$, sampled from some domain $D$ and two separate models. $\hat f_s(x)$, a simple model with only a few degrees of freedom and $\hat f_c(x)$, a more complicated model with many degrees of freedom.
+        Consider a set of data $S$, sampled from some domain $D$ and two separate models. $\tilde{\mathbf y}_s(x)$, a simple model with only a few degrees of freedom and $\tilde{\mathbf y}_c(x)$, a more complicated model with many degrees of freedom.
 
-        When fitting $\hat f_s(x)$ to the sample $S$ we only have a few degrees of freedom to tune in order to fit the data, resulting in a higher bias, but low variance as the sensitivity to changes in $S$ will be relatively low. Conversely, when utilizing a complicated model with many degrees of freedom we may tune the parameters in such a way as to get a very good fit to some particular sample $S$, which is why we usually observer the $MSE$ decreasing as the complexity of our model increases for some particular training sample $S$. However, since the model will then be so finely tuned to that particular sample it will then suffer poorly when making predictions that fall outside of this sample.
+        When fitting $\mathbf{\tilde y}_s(x)$ to the sample $S$ we only have a few degrees of freedom to tune in order to fit the data, resulting in a higher bias, but low variance as the sensitivity to changes in $S$ will be relatively low. Conversely, when utilizing a complicated model with many degrees of freedom we may tune the parameters in such a way as to get a very good fit to some particular sample $S$, which is why we usually observer the MSE decreasing as the complexity of our model increases for some particular training sample $S$. However, since the model will then be so finely tuned to that particular sample it will then suffer poorly when making predictions that fall outside of this sample.
 
-        As such, finding the optimal complexity implies weighing the benefits of having a high complexity model which yields good results on your test data vs having low complexity model which applies more generally across samples. Where the optimal model is one which balances the bias and variance contributions to the $MSE$.
+        As such, finding the optimal complexity implies weighing the benefits of having a high complexity model which yields good results on your test data vs having low complexity model which applies more generally across samples. Where the optimal model is one which balances the bias and variance contributions to the MSE.
 
 
-\section{Results}
+\section{Results \& Discussion}
 
-\section{Discussion}
+    \begin{figure}[h!tb]
+        \center
+        \includegraphics[width=\columnwidth]{../figs/OLS_MSE_Bootstrap_Hastie_211.pdf}
+        \caption{\label{fig:Hastie2.11 MSE Bootstrap}The mean MSE for testing and training data with a 1/4 split resampled 500 times with bootstrap for a OLS regression of 300 randomly sampled points of the Franke Function.}
+    \end{figure}
+
+%\section{Discussion}
 
 \section{Conclusion}
 
