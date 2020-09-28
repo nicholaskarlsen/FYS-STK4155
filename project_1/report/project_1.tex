@@ -37,9 +37,9 @@
     See \textcite{hastie}
     \subsection{Linear Regression}
         \noindent
-        Consider a set of data points $\{(x_1, y_n), \dots, (x_N, y_N)\}$ which we wish to fit to some linear model $\mathbf{\tilde y}(\pmb \beta)$ where $\pmb\beta$ is a vector containing the free parameters of the model. The model $\mathbf{\tilde y}$ will then be related to the true data points $\mathbf y$ by
+        Consider a set of data points $\{(x_1, y_n), \dots, (x_N, y_N)\}$ which we wish to fit to some linear model $\pmb{\tilde y}(\pmb \beta)$ where $\pmb\beta$ is a vector containing the free parameters of the model. The model $\pmb{\tilde y}$ will then be related to the true data points $\pmb y$ by
         \begin{equation}
-            \mathbf y = \mathbf{\tilde y}(\pmb\beta) + \pmb\varepsilon
+            \pmb y = \pmb{\tilde y}(\pmb\beta) + \pmb\varepsilon
         \end{equation}
         where $\pmb\varepsilon = (\epsilon_1, \dots, \epsilon_N)$ represents the error of the model. The aim of Linear regression models is thus to find the optimal parameters $\pmb\beta$ such that not only the error of the model on some particular dataset is minimized, but also the error of the model applied to different data sets sampled in the same domain is minimized, such that we may use our model to make predictions.
 
@@ -61,11 +61,11 @@
                 \end{matrix}
                 ]
             \end{equation}
-            where we see that entry $\textup{X}_{ij}$ contains the $x_i$ data point evaluated in the $j$-th basis function. This matrix has the particularly useful property that we may then multiply it with $\pmb \beta$ to obtain the corresponding set of predictions $\mathbf{\tilde y}$ like
+            where we see that entry $\textup{X}_{ij}$ contains the $x_i$ data point evaluated in the $j$-th basis function. This matrix has the particularly useful property that we may then multiply it with $\pmb \beta$ to obtain the corresponding set of predictions $\pmb{\tilde y}$ like
             \begin{equation}
-                \mathbf{\tilde y} = \textup{X}\pmb \beta
+                \pmb{\tilde y} = \textup{X}\pmb \beta
             \end{equation}
-            leaving us with a linear algebra problem to solve in finding the $\pmb\beta$ which optimizes $\mathbf{\tilde y}$.
+            leaving us with a linear algebra problem to solve in finding the $\pmb\beta$ which optimizes $\pmb{\tilde y}$.
 
             \begin{itemize}
                 \item Scaling
@@ -74,37 +74,37 @@
         \subsubsection{Model assessment}
 
         \begin{equation}
-            \textup{MSE}(\mathbf y, \mathbf{\tilde y}) = \frac{1}{n}\sum_i \qty(y_i - \tilde y_i)^2
+            \textup{MSE}(\pmb y, \pmb{\tilde y}) = \frac{1}{n}\sum_i \qty(y_i - \tilde y_i)^2
         \end{equation}
         \begin{equation}
-            \textup{R}^2(\mathbf y, \tilde{\mathbf{y}}) = 1 -
-            \frac{\sum_i(y_i - \tilde y_i)^2}{\sum_i \qty(y_i - \langle \mathbf y\rangle)^2}
+            \textup{R}^2(\pmb y, \tilde{\pmb{y}}) = 1 -
+            \frac{\sum_i(y_i - \tilde y_i)^2}{\sum_i \qty(y_i - \mathbb E\qty[\pmb y])^2}
         \end{equation}
 
         \subsubsection{Ordinary Least Squares}
             \noindent
-            In ordinary least squares (OLS), we aim to find an optimal set of parameters $\pmb{\hat\beta} = [\hat\beta_0, \dots, \hat\beta_n]^T$ such that the $L^2$ norm $\norm{\mathbf y - \textup{X}\pmb{\beta}}_2$ is minimal, with the $L^2$ norm being induced by the inner product
+            In ordinary least squares (OLS), we aim to find an optimal set of parameters $\pmb{\hat\beta} = [\hat\beta_0, \dots, \hat\beta_n]^T$ such that the $L^2$ norm $\norm{\pmb y - \textup{X}\pmb{\beta}}_2$ is minimal, with the $L^2$ norm being induced by the inner product
             \begin{equation}
-                \norm{\mathbf u}_2^2 = \sum_i u_i^2 = \mathbf u^T \mathbf u
+                \norm{\pmb u}_2^2 = \sum_i u_i^2 = \pmb u^T \pmb u
             \end{equation}
             This defines the cost function for OLS, which may be written as
             \begin{equation}
                 C_{OLS}(\pmb \beta)
-                = \qty(\mathbf y - \textup{X}\pmb \beta)^T(\mathbf y - \textup{X}\pmb \beta)
+                = \qty(\pmb y - \textup{X}\pmb \beta)^T(\pmb y - \textup{X}\pmb \beta)
             \end{equation}
             In order to find its minima, we differentiate wrt to $\pmb\beta$ and assert that $\partial_{\pmb\beta}C_{OLS} = 0$ for the optimal predictor. Taking the partial derivative yields
             \begin{align}
                 \begin{split}
-                \pdv{\pmb\beta}C_{OLS}(\pmb\beta) = -2\textup{X}^T\qty(\mathbf y - \textup X\pmb \beta)
+                \pdv{\pmb\beta}C_{OLS}(\pmb\beta) = -2\textup{X}^T\qty(\pmb y - \textup X\pmb \beta)
                 \end{split}
             \end{align}
             We assert this is zero at the minima, which yields
             \begin{equation}
-                \textup{X}^T\mathbf y = \textup{X}^T\textup{X}\pmb\beta
+                \textup{X}^T\pmb y = \textup{X}^T\textup{X}\pmb\beta
             \end{equation}
             then taking the inverse of $\textup{X}^T\textup{X}$ on both sides then gives the optimal $\pmb\beta$ as
             \begin{equation}\label{eqn:OLS optimal beta}
-                \hat{\pmb \beta}_{\textup{OLS}} = (\textup{X}^T\textup{X})^{-1}\textup{X}^T\mathbf y
+                \hat{\pmb \beta}_{\textup{OLS}} = (\textup{X}^T\textup{X})^{-1}\textup{X}^T\pmb y
             \end{equation}
             which mathematically is the best projection of the data-points to our model. However, this may not actually yield the best predictive model. OLS may suffer from over-fitting to the particular sample, and as such will not always perform very well on new data points for which the model has not been trained. As such, we instead look at alternate regression methods with additional turning parameters which allow us to account for the variance between different sets of data as to yield a model with better predictive abilities compared to the OLS.
 
@@ -113,14 +113,14 @@
             One such method is the Ridge regression, where the cost function is given as
             \begin{equation}
                 C_{R}(\pmb \beta)
-                = (\mathbf y - \textup{X}\pmb\beta)^T(\mathbf y - \textup{X}\pmb\beta)
+                = (\pmb y - \textup{X}\pmb\beta)^T(\pmb y - \textup{X}\pmb\beta)
                 + \lambda \pmb\beta^T\pmb\beta
             \end{equation}
             The only difference between the cost function for OLS and Ridge regression is the addition of the "penalty" parameter $\lambda$ to the $L^2$ norm of the coefficients $\pmb{\beta}$. The main point of introducing this parameter is to reduce the variance of the regression coefficients $\pmb{\beta}$. It introduces a constraint on the allowable values of $\pmb{\beta}$, which means that the method no longer is unbiased. The aim is that the reduction of the variance outweighs the increase of the method's bias, leading to an overall lower test error, cf. the later discussion of the Bias-Variance Trade-off.
         \subsubsection{Lasso Regression}
             \begin{equation}
                 C_L(\pmb \beta) =
-                \norm{\mathbf y - \textup{X}\pmb{\beta}}_2^2
+                \norm{\pmb y - \textup{X}\pmb{\beta}}_2^2
                 + \lambda\norm{\pmb{\beta}}_1
             \end{equation}
            The Lasso method is distinguished from the Ridge regression by which norm of $\pmb{\beta}$ is penalized. While the Ridge regression applies the penalty to the $L^2$ norm, the Lasso aims to shrink the $L^1$ norm. Two important consequences arise from this: firstly, it is no longer possible to obtain a closed-form solution to the minimization problem; secondly, the regression coefficients may be shrunk far more unevenly. In contrast to the Ridge regression, Lasso regression may shrink individual $\beta_{i}$ toward zero. This is an extremely useful property of the method, since it allows unimportant predictors to be identified and discarded. The drawback, of course, is that the bias of the Lasso method is expected to exceed the bias of the Ridge method.
@@ -207,66 +207,74 @@
 
     \subsection{The Bias-Variance Trade-off}
         %%%NICHOLAS' DRAFT START
-        % Consider a set of data $S$, sampled from some domain $D$ and two separate models. $\tilde{\mathbf y}_s(x)$, a simple model with only a few degrees of freedom and $\tilde{\mathbf y}_c(x)$, a more complicated model with many degrees of freedom.
+        % Consider a set of data $S$, sampled from some domain $D$ and two separate models. $\tilde{\pmb y}_s(x)$, a simple model with only a few degrees of freedom and $\tilde{\pmb y}_c(x)$, a more complicated model with many degrees of freedom.
 
-        % When fitting $\mathbf{\tilde y}_s(x)$ to the sample $S$ we only have a few degrees of freedom to tune in order to fit the data, resulting in a higher bias, but low variance as the sensitivity to changes in $S$ will be relatively low. Conversely, when utilizing a complicated model with many degrees of freedom we may tune the parameters in such a way as to get a very good fit to some particular sample $S$, which is why we usually observer the MSE decreasing as the complexity of our model increases for some particular training sample $S$. However, since the model will then be so finely tuned to that particular sample it will then suffer poorly when making predictions that fall outside of this sample.
+        % When fitting $\pmb{\tilde y}_s(x)$ to the sample $S$ we only have a few degrees of freedom to tune in order to fit the data, resulting in a higher bias, but low variance as the sensitivity to changes in $S$ will be relatively low. Conversely, when utilizing a complicated model with many degrees of freedom we may tune the parameters in such a way as to get a very good fit to some particular sample $S$, which is why we usually observer the MSE decreasing as the complexity of our model increases for some particular training sample $S$. However, since the model will then be so finely tuned to that particular sample it will then suffer poorly when making predictions that fall outside of this sample.
         % As such, finding the optimal complexity implies weighing the benefits of having a high complexity model which yields good results on your test data vs having low complexity model which applies more generally across samples. Where the optimal model is one which balances the bias and variance contributions to the MSE.
         %%% NICHOLAS' WEEKEND DRAFT END
         \noindent
         A key concept in much of machine learning is the so-called Bias-Variance Tradeoff. Simply put the test error of a learned prediction method can be viewed as being partly the sum of two distinct quantities, the bias of the method and the variance of the method. The bias can be thought of as errors due to inflexible assumptions and constraints on the model, while the variance, quite opposingly, is the actual statistical variance of the procedure. Crucially, the variance is connected with the model having too much flexibility, overfitting on the training data while giving very spread results on the test data. Naturally, the relative sizes of the errors due to bias and the errors due to variance change with the flexibility/complexity of the model. For an inflexible model, e.g. a polynomial regression model of low degree, the bias is expected to be the dominant contribution to the test error. On the other side of the spectrum, for a very flexible model, e.g. a polynomial regression model of high degree, the variance would be anticipated to be the dominating source of the test error. Importantly, the relative effects of the bias and the variance won't necessarily change at the same rate. Thus, one could hope to find an optimally flexible model which minimizes the combined error due to variance and bias. This is the essence of the Bias-Variance Tradeoff; one could, for instance, try to slightly increase the bias of a method in the hopes of reducing the variance far more.
 
-        Concretely for the problem at hand in this article, we use the expected MSE of our models on the test data to assess our models. This expected MSE can be explicitly decomposed into a bias term, a variance term and an irreducible error \cite{hastie}. We assume that our  response values $\pmb{y}$ are given by a "true" function $\pmb{f}$ with the addition of normally distributed noise $\pmb{e}$ with zero mean:
+        Concretely for the problem at hand in this article, we use the expected MSE of our models on the test data to assess our models. This expected MSE can be explicitly decomposed into a bias term, a variance term and an irreducible error \cite{hastie}. We assume that our  response values $\pmb{y}$ are given by a "true" function $\pmb{f}$ with the addition of normally distributed noise $\pmb{\varepsilon}$ with zero mean:
 
         \begin{equation}
         \label{model_assumption}
-        \pmb{y} = \pmb{f} + \pmb{e}
+        \pmb{y} = \pmb{f} + \pmb{\varepsilon}
         \end{equation}
             Denoting our model predictions by $\pmb{\tilde{y}}$ and keeping our "true" test values $\pmb{f}$ fixed,  we can then decompose the expected squared test error, the expectations being taken over the ensemble of possible predictions and noise values, as:
-        \begin{equation}
+        \begin{align}
         \label{bias_variance_decomp}
         \begin{split}
-        \mathbb{E} [(\pmb{y} - \pmb{\tilde{y}})^2] = \mathbb{E} [((\pmb{y} - \mathbb{E}[\pmb{\tilde{y}}]) - (\pmb{\tilde{y}} - \mathbb{E}[\pmb{\tilde{y}}]))^2] \\
-        = \mathbb{E}[(\pmb{y} - \mathbb{E}[\pmb{\tilde{y}}])^2] + \mathbb{E}[(\pmb{\tilde{y}} - \mathbb{E}[\pmb{\tilde{y}}])^2] \\
-        - \mathbb{E} [ 2 ( (\pmb{y} - \mathbb{E}[\pmb{\tilde{y}}])(\pmb{\tilde{y}} - \mathbb{E}[\pmb{\tilde{y}}]))] \\
-        = \mathbb{E}[(\pmb{y} - \mathbb{E}[\pmb{\tilde{y}}])^2] + var[\pmb{\tilde{y}}] - 2(\pmb{y} - \mathbb{E}[\pmb{\tilde{y}}])\mathbb{E}[(\pmb{\tilde{y}} - \mathbb{E}[\pmb{\tilde{y}}])] \\
-        = \mathbb{E}[(\pmb{y} - \mathbb{E}[\pmb{\tilde{y}}])^2] + var[\pmb{\tilde{y}}] - 2(\pmb{y} - \mathbb{E}[\pmb{\tilde{y}}])(\mathbb{E}[\pmb{\tilde{y}}] - \mathbb{E}[\pmb{\tilde{y}}]) \\
-        = \mathbb{E}[(\pmb{y} - \mathbb{E}[\pmb{\tilde{y}}])^2] + var[\pmb{\tilde{y}}] = bias^2[\pmb{y},\pmb{\tilde{y}}] + var[\pmb{\tilde{y}}] \\
-        = \mathbb{E}[(\pmb{f} + \pmb{e} - \mathbb{E}[\pmb{\tilde{y}}])^2] + var[\pmb{\tilde{y}}] \\ = \mathbb{E}[(\pmb{f} - \mathbb{E}[\pmb{\tilde{y}}])^2] + var[\pmb{\tilde{y}}] + var[\pmb{e}] \\
-        = bias^2[\pmb{f},\pmb{\tilde{y}}] + var[\pmb{\tilde{y}}] + \pmb{\sigma}^2
+        & \quad\,\, \mathbb{E} [(\pmb{y} - \pmb{\tilde{y}})^2]
+        \\
+        &= \mathbb{E} [((\pmb{y} - \mathbb{E}[\pmb{\tilde{y}}]) - (\pmb{\tilde{y}} - \mathbb{E}[\pmb{\tilde{y}}]))^2]
+        \\
+        &= \mathbb{E}[(\pmb{y} - \mathbb{E}[\pmb{\tilde{y}}])^2] + \mathbb{E}[(\pmb{\tilde{y}} - \mathbb{E}[\pmb{\tilde{y}}])^2]
+        \\
+        &\quad\,\,- \mathbb{E} [ 2 ( (\pmb{y} - \mathbb{E}[\pmb{\tilde{y}}])(\pmb{\tilde{y}} - \mathbb{E}[\pmb{\tilde{y}}]))]
+        \\
+        &= \mathbb{E}[(\pmb{y} - \mathbb{E}[\pmb{\tilde{y}}])^2] + \textup{Var}[\pmb{\tilde{y}}] - 2(\pmb{y} - \mathbb{E}[\pmb{\tilde{y}}])\mathbb{E}[(\pmb{\tilde{y}} - \mathbb{E}[\pmb{\tilde{y}}])]
+        \\
+        &= \mathbb{E}[(\pmb{y} - \mathbb{E}[\pmb{\tilde{y}}])^2] + \textup{Var}[\pmb{\tilde{y}}] - 2(\pmb{y} - \mathbb{E}[\pmb{\tilde{y}}])(\mathbb{E}[\pmb{\tilde{y}}] - \mathbb{E}[\pmb{\tilde{y}}])
+        \\
+        &= \mathbb{E}[(\pmb{y} - \mathbb{E}[\pmb{\tilde{y}}])^2] + \textup{Var}[\pmb{\tilde{y}}] = \textup{Bias}^2[\pmb{y},\pmb{\tilde{y}}] + \textup{Var}[\pmb{\tilde{y}}]
+        \\
+        &= \mathbb{E}[(\pmb{f} + \pmb{\varepsilon} - \mathbb{E}[\pmb{\tilde{y}}])^2] + \textup{Var}[\pmb{\tilde{y}}]
+        \\
+        &= \mathbb{E}[(\pmb{f} - \mathbb{E}[\pmb{\tilde{y}}])^2] + \textup{Var}[\pmb{\tilde{y}}] + \textup{Var}[\pmb{\varepsilon}]
+        \\
+        &= \textup{Bias}^2[\pmb{f},\pmb{\tilde{y}}] + \textup{Var}[\pmb{\tilde{y}}] + \pmb{\sigma}^2
         \end{split}
-        \end{equation}
-
+        \end{align}
         In a convenient abuse of notation, the above calculation is meant to be performed element-wise. What has been computed above is the expected squared test error for each data point in the test set separately; for notational convenience stacked up as vectors. To get a total MSE for the whole test set, one simply must take the mean over the vector elements afterwards. This yields:
-
-        \begin{equation}
+        \begin{align}
         \label{mse_bias_variance}
         \begin{split}
-        MSE = \frac{1}{n} \sum^{n}_{i} \mathbb{E} [(y_{i} - \tilde{y}_{i})^2]  \\
-        = \frac{1}{n} \sum^{n}_{i} (\mathbb{E}[(y_{i} - \mathbb{E}[\tilde{y}_{i}])^2]+var[\tilde{y}_{i}]) \\
-        = \frac{1}{n} \sum^{n}_{i} (\mathbb{E}[(f_{i} + e_{i} - \mathbb{E}[\tilde{y}_{i}])^2] + var[\tilde{y}_{i}]) \\
-        = \frac{1}{n} \sum^{n}_{i} (\mathbb{E}[(f_{i} - \mathbb{E}[\tilde{y}_{i}])^2] + var[\tilde{y}_{i}] + var[e_{i}] \\
-        = \frac{1}{n} \sum^{n}_{i} ((\mathbb{E}[(f_{i} - \mathbb{E}[\tilde{y}_{i}])^2] + var[\tilde{y}_{i}] + \sigma_{i}^2) \\
-        =  \frac{1}{n} \sum^{n}_{i} (bias^2[f_i,\tilde{y}_{i}] + var[\tilde{y}_{i}]) + \sigma^2
+        \textup{MSE} &= \frac{1}{n} \sum^{n}_{i} \mathbb{E} [(y_{i} - \tilde{y}_{i})^2]  \\
+        &= \frac{1}{n} \sum^{n}_{i} (\mathbb{E}[(y_{i} - \mathbb{E}[\tilde{y}_{i}])^2]+\textup{Var}[\tilde{y}_{i}]) \\
+        &= \frac{1}{n} \sum^{n}_{i} (\mathbb{E}[(f_{i} + e_{i} - \mathbb{E}[\tilde{y}_{i}])^2] + \textup{Var}[\tilde{y}_{i}]) \\
+        &= \frac{1}{n} \sum^{n}_{i} (\mathbb{E}[(f_{i} - \mathbb{E}[\tilde{y}_{i}])^2] + \textup{Var}[\tilde{y}_{i}] + \textup{Var}[e_{i}] \\
+        &= \frac{1}{n} \sum^{n}_{i} ((\mathbb{E}[(f_{i} - \mathbb{E}[\tilde{y}_{i}])^2] + \textup{Var}[\tilde{y}_{i}] + \sigma_{i}^2) \\
+        &=  \frac{1}{n} \sum^{n}_{i} (\textup{Bias}^2[f_i,\tilde{y}_{i}] + \textup{Var}[\tilde{y}_{i}]) + \sigma^2
         \end{split}
-        \end{equation}
+        \end{align}
+        Here $\sigma_{i}^2$ is the variance of the noise for each test point. Since all test points are assumed to have the same noise distribution, their variances will be equal.  To be perfectly clear, the random variables for both of the preceding calculations are the model predictions $\tilde{y}_{i}$ and the noise $\varepsilon_{i}$, which are considered to be independent of each other.
 
-        Here $\sigma_{i}^2$ is the variance of the noise for each test point. Since all test points are assumed to have the same noise distribution, their variances will be equal.  To be perfectly clear, the random variables for both of the preceding calculations are the model predictions $\tilde{y}_{i}$ and the noise $e_{i}$, which are considered to be independent of each other.
-
-        In practical terms, we use the bootstrap resampling to estimate the bias and variance of the model. This is achieved by replacing $\tilde{y}_{i}$ with $\tilde{y}_{i,B}$ in equation \ref{mse_bias_variance}. The expectation values will then be computed over all the bootstrap iterations. Furthermore, we are not able to extract the noise from the response values, and must then use the bias estimate $bias^2[y_{i},\tilde{y}_{i,B}]$. Explicitly, the MSE, the bias and the variance estimates obtained from the bootstrap resampling become, for a test set with size $n$ and a number $M$ bootstrap iterations:
+        In practical terms, we use the bootstrap resampling to estimate the bias and variance of the model. This is achieved by replacing $\tilde{y}_{i}$ with $\tilde{y}_{i,B}$ in Eqn.~\ref{mse_bias_variance}. The expectation values will then be computed over all the bootstrap iterations. Furthermore, we are not able to extract the noise from the response values, and must then use the bias estimate $\textup{Bias}^2[y_{i},\tilde{y}_{i,B}]$. Explicitly, the MSE, the bias and the variance estimates obtained from the bootstrap resampling become, for a test set with size $n$ and a number $M$ bootstrap iterations:
 
         \begin{equation}
         \label{bootstrap_mse}
-        MSE_{bootstrap} = \frac{1}{n} \sum^{n}_{i} (\frac{1}{M}\sum^{M}_{B} (y_{i} - \tilde{y}_{i,B})^2)  \\
+        \textup{MSE}_{bootstrap} = \frac{1}{n} \sum^{n}_{i} \qty(\frac{1}{M}\sum^{M}_{B} \qty(y_{i} - \tilde{y}_{i,B})^2)
         \end{equation}
 
         \begin{equation}
         \label{bootstrap_bias}
-        bias^2_{bootstrap} = \frac{1}{n} \sum^{n}_{i} (y_{i} - \frac{1}{M}\sum^{M}_{B} \tilde{y}_{i,B})^2
+        \textup{Bias}^2_{bootstrap} = \frac{1}{n} \sum^{n}_{i} \qty(y_{i} - \frac{1}{M}\sum^{M}_{B} \tilde{y}_{i,B})^2
         \end{equation}
 
         \begin{equation}
         \label{bootstrap_variance}
-        var_{bootstrap} = \frac{1}{n} \sum^{n}_{i} (\frac{1}{M}\sum^{M}_{B} (\tilde{y}_{i,B} - \frac{1}{M}\sum^{M}_{B} \tilde{y}_{i,B})^2)
+        \textup{Var}_{bootstrap} = \frac{1}{n} \sum^{n}_{i} \qty(\frac{1}{M}\sum^{M}_{B} \qty(\tilde{y}_{i,B} - \frac{1}{M}\sum^{M}_{B} \tilde{y}_{i,B})^2)
         \end{equation}
 
 
