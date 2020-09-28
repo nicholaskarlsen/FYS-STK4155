@@ -34,51 +34,12 @@
 \section{Theory}
     See \textcite{hastie}
     \subsection{Linear Regression}
-<<<<<<< HEAD
-        \noindent
-        Consider a set of data points $\{(x_1, y_n), \dots, (x_N, y_N)\}$ which we wish to fit to some linear model $\mathbf{\tilde y}(\pmb \beta)$ where $\pmb\beta$ is a vector containing the free parameters of the model. The model $\mathbf{\tilde y}$ will then be related to the true data points $\mathbf y$ by
-        \begin{equation}
-            \mathbf y = \mathbf{\tilde y}(\pmb\beta) + \pmb\varepsilon
-        \end{equation}
-        where $\pmb\varepsilon = (\epsilon_1, \dots, \epsilon_N)$ represents the error of the model. The aim of Linear regression models is thus to find the optimal parameters $\pmb\beta$ such that not only the error of the model on some particular dataset is minimized, but also the error of the model applied to different data sets sampled in the same domain is minimized, such that we may use our model to make predictions.
-
-        \subsubsection{The Design Matrix}
-            \noindent
-            When constructing a model, we first have to chose a set of basis functions. A popular choice for which is $\mathbb P_n$, which models a wide range of different phenomena and is also the choice we will make for this paper. But in principle, any set of linear basis functions may be chosen.
-            Our model will then be in the form
-            \begin{equation}
-                \tilde y (x) = \beta_0 + \beta_1 x + \dots \beta_n x^n
-            \end{equation}
-            when trying to find the optimal $\pmb \beta$, a useful quantity is the so-called Design Matrix, which for our chosen basis takes the form
-            \begin{equation}
-                \textup{X} = \qty[
-                \begin{matrix}
-                    1 & x_1 & \dots & x_1^n \\
-                    1 & x_2 & \dots & x_2^n \\
-                    \vdots & \vdots & \vdots & \vdots \\
-                    1 & x_N & \dots & x_N^n
-                \end{matrix}
-                ]
-            \end{equation}
-            where we see that entry $\textup{X}_{ij}$ contains the $x_i$ data point evaluated in the $j$-th basis function. This matrix has the particularly useful property that we may then multiply it with $\pmb \beta$ to obtain the corresponding set of predictions $\mathbf{\tilde y}$ like
-            \begin{equation}
-                \mathbf{\tilde y} = \textup{X}\pmb \beta
-            \end{equation}
-            leaving us with a linear algebra problem to solve in finding the $\pmb\beta$ which optimizes $\mathbf{\tilde y}$.
-
-            \begin{itemize}
-                \item Scaling
-            \end{itemize}
-
-        \subsubsection{Model assessment}
-=======
         \begin{itemize}
             \item describe the general problem
             \item brief description of design matrix
             \item brief introduction to the cost function
             \item discuss different choices of bases. explain why $\mathbb P_n$ is often a good choice. Perhaps also touch on overfitting.
         \end{itemize}
->>>>>>> d83ef09196d74a2f4bb21351687859edb25c69de
 
 
         \subsubsection{Ordinary Least Squares}
@@ -161,24 +122,6 @@
                 \item touch on rates of convergence
             \end{itemize}
 
-<<<<<<< HEAD
-    \subsection{The Bias-Variance Trade-off}
-        \noindent
-        Consider a set of data $S$, sampled from some domain $D$ and two separate models. $\tilde{\mathbf y}_s(x)$, a simple model with only a few degrees of freedom and $\tilde{\mathbf y}_c(x)$, a more complicated model with many degrees of freedom.
-
-        When fitting $\mathbf{\tilde y}_s(x)$ to the sample $S$ we only have a few degrees of freedom to tune in order to fit the data, resulting in a higher bias, but low variance as the sensitivity to changes in $S$ will be relatively low. Conversely, when utilizing a complicated model with many degrees of freedom we may tune the parameters in such a way as to get a very good fit to some particular sample $S$, which is why we usually observer the MSE decreasing as the complexity of our model increases for some particular training sample $S$. However, since the model will then be so finely tuned to that particular sample it will then suffer poorly when making predictions that fall outside of this sample.
-
-        As such, finding the optimal complexity implies weighing the benefits of having a high complexity model which yields good results on your test data vs having low complexity model which applies more generally across samples. Where the optimal model is one which balances the bias and variance contributions to the MSE.
-
-
-\section{Results \& Discussion}
-
-    \begin{figure}[h!tb]
-        \center
-        \includegraphics[width=\columnwidth]{../figs/OLS_MSE_Bootstrap_Hastie_211.pdf}
-        \caption{\label{fig:Hastie2.11 MSE Bootstrap}The mean MSE for testing and training data with a 1/4 split resampled 500 times with bootstrap for a OLS regression of 300 randomly sampled points of the Franke Function.}
-    \end{figure}
-=======
     \subsection{The Bias-Variance Tradeoff}
 
 	A key concept in much of machine learning is the so-called Bias-Variance Tradeoff. Simply put the test error of a learned prediction method can be viewed as being partly the sum of two distinct quantities, the bias of the method and the variance of the method. The bias can be thought of as errors due to inflexible assumptions and constraints on the model, while the variance, quite opposingly, is the actual statistical variance of the procedure. Crucially, the variance is connected with the model having too much flexibility, overfitting on the training data while giving very spread results on the test data. Naturally, the relative sizes of the errors due to bias and the errors due to variance change with the flexibility/complexity of the model. For an inflexible model, e.g. a polynomial regression model of low degree, the bias is expected to be the dominant contribution to the test error. On the other side of the spectrum, for a very flexible model, e.g. a polynomial regression model of high degree, the variance would be anticipated to be the dominating source of the test error. Importantly, the relative effects of the bias and the variance won't necessarily change at the same rate. Thus, one could hope to find an optimally flexible model which minimizes the combined error due to variance and bias. This is the essence of the Bias-Variance Tradeoff; one could, for instance, try to slightly increase the bias of a method in the hopes of reducing the variance far more.
@@ -237,9 +180,8 @@ bias^2_{bootstrap} = \frac{1}{n} \sum^{n}_{i} (y_{i} - \frac{1}{M}\sum^{M}_{B} \
 var_{bootstrap} = \frac{1}{n} \sum^{n}_{i} (\frac{1}{M}\sum^{M}_{B} (\tilde{y}_{i,B} - \frac{1}{M}\sum^{M}_{B} \tilde{y}_{i,B})^2)
 \end{equation}
 \section{Results}
->>>>>>> d83ef09196d74a2f4bb21351687859edb25c69de
 
-%\section{Discussion}
+\section{Discussion}
 
 \section{Conclusion}
 
