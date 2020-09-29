@@ -44,7 +44,7 @@ def var_beta(X, y_data):
     Returns:
         Array: Covariance Matrix (diagonal elements)
     """
-    return np.var(y_data) * np.linalg.inv(X.T @ X).diagonal()
+    return np.var(y_data) * np.linalg.pinv(X.T @ X).diagonal()
 
 
 def k_fold_selection(z, k_folds):
