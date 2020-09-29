@@ -29,6 +29,7 @@ def design_matrix(x, y, n):
     return X
 
 
+@numba.jit(nopython=True)
 def OLS(X, z):
     """Computes the ordinary least squares solution of X -> (z) where X is the design
         matrix for an p-th degree polynomial fitting.
@@ -44,6 +45,7 @@ def OLS(X, z):
     return beta
 
 
+@numba.jit(nopython=True)
 def OLS_SVD(X, z, use_np_pinv=True):
     """Computes the ordinary least squares solution of X -> (z) where X is the design
         matrix for an p-th degree polynomial fitting, using the SVD-inversion.
@@ -78,6 +80,7 @@ def OLS_SVD(X, z, use_np_pinv=True):
     return beta
 
 
+@numba.jit(nopython=True)
 def Ridge(X, z, lamb):
     """Computes the ordinary least squares solution of X -> (z) where X is the design
         matrix for an n-th degree polynomial fitting.

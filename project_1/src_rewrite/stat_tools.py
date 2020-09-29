@@ -1,5 +1,6 @@
 import numpy as np
 import sklearn.linear_model as skl
+import numba
 
 
 def R2(y_data, y_model):
