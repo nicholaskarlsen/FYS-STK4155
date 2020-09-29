@@ -22,7 +22,7 @@ def FrankeFunction(x, y):
     return term1 + term2 + term3 + term4
 
 
-n = 1000
+n = 100
 noise_scale = 0.2
 x = np.random.uniform(0, 1, n)
 y = np.random.uniform(0, 1, n)
@@ -31,12 +31,22 @@ z = FrankeFunction(x, y)
 z = z + noise_scale*np.random.normal(0,1,len(z))
 max_degree = 20
 n_lambdas = 30
-n_bootstraps = 50
+n_bootstraps = 500
 k_folds = 5
 lambdas = np.logspace(-3,0,n_lambdas)
 subset_lambdas = lambdas[::5]
 
 x_train, x_test, y_train, y_test, z_train, z_test = train_test_split(x, y, z, test_size = 0.2)
+
+#   Centering the response
+z_intercept = np.mean(z)
+z = z - z_intercept
+
+#   Centering the response
+z_train_intercept = np.mean(z_train)
+z_train = z_train - z_train_intercept
+z_test = z_test - z_train_intercept
+
 
 # Quantities of interest:
 mse_ols_test = np.zeros(max_degree)
@@ -78,15 +88,19 @@ for degree in range(max_degree):
     scaler = StandardScaler()
     scaler.fit(X)
     X_scaled = scaler.transform(X)
-    X_scaled[:,0] = 1 # Maybe not for ridge+lasso. Don't want to penalize constants...
+#    X_scaled[:,0] = 1 # Maybe not for ridge+lasso. Don't want to penalize constants...
+
+
+
 
     # Scaling and feeding to bootstrap and OLS
     scaler_boot = StandardScaler()
     scaler_boot.fit(X_train)
     X_train_scaled = scaler_boot.transform(X_train)
     X_test_scaled = scaler_boot.transform(X_test)
-    X_train_scaled[:,0] = 1 #maybe not for ridge+lasso
-    X_test_scaled[:,0] = 1 #maybe not for ridge+lasso
+#    X_train_scaled[:,0] = 1 #maybe not for ridge+lasso
+#    X_test_scaled[:,0] = 1 #maybe not for ridge+lasso
+
 
     # OLS, get MSE for test and train set.
 
@@ -100,13 +114,14 @@ for degree in range(max_degree):
     # CV, find best lambdas and get mse vs lambda for given degree. Also, gets
     # ols_CV_MSE
 
-    lasso_cv_mse, ridge_cv_mse, ols_cv_mse = stat_tools.k_fold_cv_all(X_scaled,z,n_lambdas,lambdas,k_folds)
+    lasso_cv_mse, ridge_cv_mse, ols_cv_mse_deg = stat_tools.k_fold_cv_all(X_scaled,z,n_lambdas,lambdas,k_folds)
     best_lasso_lambda[degree] = lambdas[np.argmin(lasso_cv_mse)]
     best_ridge_lambda[degree] = lambdas[np.argmin(ridge_cv_mse)]
     best_lasso_mse[degree] = np.min(lasso_cv_mse)
     best_ridge_mse[degree] = np.min(ridge_cv_mse)
     lasso_lamb_deg_mse[degree] = lasso_cv_mse
     ridge_lamb_deg_mse[degree] = ridge_cv_mse
+    ols_cv_mse[degree] = ols_cv_mse_deg
 
     # All regression bootstraps at once
     lamb_ridge = best_ridge_lambda[degree]

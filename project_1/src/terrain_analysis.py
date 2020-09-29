@@ -15,29 +15,39 @@ utils.plot_settings() # LaTeX fonts in Plots!
 
 # Setting up the terrain data:
 terrain_data = imread('../datafiles/SRTM_data_Norway_1.tif')
-x_terrain = np.arange(terrain_data.shape[1])
-y_terrain = np.arange(terrain_data.shape[0])
-X_coord, Y_coord = np.meshgrid(x_terrain,y_terrain)
-z_terrain = terrain_data.flatten() # the response values
-x_terrain_flat = X_coord.flatten() # the first degree feature variables
-y_terrain_flat = Y_coord.flatten() # the first degree feature variables
+point_selection = terrain_data[::100,::100] # Downsizing the dataset to 1/20 in each direction
+x_terrain_selection = np.linspace(0,0.5,point_selection.shape[1])
+y_terrain_selection = np.linspace(0,1,point_selection.shape[0])
+X_coord_selection, Y_coord_selection = np.meshgrid(x_terrain_selection, y_terrain_selection)
+z_terrain_selection = point_selection.flatten() # the response values
+x_terrain_selection_flat = X_coord_selection.flatten() # the first degree feature variables
+y_terrain_selection_flat = Y_coord_selection.flatten() # the first degree feature variables
 # Would take ~ 90 hours to run on my PC with these parameters. (didnt estimate untill ~6 hours in...)
-max_degree = 20
-n_lambdas = 30
+# Should be better with these parameters.
+max_degree = 10
+n_lambdas = 10
 n_bootstraps = 50
 k_folds = 5
-lambdas = np.logspace(-3,0,n_lambdas)
+lambdas = np.logspace(-6,0,n_lambdas)
 subset_lambdas = lambdas[::5]
 
-#### Should select a subset in some manner of the terrain points
-#### Should probably also make the feature variables be float that range from [0,1]
 
-x = x_terrain_flat[::20]
-y = y_terrain_flat[::20]
-z = z_terrain[::20]
+x = x_terrain_selection_flat
+y = y_terrain_selection_flat
+z = z_terrain_selection
 
 
 x_train, x_test, y_train, y_test, z_train, z_test = train_test_split(x, y, z, test_size = 0.2)
+
+# Centering
+z_intercept = np.mean(z)
+z = z - z_intercept
+
+z_train_intercept = np.mean(z_train)
+z_train = z_train - z_train_intercept
+z_test = z_test - z_train_intercept
+
+
 
 # Quantities of interest:
 mse_ols_test = np.zeros(max_degree)
@@ -81,15 +91,18 @@ for degree in range(max_degree):
     scaler = StandardScaler()
     scaler.fit(X)
     X_scaled = scaler.transform(X)
-    X_scaled[:,0] = 1 # Probably should not have this.
+#    X_scaled[:,0] = 1 # Probably should not have this.
+
 
     # Scaling and feeding to bootstrap and OLS
     scaler_boot = StandardScaler()
     scaler_boot.fit(X_train)
     X_train_scaled = scaler_boot.transform(X_train)
     X_test_scaled = scaler_boot.transform(X_test)
-    X_train_scaled[:,0] = 1 # Probably actually not
-    X_test_scaled[:,0] = 1 # Have a bad feeling about how this might affect ridge/lasso.
+#    X_train_scaled[:,0] = 1 # Probably actually not
+#    X_test_scaled[:,0] = 1 # Have a bad feeling about how this might affect ridge/lasso.
+
+
 
     # OLS, get MSE for test and train set.
 
@@ -102,14 +115,14 @@ for degree in range(max_degree):
 
     # CV, find best lambdas and get mse vs lambda for given degree.
 
-    lasso_cv_mse, ridge_cv_mse, ols_cv_mse = stat_tools.k_fold_cv_all(X_scaled,z,n_lambdas,lambdas,k_folds)
+    lasso_cv_mse, ridge_cv_mse, ols_cv_mse_deg = stat_tools.k_fold_cv_all(X_scaled,z,n_lambdas,lambdas,k_folds)
     best_lasso_lambda[degree] = lambdas[np.argmin(lasso_cv_mse)]
     best_ridge_lambda[degree] = lambdas[np.argmin(ridge_cv_mse)]
     best_lasso_mse[degree] = np.min(lasso_cv_mse)
     best_ridge_mse[degree] = np.min(ridge_cv_mse)
     lasso_lamb_deg_mse[degree] = lasso_cv_mse
     ridge_lamb_deg_mse[degree] = ridge_cv_mse
-
+    ols_cv_mse[degree] = ols_cv_mse_deg
     # All regression bootstraps at once
 
 
