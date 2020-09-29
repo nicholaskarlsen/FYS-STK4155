@@ -1,38 +1,61 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.model_selection import train_test_split
 
 import stat_tools
 import linear_regression
 import bootstrap
 import cross_validation
+from sklearn.preprocessing import StandardScaler
 
 
-def part_1(x, y, z, degrees):
+def bootstrap_analysis(x, y, z, degrees, N_bootstraps, regression=linear_regression.OLS_SVD):
 
-    mse = pd.DataFrame(columns=["train", "test"], index=degrees)
-    r2 = pd.DataFrame(columns=["train", "test"], index=degrees)
-
-    # var_b = pd.DataFrame(indices=degrees)
+    scaler = StandardScaler()
+    df = pd.DataFrame(
+        columns=[
+            "MSE train",
+            "MSE test",
+            "R2 test",
+            "Bias test",
+            "Variance test",
+        ]
+    )
 
     for i, deg in enumerate(degrees):
-        X = design_matrix(x, y, deg)
+        X = linear_regression.design_matrix(x, y, deg)
         # Split data, but don't shuffle. OK since data is already randomly sampled!
-        # Fasilitates a direct comparrison of the clean & Noisy data
+        # Facilitates a direct comparison of the clean & Noisy data
         X_train, X_test, z_train, z_test = train_test_split(X, z, test_size=0.2, shuffle=False)
+
         # Normalize data sets
         X_train = scaler.fit_transform(X_train)
         X_train[:, 0] = np.ones(X_train.shape[0])
         X_test = scaler.fit_transform(X_test)
         X_test[:, 0] = np.ones(X_test.shape[0])
 
-        beta = OLS_SVD(X_train, z_train)
+        output = bootstrap.bootstrap(
+            X_train, X_test, z_train, z_test, bootstraps=N_bootstraps, regression=regression
+        )
 
-        mse["train"][i] = MSE(z_train, X_train @ beta)
-        mse["test"][i] = MSE(z_test, X_test @ beta)
+        df = df.append(pd.DataFrame(output, index=[deg]))
 
-        r2["train"][i] = R2(z_train, X_train @ beta)
-        r2["test"][i] = R2(z_test, X_test @ beta)
+    return df
 
-        # var_b.append([deg, var_beta(z_train, X_train)])
 
-    return mse, r2, 0  # , var_b
+def cv_analysis(x, y, z, degrees, k, regression=linear_regression.OLS_SVD):
+
+    scaler = StandardScaler()
+    df = pd.DataFrame(columns=["MSE train", "MSE test", "R2 train", "R2 test"])
+
+    for i, deg in enumerate(degrees):
+        X = linear_regression.design_matrix(x, y, deg)
+        # Normalize the design matrix
+        X = scaler.fit_transform(X)
+        X[:, 0] = np.ones(X.shape[0])
+
+        output = cross_validation.cross_validation(X, z, k_folds=k, regression=regression)
+        df = df.append(pd.DataFrame(output, index=[deg]))
+
+    return df

@@ -1,6 +1,8 @@
 import numpy as np
+import numba
 
 
+@numba.jit(nopython=True)
 def design_matrix(x, y, n):
     """Constructs a design matrix for 2D input data i.e f: (x, y) -> z where the target function
     is an n-th degree polynomial.
@@ -13,9 +15,9 @@ def design_matrix(x, y, n):
     Returns:
         [Array] : Design matrix yielding the least-squares solution
     """
-    N = len(x)  # Number of data points
+    N = x.size  # Number of data points
     d = int((n + 1) * (n + 2) / 2.0)  # d.o.f for n-th degree polynomial
-    X = np.zeros([N, d])  # Design matrix
+    X = np.empty((N, d))  # Design matrix
 
     X[:, 0] = 1
 

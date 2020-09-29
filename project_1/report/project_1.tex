@@ -116,7 +116,16 @@
                 = (\pmb y - \textup{X}\pmb\beta)^T(\pmb y - \textup{X}\pmb\beta)
                 + \lambda \pmb\beta^T\pmb\beta
             \end{equation}
-            The only difference between the cost function for OLS and Ridge regression is the addition of the "penalty" parameter $\lambda$ to the $L^2$ norm of the coefficients $\pmb{\beta}$. The main point of introducing this parameter is to reduce the variance of the regression coefficients $\pmb{\beta}$. It introduces a constraint on the allowable values of $\pmb{\beta}$, which means that the method no longer is unbiased. The aim is that the reduction of the variance outweighs the increase of the method's bias, leading to an overall lower test error, cf. the later discussion of the Bias-Variance Trade-off.
+            Similar for what we did for OLS, we take the partial derivative wrt. $\pmb \beta$, in which the only difference recides in the last term, which gives
+            \begin{equation}
+                \pdv{\pmb \beta} \lambda \pmb\beta^T\pmb\beta = 2\lambda\pmb\beta
+            \end{equation}
+            if we again assert that the optimal $\pmb\beta$ is given by $\partial_{\pmb\beta}C_R(\pmb\beta)$ and rearange we get
+            \begin{equation}
+                \pmb{\hat\beta}_R = \qty(\textup{X}^T\textup{X}  + \lambda)^{-1}\textup{X}^T\pmb{\tilde y}
+            \end{equation}
+            As the optimal $\beta$ for Ridge regression.
+            So we see that the only difference between OLS and Ridge regression is the addition of the "penalty" parameter $\lambda$ to the $L^2$ norm of the coefficients $\pmb{\beta}$. The main point of introducing this parameter is to reduce the variance of the regression coefficients $\pmb{\beta}$. It introduces a constraint on the allowable values of $\pmb{\beta}$, which means that the method no longer is unbiased. The aim is that the reduction of the variance outweighs the increase of the method's bias, leading to an overall lower test error, cf. the later discussion of the Bias-Variance Trade-off.
         \subsubsection{Lasso Regression}
             \begin{equation}
                 C_L(\pmb \beta) =

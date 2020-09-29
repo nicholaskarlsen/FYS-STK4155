@@ -25,13 +25,13 @@ def MSE(y_data, y_model):
 
 def mean_variance(y_data, y_model):
     # Computes the variance of a particular data point in bootstrap
-    return np.mean(np.var(y_model, axis=1, keepdims=True))
+    return np.mean(np.var(y_model, axis=0, keepdims=True))
 
 
 def mean_squared_bias(y_data, y_model):
     # return np.mean((y_data - np.mean(y_model, axis=1, keepdims=True)) ** 2)
     return np.mean(
-        np.sum((y_data - np.mean(y_model, axis=1, keepdims=True)) ** 2, axis=1) / len(y_data)
+        np.sum((y_data - np.mean(y_model, axis=0, keepdims=True)) ** 2, axis=1) / len(y_data)
     )
 
 
