@@ -38,6 +38,16 @@ subset_lambdas = lambdas[::5]
 
 x_train, x_test, y_train, y_test, z_train, z_test = train_test_split(x, y, z, test_size = 0.2)
 
+#   Centering the response
+z_intercept = np.mean(z)
+z = z - z_intercept
+
+#   Centering the response
+z_train_intercept = np.mean(z_train)
+z_train = z_train - z_train_intercept
+z_test = z_test - z_train_intercept
+
+
 # Quantities of interest:
 mse_ols_test = np.zeros(max_degree)
 mse_ols_train = np.zeros(max_degree)
@@ -79,9 +89,7 @@ for degree in range(max_degree):
     scaler.fit(X)
     X_scaled = scaler.transform(X)
 #    X_scaled[:,0] = 1 # Maybe not for ridge+lasso. Don't want to penalize constants...
-#   Centering the response
-    z_intercept = np.mean(z)
-    z = z - z_intercept
+
 
 
 
@@ -93,10 +101,6 @@ for degree in range(max_degree):
 #    X_train_scaled[:,0] = 1 #maybe not for ridge+lasso
 #    X_test_scaled[:,0] = 1 #maybe not for ridge+lasso
 
-#   Centering the response
-    z_train_intercept = np.mean(z_train)
-    z_train = z_train - z_train_intercept
-    z_test = z_test - z_train_intercept
 
     # OLS, get MSE for test and train set.
 
@@ -110,13 +114,14 @@ for degree in range(max_degree):
     # CV, find best lambdas and get mse vs lambda for given degree. Also, gets
     # ols_CV_MSE
 
-    lasso_cv_mse, ridge_cv_mse, ols_cv_mse = stat_tools.k_fold_cv_all(X_scaled,z,n_lambdas,lambdas,k_folds)
+    lasso_cv_mse, ridge_cv_mse, ols_cv_mse_deg = stat_tools.k_fold_cv_all(X_scaled,z,n_lambdas,lambdas,k_folds)
     best_lasso_lambda[degree] = lambdas[np.argmin(lasso_cv_mse)]
     best_ridge_lambda[degree] = lambdas[np.argmin(ridge_cv_mse)]
     best_lasso_mse[degree] = np.min(lasso_cv_mse)
     best_ridge_mse[degree] = np.min(ridge_cv_mse)
     lasso_lamb_deg_mse[degree] = lasso_cv_mse
     ridge_lamb_deg_mse[degree] = ridge_cv_mse
+    ols_cv_mse[degree] = ols_cv_mse_deg
 
     # All regression bootstraps at once
     lamb_ridge = best_ridge_lambda[degree]
