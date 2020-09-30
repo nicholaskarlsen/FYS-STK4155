@@ -15,8 +15,8 @@ utils.plot_settings() # LaTeX fonts in Plots!
 
 # Setting up the terrain data:
 terrain_data = imread('../datafiles/SRTM_data_Norway_1.tif')
-point_selection = terrain_data[::100,::100] # Downsizing the dataset to 1/20 in each direction
-x_terrain_selection = np.linspace(0,0.5,point_selection.shape[1])
+point_selection = terrain_data[:1800:50,:1800:50] # Downsizing the dataset to 1/20 in each direction
+x_terrain_selection = np.linspace(0,1,point_selection.shape[1])
 y_terrain_selection = np.linspace(0,1,point_selection.shape[0])
 X_coord_selection, Y_coord_selection = np.meshgrid(x_terrain_selection, y_terrain_selection)
 z_terrain_selection = point_selection.flatten() # the response values
@@ -24,7 +24,7 @@ x_terrain_selection_flat = X_coord_selection.flatten() # the first degree featur
 y_terrain_selection_flat = Y_coord_selection.flatten() # the first degree feature variables
 # Would take ~ 90 hours to run on my PC with these parameters. (didnt estimate untill ~6 hours in...)
 # Should be better with these parameters.
-max_degree = 10
+max_degree = 20
 n_lambdas = 10
 n_bootstraps = 50
 k_folds = 5
@@ -47,6 +47,8 @@ z_train_intercept = np.mean(z_train)
 z_train = z_train - z_train_intercept
 z_test = z_test - z_train_intercept
 
+
+##### Setup of problem is completede above. 
 
 
 # Quantities of interest:
@@ -158,5 +160,14 @@ for degree in range(max_degree):
 
 
 
-################ All necessary computations should have been done above. Below follows
-################ the plotting part.
+# Plots go here. Point is to use the previous computations to obtain the best hyper-parameters (lambda, degree)
+# for the different regression methods.
+
+
+
+############### Final comparison:
+# Do best parameters (lambda, degree) plots of uniformly sampled x,y grid here.
+# Aim is to compare the Franke function evaluated at that grid, with the best of the
+# 3 regression methods (OLS, Ridge, Lasso). The methods will be trained on the training set X_train.
+# These trainings will produce betas. These betas will be applied to a (scaled) x,y-grid design matrix
+# and the z_train_intercept will be added to the result.

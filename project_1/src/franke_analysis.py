@@ -29,11 +29,11 @@ y = np.random.uniform(0, 1, n)
 z = FrankeFunction(x, y)
 # Adding standard normal noise:
 z = z + noise_scale*np.random.normal(0,1,len(z))
-max_degree = 20
-n_lambdas = 30
-n_bootstraps = 500
+max_degree = 15
+n_lambdas = 60
+n_bootstraps = 100
 k_folds = 5
-lambdas = np.logspace(-3,0,n_lambdas)
+lambdas = np.logspace(-12,1,n_lambdas)
 subset_lambdas = lambdas[::5]
 
 x_train, x_test, y_train, y_test, z_train, z_test = train_test_split(x, y, z, test_size = 0.2)
@@ -47,6 +47,7 @@ z_train_intercept = np.mean(z_train)
 z_train = z_train - z_train_intercept
 z_test = z_test - z_train_intercept
 
+########### Setup of problem is completed above.
 
 # Quantities of interest:
 mse_ols_test = np.zeros(max_degree)
@@ -154,4 +155,15 @@ for degree in range(max_degree):
 
         subset_lambda_index  += 1
 
-# Plots goes here
+# Plots go here. Point is to use the previous computations to obtain the best hyper-parameters (lambda, degree)
+# for the different regression methods.
+
+
+
+
+########### Final comparison with ground truth:
+# Do best parameters (lambda, degree) plots of uniformly sampled x,y grid here.
+# Aim is to compare the Franke function evaluated at that grid, with the best of the
+# 3 regression methods (OLS, Ridge, Lasso). The methods will be trained on the training set X_train.
+# These trainings will produce betas. These betas will be applied to a (scaled) x,y-grid design matrix
+# and the z_train_intercept will be added to the result.
