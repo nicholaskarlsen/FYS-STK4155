@@ -14,8 +14,14 @@ utils.plot_settings() # LaTeX fonts in Plots!
 
 
 # Setting up the terrain data:
+# Note structure! X-coordinates are on the rows of terrain_data
+# Point_selection.flatten() moves most rapidly over the x-coordinates
+# Meshgrids flattened also move most rapidly over the x-coordinates. Thus
+# this should make z(x,y).reshape(length_y,length_x) be consistent with terrain_data
+
+
 terrain_data = imread('../datafiles/SRTM_data_Norway_1.tif')
-point_selection = terrain_data[:1800:50,:1800:50] # Downsizing the dataset to 1/20 in each direction
+point_selection = terrain_data[:1801:10,:1801:10] # Make quadratic and downsample
 x_terrain_selection = np.linspace(0,1,point_selection.shape[1])
 y_terrain_selection = np.linspace(0,1,point_selection.shape[0])
 X_coord_selection, Y_coord_selection = np.meshgrid(x_terrain_selection, y_terrain_selection)
@@ -24,11 +30,11 @@ x_terrain_selection_flat = X_coord_selection.flatten() # the first degree featur
 y_terrain_selection_flat = Y_coord_selection.flatten() # the first degree feature variables
 # Would take ~ 90 hours to run on my PC with these parameters. (didnt estimate untill ~6 hours in...)
 # Should be better with these parameters.
-max_degree = 20
+max_degree = 10
 n_lambdas = 10
 n_bootstraps = 50
 k_folds = 5
-lambdas = np.logspace(-6,0,n_lambdas)
+lambdas = np.logspace(-12,1,n_lambdas)
 subset_lambdas = lambdas[::5]
 
 
@@ -48,7 +54,7 @@ z_train = z_train - z_train_intercept
 z_test = z_test - z_train_intercept
 
 
-##### Setup of problem is completede above. 
+##### Setup of problem is completede above.
 
 
 # Quantities of interest:
@@ -171,3 +177,158 @@ for degree in range(max_degree):
 # 3 regression methods (OLS, Ridge, Lasso). The methods will be trained on the training set X_train.
 # These trainings will produce betas. These betas will be applied to a (scaled) x,y-grid design matrix
 # and the z_train_intercept will be added to the result.
+
+
+
+# OLS
+
+degree = 10
+
+X = linear_regression.design_matrix_2D(x,y,degree)
+scaler = StandardScaler()
+scaler.fit(X)
+X_scaled = scaler.transform(X)
+betas = linear_regression.OLS_SVD_2D(X_scaled, z)
+
+
+x_plot = np.linspace(0,1,1801)
+y_plot = np.linspace(0,1,1801)
+x_plot_mesh, y_plot_mesh = np.meshgrid(x_plot,y_plot)
+x_plot_mesh_flat, y_plot_mesh_flat = x_plot_mesh.flatten(), y_plot_mesh.flatten()
+
+X_plot_design = linear_regression.design_matrix_2D(x_plot_mesh_flat,y_plot_mesh_flat,degree)
+X_plot_design_scaled = scaler.transform(X_plot_design)
+z_predict_flat = (X_plot_design_scaled @ betas) + z_intercept
+
+####### Using the 3d plot, not pretty
+
+fig = plt.figure()
+
+# Plot the measured terrain
+ax = fig.add_subplot(1, 2, 1, projection="3d")
+ax.set_title("Terrain")
+ax.view_init(azim=270, elev=90)
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+ax.set_zlabel("z")
+surf = ax.plot_surface(x_plot_mesh*1800,y_plot_mesh*1800,terrain_data[:1801,:1801], cmap=cm.coolwarm)
+
+
+# Plot the predicted terrain.
+ax = fig.add_subplot(1, 2, 2, projection="3d")
+ax.set_title("Predicted terrain")
+ax.view_init(azim=270, elev=90)
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+ax.set_zlabel("z")
+surf = ax.plot_surface(x_plot_mesh*1800,y_plot_mesh*1800,z_predict_flat.reshape(-1,1801), cmap=cm.coolwarm)
+
+###########
+
+# using imshow
+# plt.figure()
+# plt.imshow(terrain_data[:1801,:1801], origin = 'lower')
+# plt.figure()
+# plt.imshow(z_predict_flat.reshape(-1,1801), origin = 'lower')
+
+
+# Ridge
+
+degree = 5
+ridge_lambda = 1e-2
+
+X = linear_regression.design_matrix_2D(x,y,degree)
+scaler = StandardScaler()
+scaler.fit(X)
+X_scaled = scaler.transform(X)
+betas_ridge = linear_regression.Ridge_2D(X_scaled, z, ridge_lambda)
+
+
+x_plot = np.linspace(0,1,1801)
+y_plot = np.linspace(0,1,1801)
+x_plot_mesh, y_plot_mesh = np.meshgrid(x_plot,y_plot)
+x_plot_mesh_flat, y_plot_mesh_flat = x_plot_mesh.flatten(), y_plot_mesh.flatten()
+X_plot_design = linear_regression.design_matrix_2D(x_plot_mesh_flat,y_plot_mesh_flat,degree)
+X_plot_design_scaled = scaler.transform(X_plot_design)
+z_predict_flat = (X_plot_design_scaled @ betas_ridge) + z_intercept
+
+######## Using the 3d plot, not pretty
+
+# fig = plt.figure()
+#
+# # Plot the measured terrain
+# ax = fig.add_subplot(1, 2, 1, projection="3d")
+# ax.set_title("Terrain")
+# ax.view_init(azim=270, elev=90)
+# ax.set_xlabel("x")
+# ax.set_ylabel("y")
+# ax.set_zlabel("z")
+# surf = ax.plot_surface(x_plot_mesh*1800,y_plot_mesh*1800,terrain_data[:1801,:1801], cmap=cm.coolwarm)
+#
+#
+# # Plot the predicted terrain.
+# ax = fig.add_subplot(1, 2, 2, projection="3d")
+# ax.set_title("Predicted terrain")
+# ax.view_init(azim=270, elev=90)
+# ax.set_xlabel("x")
+# ax.set_ylabel("y")
+# ax.set_zlabel("z")
+# surf = ax.plot_surface(x_plot_mesh*1800,y_plot_mesh*1800,z_predict_flat.reshape(-1,1801), cmap=cm.coolwarm)
+
+############
+
+# using imshow
+plt.figure()
+plt.imshow(terrain_data[:1801,:1801], origin = 'lower')
+plt.figure()
+plt.imshow(z_predict_flat.reshape(-1,1801), origin = 'lower')
+# Lasso
+
+degree = 4
+lasso_lambda = 1e-5
+
+X = linear_regression.design_matrix_2D(x,y,degree)
+scaler = StandardScaler()
+scaler.fit(X)
+X_scaled = scaler.transform(X)
+clf_Lasso = skl.Lasso(alpha=lasso_lambda,fit_intercept=False).fit(X_scaled,z)
+
+
+x_plot = np.linspace(0,1,1801)
+y_plot = np.linspace(0,1,1801)
+x_plot_mesh, y_plot_mesh = np.meshgrid(x_plot,y_plot)
+x_plot_mesh_flat, y_plot_mesh_flat = x_plot_mesh.flatten(), y_plot_mesh.flatten()
+X_plot_design = linear_regression.design_matrix_2D(x_plot_mesh_flat,y_plot_mesh_flat,degree)
+X_plot_design_scaled = scaler.transform(X_plot_design)
+z_predict_flat = clf_Lasso.predict(X_plot_design_scaled) + z_intercept
+
+######## Using the 3d plot, not pretty
+#
+# fig = plt.figure()
+#
+# # Plot the measured terrain
+# ax = fig.add_subplot(1, 2, 1, projection="3d")
+# ax.set_title("Terrain")
+# ax.view_init(azim=270, elev=90)
+# ax.set_xlabel("x")
+# ax.set_ylabel("y")
+# ax.set_zlabel("z")
+# surf = ax.plot_surface(x_plot_mesh*1800,y_plot_mesh*1800,terrain_data[:1801,:1801], cmap=cm.coolwarm)
+#
+#
+# # Plot the predicted terrain.
+# ax = fig.add_subplot(1, 2, 2, projection="3d")
+# ax.set_title("Predicted terrain")
+# ax.view_init(azim=270, elev=90)
+# ax.set_xlabel("x")
+# ax.set_ylabel("y")
+# ax.set_zlabel("z")
+# surf = ax.plot_surface(x_plot_mesh*1800,y_plot_mesh*1800,z_predict_flat.reshape(-1,1801), cmap=cm.coolwarm)
+
+############
+
+# using imshow
+plt.figure()
+plt.imshow(terrain_data[:1800,:1800], origin = 'lower')
+plt.figure()
+plt.imshow(z_predict_flat.reshape(-1,1801) origin = 'lower')

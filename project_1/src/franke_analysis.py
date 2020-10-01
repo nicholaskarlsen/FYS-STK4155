@@ -22,7 +22,7 @@ def FrankeFunction(x, y):
     return term1 + term2 + term3 + term4
 
 
-n = 100
+n = 500
 noise_scale = 0.2
 x = np.random.uniform(0, 1, n)
 y = np.random.uniform(0, 1, n)
@@ -34,7 +34,7 @@ n_lambdas = 60
 n_bootstraps = 100
 k_folds = 5
 lambdas = np.logspace(-12,1,n_lambdas)
-subset_lambdas = lambdas[::5]
+subset_lambdas = lambdas[::60]
 
 x_train, x_test, y_train, y_test, z_train, z_test = train_test_split(x, y, z, test_size = 0.2)
 
@@ -170,7 +170,7 @@ for degree in range(max_degree):
 
 # OLS
 
-degree = 5
+degree = 3
 
 X = linear_regression.design_matrix_2D(x,y,degree)
 scaler = StandardScaler()
@@ -179,8 +179,8 @@ X_scaled = scaler.transform(X)
 betas = linear_regression.OLS_SVD_2D(X_scaled, z)
 
 
-x_plot = np.linspace(0,1,2000)
-y_plot = np.linspace(0,1,2000)
+x_plot = np.linspace(0,0.5,5)
+y_plot = np.linspace(0,1,10)
 x_plot_mesh, y_plot_mesh = np.meshgrid(x_plot,y_plot)
 x_plot_mesh_flat, y_plot_mesh_flat = x_plot_mesh.flatten(), y_plot_mesh.flatten()
 z_plot_franke = FrankeFunction(x_plot_mesh, y_plot_mesh)
@@ -208,14 +208,14 @@ ax.view_init(azim=45)
 ax.set_xlabel("x")
 ax.set_ylabel("y")
 ax.set_zlabel("z")
-surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_predict_flat.reshape(2000,-1), cmap=cm.coolwarm)
+surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_predict_flat.reshape(-1,5), cmap=cm.coolwarm)
 
 
 
 # Ridge
 
 degree = 5
-ridge_lambda = 1e-3
+ridge_lambda = 1e-2
 
 X = linear_regression.design_matrix_2D(x,y,degree)
 scaler = StandardScaler()
@@ -257,8 +257,8 @@ surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_predict_flat.reshape(2000,-1)
 
 # Lasso
 
-degree = 10
-lasso_lambda = 1e-10
+degree = 4
+lasso_lambda = 1e-5
 
 X = linear_regression.design_matrix_2D(x,y,degree)
 scaler = StandardScaler()
