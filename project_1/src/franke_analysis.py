@@ -167,3 +167,131 @@ for degree in range(max_degree):
 # 3 regression methods (OLS, Ridge, Lasso). The methods will be trained on the training set X_train.
 # These trainings will produce betas. These betas will be applied to a (scaled) x,y-grid design matrix
 # and the z_train_intercept will be added to the result.
+
+# OLS
+
+degree = 5
+
+X = linear_regression.design_matrix_2D(x,y,degree)
+scaler = StandardScaler()
+scaler.fit(X)
+X_scaled = scaler.transform(X)
+betas = linear_regression.OLS_SVD_2D(X_scaled, z)
+
+
+x_plot = np.linspace(0,1,2000)
+y_plot = np.linspace(0,1,2000)
+x_plot_mesh, y_plot_mesh = np.meshgrid(x_plot,y_plot)
+x_plot_mesh_flat, y_plot_mesh_flat = x_plot_mesh.flatten(), y_plot_mesh.flatten()
+z_plot_franke = FrankeFunction(x_plot_mesh, y_plot_mesh)
+X_plot_design = linear_regression.design_matrix_2D(x_plot_mesh_flat,y_plot_mesh_flat,degree)
+X_plot_design_scaled = scaler.transform(X_plot_design)
+z_predict_flat = (X_plot_design_scaled @ betas) + z_intercept
+
+
+
+fig = plt.figure()
+
+# Plot the analytic curve
+ax = fig.add_subplot(1, 2, 1, projection="3d")
+ax.set_title("Franke Function")
+ax.view_init(azim=45)
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+ax.set_zlabel("z")
+surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_plot_franke, cmap=cm.coolwarm)
+
+# Plot the fitted curve
+ax = fig.add_subplot(1, 2, 2, projection="3d")
+ax.set_title("OLS")
+ax.view_init(azim=45)
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+ax.set_zlabel("z")
+surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_predict_flat.reshape(2000,-1), cmap=cm.coolwarm)
+
+
+
+# Ridge
+
+degree = 5
+ridge_lambda = 1e-3
+
+X = linear_regression.design_matrix_2D(x,y,degree)
+scaler = StandardScaler()
+scaler.fit(X)
+X_scaled = scaler.transform(X)
+betas_ridge = linear_regression.Ridge_2D(X_scaled, z, ridge_lambda)
+
+
+x_plot = np.linspace(0,1,2000)
+y_plot = np.linspace(0,1,2000)
+x_plot_mesh, y_plot_mesh = np.meshgrid(x_plot,y_plot)
+x_plot_mesh_flat, y_plot_mesh_flat = x_plot_mesh.flatten(), y_plot_mesh.flatten()
+z_plot_franke = FrankeFunction(x_plot_mesh, y_plot_mesh)
+X_plot_design = linear_regression.design_matrix_2D(x_plot_mesh_flat,y_plot_mesh_flat,degree)
+X_plot_design_scaled = scaler.transform(X_plot_design)
+z_predict_flat = (X_plot_design_scaled @ betas_ridge) + z_intercept
+
+
+fig = plt.figure()
+
+# Plot the analytic curve
+ax = fig.add_subplot(1, 2, 1, projection="3d")
+ax.set_title("Franke Function")
+ax.view_init(azim=45)
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+ax.set_zlabel("z")
+surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_plot_franke, cmap=cm.coolwarm)
+
+# Plot the fitted curve
+ax = fig.add_subplot(1, 2, 2, projection="3d")
+ax.set_title("Ridge")
+ax.view_init(azim=45)
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+ax.set_zlabel("z")
+surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_predict_flat.reshape(2000,-1), cmap=cm.coolwarm)
+
+
+# Lasso
+
+degree = 10
+lasso_lambda = 1e-10
+
+X = linear_regression.design_matrix_2D(x,y,degree)
+scaler = StandardScaler()
+scaler.fit(X)
+X_scaled = scaler.transform(X)
+clf_Lasso = skl.Lasso(alpha=lasso_lambda,fit_intercept=False).fit(X_scaled,z)
+
+
+x_plot = np.linspace(0,1,2000)
+y_plot = np.linspace(0,1,2000)
+x_plot_mesh, y_plot_mesh = np.meshgrid(x_plot,y_plot)
+x_plot_mesh_flat, y_plot_mesh_flat = x_plot_mesh.flatten(), y_plot_mesh.flatten()
+z_plot_franke = FrankeFunction(x_plot_mesh, y_plot_mesh)
+X_plot_design = linear_regression.design_matrix_2D(x_plot_mesh_flat,y_plot_mesh_flat,degree)
+X_plot_design_scaled = scaler.transform(X_plot_design)
+z_predict_flat = clf_Lasso.predict(X_plot_design_scaled) + z_intercept
+
+fig = plt.figure()
+
+# Plot the analytic curve
+ax = fig.add_subplot(1, 2, 1, projection="3d")
+ax.set_title("Franke Function")
+ax.view_init(azim=45)
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+ax.set_zlabel("z")
+surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_plot_franke, cmap=cm.coolwarm)
+
+# Plot the fitted curve
+ax = fig.add_subplot(1, 2, 2, projection="3d")
+ax.set_title("Lasso")
+ax.view_init(azim=45)
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+ax.set_zlabel("z")
+surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_predict_flat.reshape(2000,-1), cmap=cm.coolwarm)
