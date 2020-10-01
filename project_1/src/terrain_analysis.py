@@ -30,11 +30,11 @@ x_terrain_selection_flat = X_coord_selection.flatten() # the first degree featur
 y_terrain_selection_flat = Y_coord_selection.flatten() # the first degree feature variables
 # Would take ~ 90 hours to run on my PC with these parameters. (didnt estimate untill ~6 hours in...)
 # Should be better with these parameters.
-max_degree = 10
-n_lambdas = 10
+max_degree = 25
+n_lambdas = 20
 n_bootstraps = 50
 k_folds = 5
-lambdas = np.logspace(-12,1,n_lambdas)
+lambdas = np.logspace(-5,1,n_lambdas)
 subset_lambdas = lambdas[::5]
 
 
@@ -131,39 +131,39 @@ for degree in range(max_degree):
     lasso_lamb_deg_mse[degree] = lasso_cv_mse
     ridge_lamb_deg_mse[degree] = ridge_cv_mse
     ols_cv_mse[degree] = ols_cv_mse_deg
-    # All regression bootstraps at once
-
-
-    lamb_ridge = best_ridge_lambda[degree]
-    lamb_lasso = best_lasso_lambda[degree]
-
-    ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance, ols_mse, ols_bias, ols_variance = \
-    stat_tools.bootstrap_all(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
-
-    ridge_best_lambda_boot_mse[degree], ridge_best_lambda_boot_bias[degree], \
-    ridge_best_lambda_boot_variance[degree] = ridge_mse, ridge_bias, ridge_variance
-
-    lasso_best_lambda_boot_mse[degree], lasso_best_lambda_boot_bias[degree], \
-    lasso_best_lambda_boot_variance[degree] = lasso_mse, lasso_bias, lasso_variance
-
-    ols_boot_mse[degree], ols_boot_bias[degree], \
-    ols_boot_variance[degree] = ols_mse, ols_bias, ols_variance
+    # # All regression bootstraps at once
+    #
+    #
+    # lamb_ridge = best_ridge_lambda[degree]
+    # lamb_lasso = best_lasso_lambda[degree]
+    #
+    # ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance, ols_mse, ols_bias, ols_variance = \
+    # stat_tools.bootstrap_all(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
+    #
+    # ridge_best_lambda_boot_mse[degree], ridge_best_lambda_boot_bias[degree], \
+    # ridge_best_lambda_boot_variance[degree] = ridge_mse, ridge_bias, ridge_variance
+    #
+    # lasso_best_lambda_boot_mse[degree], lasso_best_lambda_boot_bias[degree], \
+    # lasso_best_lambda_boot_variance[degree] = lasso_mse, lasso_bias, lasso_variance
+    #
+    # ols_boot_mse[degree], ols_boot_bias[degree], \
+    # ols_boot_variance[degree] = ols_mse, ols_bias, ols_variance
 
     # Bootstrapping for a selection of lambdas for ridge and lasso
-    subset_lambda_index = 0
-    for lamb in subset_lambdas:
-
-        ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance = \
-        stat_tools.bootstrap_ridge_lasso(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
-
-        ridge_subset_lambda_boot_mse[degree, subset_lambda_index ], ridge_subset_lambda_boot_bias[degree, subset_lambda_index ], \
-        ridge_subset_lambda_boot_variance[degree, subset_lambda_index ] = ridge_mse, ridge_bias, ridge_variance
-
-        lasso_subset_lambda_boot_mse[degree, subset_lambda_index ], lasso_subset_lambda_boot_bias[degree, subset_lambda_index ], \
-        lasso_subset_lambda_boot_variance[degree, subset_lambda_index ] = lasso_mse, lasso_bias, lasso_variance
-
-        subset_lambda_index  += 1
-
+    # subset_lambda_index = 0
+    # for lamb in subset_lambdas:
+    #
+    #     ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance = \
+    #     stat_tools.bootstrap_ridge_lasso(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
+    #
+    #     ridge_subset_lambda_boot_mse[degree, subset_lambda_index ], ridge_subset_lambda_boot_bias[degree, subset_lambda_index ], \
+    #     ridge_subset_lambda_boot_variance[degree, subset_lambda_index ] = ridge_mse, ridge_bias, ridge_variance
+    #
+    #     lasso_subset_lambda_boot_mse[degree, subset_lambda_index ], lasso_subset_lambda_boot_bias[degree, subset_lambda_index ], \
+    #     lasso_subset_lambda_boot_variance[degree, subset_lambda_index ] = lasso_mse, lasso_bias, lasso_variance
+    #
+    #     subset_lambda_index  += 1
+    #
 
 
 # Plots go here. Point is to use the previous computations to obtain the best hyper-parameters (lambda, degree)
@@ -182,7 +182,7 @@ for degree in range(max_degree):
 
 # OLS
 
-degree = 10
+degree = 25
 
 X = linear_regression.design_matrix_2D(x,y,degree)
 scaler = StandardScaler()
@@ -234,7 +234,7 @@ surf = ax.plot_surface(x_plot_mesh*1800,y_plot_mesh*1800,z_predict_flat.reshape(
 
 # Ridge
 
-degree = 5
+degree = 15
 ridge_lambda = 1e-2
 
 X = linear_regression.design_matrix_2D(x,y,degree)
@@ -284,7 +284,7 @@ plt.figure()
 plt.imshow(z_predict_flat.reshape(-1,1801), origin = 'lower')
 # Lasso
 
-degree = 4
+degree = 5
 lasso_lambda = 1e-5
 
 X = linear_regression.design_matrix_2D(x,y,degree)

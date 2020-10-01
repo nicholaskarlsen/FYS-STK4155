@@ -30,10 +30,10 @@ z = FrankeFunction(x, y)
 # Adding standard normal noise:
 z = z + noise_scale*np.random.normal(0,1,len(z))
 max_degree = 15
-n_lambdas = 60
+n_lambdas = 30
 n_bootstraps = 100
 k_folds = 5
-lambdas = np.logspace(-12,1,n_lambdas)
+lambdas = np.logspace(-5,0,n_lambdas)
 subset_lambdas = lambdas[::60]
 
 x_train, x_test, y_train, y_test, z_train, z_test = train_test_split(x, y, z, test_size = 0.2)
@@ -141,19 +141,19 @@ for degree in range(max_degree):
     ols_boot_variance[degree] = ols_mse, ols_bias, ols_variance
 
     # Bootstrapping for a selection of lambdas for ridge and lasso
-    subset_lambda_index = 0
-    for lamb in subset_lambdas:
-
-        ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance = \
-        stat_tools.bootstrap_ridge_lasso(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
-
-        ridge_subset_lambda_boot_mse[degree, subset_lambda_index ], ridge_subset_lambda_boot_bias[degree, subset_lambda_index ], \
-        ridge_subset_lambda_boot_variance[degree, subset_lambda_index ] = ridge_mse, ridge_bias, ridge_variance
-
-        lasso_subset_lambda_boot_mse[degree, subset_lambda_index ], lasso_subset_lambda_boot_bias[degree, subset_lambda_index ], \
-        lasso_subset_lambda_boot_variance[degree, subset_lambda_index ] = lasso_mse, lasso_bias, lasso_variance
-
-        subset_lambda_index  += 1
+    # subset_lambda_index = 0
+    # for lamb in subset_lambdas:
+    #
+    #     ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance = \
+    #     stat_tools.bootstrap_ridge_lasso(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
+    #
+    #     ridge_subset_lambda_boot_mse[degree, subset_lambda_index ], ridge_subset_lambda_boot_bias[degree, subset_lambda_index ], \
+    #     ridge_subset_lambda_boot_variance[degree, subset_lambda_index ] = ridge_mse, ridge_bias, ridge_variance
+    #
+    #     lasso_subset_lambda_boot_mse[degree, subset_lambda_index ], lasso_subset_lambda_boot_bias[degree, subset_lambda_index ], \
+    #     lasso_subset_lambda_boot_variance[degree, subset_lambda_index ] = lasso_mse, lasso_bias, lasso_variance
+    #
+    #     subset_lambda_index  += 1
 
 # Plots go here. Point is to use the previous computations to obtain the best hyper-parameters (lambda, degree)
 # for the different regression methods.
@@ -170,7 +170,7 @@ for degree in range(max_degree):
 
 # OLS
 
-degree = 3
+degree = 15
 
 X = linear_regression.design_matrix_2D(x,y,degree)
 scaler = StandardScaler()
@@ -179,8 +179,8 @@ X_scaled = scaler.transform(X)
 betas = linear_regression.OLS_SVD_2D(X_scaled, z)
 
 
-x_plot = np.linspace(0,0.5,5)
-y_plot = np.linspace(0,1,10)
+x_plot = np.linspace(0,1,2000)
+y_plot = np.linspace(0,1,2000)
 x_plot_mesh, y_plot_mesh = np.meshgrid(x_plot,y_plot)
 x_plot_mesh_flat, y_plot_mesh_flat = x_plot_mesh.flatten(), y_plot_mesh.flatten()
 z_plot_franke = FrankeFunction(x_plot_mesh, y_plot_mesh)
@@ -208,13 +208,13 @@ ax.view_init(azim=45)
 ax.set_xlabel("x")
 ax.set_ylabel("y")
 ax.set_zlabel("z")
-surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_predict_flat.reshape(-1,5), cmap=cm.coolwarm)
+surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_predict_flat.reshape(-1,2000), cmap=cm.coolwarm)
 
 
 
 # Ridge
 
-degree = 5
+degree = 15
 ridge_lambda = 1e-2
 
 X = linear_regression.design_matrix_2D(x,y,degree)
@@ -257,7 +257,7 @@ surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_predict_flat.reshape(2000,-1)
 
 # Lasso
 
-degree = 4
+degree = 15
 lasso_lambda = 1e-5
 
 X = linear_regression.design_matrix_2D(x,y,degree)
