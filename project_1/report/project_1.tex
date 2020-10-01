@@ -289,6 +289,48 @@
 
 \section{Results \& Discussion}
 
+The stated goal of this paper is to study the application of the three different regression methods (OLS, Ridge and LASSO) first to samplings of the Franke function, then to samplings of a certain set of terrain-data. The Franke function is defined on an interval $INTERVAL$ by:
+
+\begin{equation}
+\label{Franke_equation}
+\end{equation}
+
+The terrain data, on the other hand, is a collection of measured elevation heights as a function of x- and y-coordinates, which has been downloaded from \cite{lecture_notes}.
+
+We aim to model both the Franke function and the terrain data as sums of polynomials in x and y. Our overarching goal is to determine which regression method performs the best (i.e. most faithfully reproduces the full data-set on which they are sampled) in both cases, and for which degree of the polynomial model and which value of the penalty parameter $\lambda$. 
+
+\subsection{The Franke function}
+
+PART A:
+
+
+Subsequent parts:
+
+%%%%Figures wanted:
+%%%%
+%%%%For low n and high n separately:
+%%%%	OLS - bias-variance-bootmse vs complexity
+%%%%	OLS - CV-mse vs complexity
+%%%%	Ridge - CV-mse vs complexity for a couple of lambdas. (e.g. 0.00001, 0.001, 0.1)
+%%%%	Ridge - bias-variance-bootmse vs complexity for a couple of lambdas (e.g. 0.00001, 0.001, 0.1)
+%%%%	Lasso - CV-mse vs complexity for a couple of lambdas (e.g. 0.00001, 0.001, 0.1)
+%%%%	Lasso - bias-variance-boot-mse vs complexity for a couple of lambdas (e.g. 0.00001, 0.001, 0.1)
+%%%%
+%%%%4x4 panel of ground-truth, Best OLS, Best Ridge, Best Lasso
+%%%%for high n, low n, high n with noise, low n with noise
+
+
+\subsection{The terrain data}
+
+
+%%%Figures wanted:
+%%%
+%%%For few points, medium points, many points separately:
+%%%	OLS, best ridge, best-lasso cv-mse vs complexity
+%%%	
+%%%3x4 panel of ground-truth, Best OLS, Best Ridge, Best Lasso
+%%%for few points, medium points, many points.
+
     \begin{figure}[h!tb]
         \center
         \includegraphics[width=\columnwidth]{../figs/OLS_MSE_Bootstrap_Hastie_211.pdf}
