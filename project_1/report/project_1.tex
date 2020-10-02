@@ -325,31 +325,59 @@ PART A:
 
 
 Subsequent parts:
+%Prosjektbeskrivelsen behandler de forskjellige metodene ganske separat, og ber jo om mer eller mindre den samme typen plott tre ganger. Jeg har mest lyst til å kombinere en del av dem. For Franke tenker jeg at vi bør ha:
+%
+%For n=100 og for n=1000, max-degree = 20, med og uten støy
+%
+%- Kryssvalidert MSE for OLS og beste Ridge og beste Lasso som funksjon av polynomgrad.
+%- Bootstrappet bias, varians og MSE for OLS, beste Ridge og beste lambda som funksjon av polynomgrad.
+%- Predikerte plott av typen som ligger i franke_prediction_plots for beste grad (lavest MSE), og for en rimelig høy grad (med nesten like lav MSE)
+%
+%Da får vi allerede 4x4 = 16 plott. Vi bør kanskje ta med et par plott som viser den generelle lambda-avhengigheten, f.eks.
+%
+%For n=1000, max-degree = 20, med støy.
+%- Kryssvalidert MSE for en håndfull Ridge-lambdaer som funksjon av polynomgrad.
+%- Bootstrappet bias, varians og MSE for en håndfull Ridge-lambdaer som funksjon av polynomgrad
+%- Kryssvalidert MSE for en håndfull Lasso-lambdaer som funksjon av polynomgrad.
+%- Bootstrappet bias, varians og MSE for en håndfull Lasso-lambdaer som funksjon av polynomgrad.
+%- Lasso og Ridge kryssvalider MSE for høyeste polynomgrad (19, siden max_degree teller med 0) og for en lavere polynomgrad (f.eks. 8), som en funksjon av lambda
+%
+%Da er vi oppe i 21 figurer.
+%
+%For terrengdataene tenker jeg:
+%
+%For spacing = 40 og for spacing = 100 (tilsvarer 2025 og 324 punkter), med max-degree = 20
+%- Kryssvalidert MSE for OLS og beste Ridge og beste Lasso som funksjon av polynomgrad.
+%- Bootstrappet MSE for OLS og beste Ridge og beste Lasso som funksjon av polynomgrad.
+%-  Predikerte plott av typen som ligger i terrain_prediction_plots for beste grad (lavest MSE), og for en rimelig høy grad (som fremdeles har en rimelig lav MSE).
+%
+%Da får vi 2x4 plott til, og ender opp med 28 plott! I tillegg kunne jeg ha lagt til en haug som viser hvordan polynomenes MSE forandrer seg versus lambda, resultater med forskjellige lambda-intervaller og så videre for stor og liten n, stor og liten spacing, med og uten støy. Rett ut en kombinatorisk eksplosjon.
+%
+%Hovedhistorien, derimot, tenker jeg blir ca. som følger:
+%
+%Vi ser på kryssvalidert MSE for å finne beste polynomgrad. Der ser vi at de tre metodene er omtrent jevnbyrdige inntil OLS eksploderer.
+%
+%Av bias-varians plottet ser vi at det skjer ved at OLS får stor varians, mens ridge og lasso holder seg stabile. Vi ser at eksplosjonen skjer ved høyere grad når vi har flere punkter. Og vi ser at eksplosjonen ikke er (like mye, hvis i det hele tatt) til stede uten støy.
+%
+%Ved de predikerte plottene ser vi at lav polynomgrad ikke ligner særlig, selv om MSE er lav. For høy grad ser vi at OLS går dunken med støy, men klarer seg gjerne best uten støy. Vi ser at Ridge redder de høye polynomene når du har støy. Lasso ser vi at prøver å glatte ut hele plottet; ikke rart siden prediktorene våre er sterkt korrelerte. 
+%Vi ser at det meste blir bedre med flere punkter, og at høy polynomgrad kanskje ikke hjelper hvis man har for få datapunkter, selv med hjelp fra Ridge.
+%
+%Av de lambda-relaterte plottene ser vi at begge metodene kverker variansen, og ikke gir store forskjeller i MSE over et stort lambda-intervall. De største farene er ved veldig liten (numeriske feil), eller veldig stor lambda (stor effekt av penalty). Der kverker Lasso alt, og gir oss et skråplan, mens Ridge prøver å gjøre det samme uten helt å flate alt. 
+%
+%Litt den samme karusellen gjør vi med terrengdataene. Der ser vi av de kryss-validerte MSE-ene at Lasso og Ridge stabiliserer seg som lave, selv vedhøye polynomer, mens OLS sprenges kraftig ved få punkter, og potensielt også ved mange punkter, men ved høyere polynomgrad. 
+%
+%Av bias-varians-bootstrappen ser vi OLS mislykkes pga. varians. Da kan Ridge være til hjelp.
+%
+%De predikerte plottene viser at grunnen til at Ridge og Lasso gir liten MSE ved høye grader og få punkter, er at de flater ut alt. OLS er best på å gjenskape landskapets ‘ruglethet’, men kan fordreies kraftig ved få punkter.
+%
+%Vi ser at lav polynomgrad i alle tilfeller gjør oss ute av stand til å fange noe særlig av landskapet ruglethet. Med mange punkter kan vi gå opp til høye polynomgrader og fremdeles bruke OLS, som er mest sensitiv til landskapets variasjon. Det er likevel en risiko for at OLS prediksjonen blir fordreid, og da kan det være bedre å enten gå ned noen grader, eller bruke Ridge. Alt blir bedre med flere punkter.
+%
+%Oppsummert: Ikke bruk Lasso på denne typen terremgprediksjon med polynomer som basis. For god gjenskapning av terrenget trengs høy polynomgrad. Har man da ikke nok datapunkter blåser OLS opp som den store, stygge ulven i en ballongblåser-konkurrqnse. Ved ustabil OLS kan Ridge hjelpe, men går på bekostningen av detaljer i terrenget. 
 
-%%%%Figures wanted:
-%%%%
-%%%%For low n and high n separately:
-%%%%	OLS - bias-variance-bootmse vs complexity
-%%%%	OLS - CV-mse vs complexity
-%%%%	Ridge - CV-mse vs complexity for a couple of lambdas. (e.g. 0.00001, 0.001, 0.1)
-%%%%	Ridge - bias-variance-bootmse vs complexity for a couple of lambdas (e.g. 0.00001, 0.001, 0.1)
-%%%%	Lasso - CV-mse vs complexity for a couple of lambdas (e.g. 0.00001, 0.001, 0.1)
-%%%%	Lasso - bias-variance-boot-mse vs complexity for a couple of lambdas (e.g. 0.00001, 0.001, 0.1)
-%%%%
-%%%%4x4 panel of ground-truth, Best OLS, Best Ridge, Best Lasso
-%%%%for high n, low n, high n with noise, low n with noise
 
 
 \subsection{The terrain data}
 
-
-%%%Figures wanted:
-%%%
-%%%For few points, medium points, many points separately:
-%%%	OLS, best ridge, best-lasso cv-mse vs complexity
-%%%
-%%%3x4 panel of ground-truth, Best OLS, Best Ridge, Best Lasso
-%%%for few points, medium points, many points.
 
     \begin{figure}[h!tb]
         \center
