@@ -1,4 +1,8 @@
 import numpy as np
+import sklearn.linear_model as skl
+import linear_regression
+
+from stat_tools import *
 
 
 def compute_mse_bias_variance(y_data, y_model):

@@ -1,4 +1,8 @@
 import numpy as np
+import sklearn.linear_model as skl
+import linear_regression
+
+from stat_tools import *
 
 
 def k_fold_selection(z, k):

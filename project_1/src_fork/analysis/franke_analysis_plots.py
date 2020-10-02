@@ -14,16 +14,11 @@ sys.path.insert(0, "../")
 import linear_regression
 import utils
 import stat_tools
+import crossvalidation
+import bootstrap
+from FrankeFunction import FrankeFunction
 
 utils.plot_settings()  # LaTeX fonts in Plots!
-
-
-def FrankeFunction(x, y):
-    term1 = 0.75 * np.exp(-(0.25 * (9 * x - 2) ** 2) - 0.25 * ((9 * y - 2) ** 2))
-    term2 = 0.75 * np.exp(-((9 * x + 1) ** 2) / 49.0 - 0.1 * (9 * y + 1))
-    term3 = 0.5 * np.exp(-((9 * x - 7) ** 2) / 4.0 - 0.25 * ((9 * y - 3) ** 2))
-    term4 = -0.2 * np.exp(-((9 * x - 4) ** 2) - (9 * y - 7) ** 2)
-    return term1 + term2 + term3 + term4
 
 
 def franke_analysis_plots(
@@ -127,7 +122,7 @@ def franke_analysis_plots(
         # CV, find best lambdas and get mse vs lambda for given degree. Also, gets
         # ols_CV_MSE
 
-        lasso_cv_mse, ridge_cv_mse, ols_cv_mse_deg = stat_tools.k_fold_cv_all(
+        lasso_cv_mse, ridge_cv_mse, ols_cv_mse_deg = crossvalidation.k_fold_cv_all(
             X_scaled, z, n_lambdas, lambdas, k_folds
         )
         best_lasso_lambda[degree] = lambdas[np.argmin(lasso_cv_mse)]
@@ -153,7 +148,7 @@ def franke_analysis_plots(
                 ols_mse,
                 ols_bias,
                 ols_variance,
-            ) = stat_tools.bootstrap_all(
+            ) = bootstrap.bootstrap_all(
                 X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge
             )
 
@@ -187,7 +182,7 @@ def franke_analysis_plots(
                     lasso_mse,
                     lasso_bias,
                     lasso_variance,
-                ) = stat_tools.bootstrap_ridge_lasso(
+                ) = bootstrap.bootstrap_ridge_lasso(
                     X_train_scaled,
                     X_test_scaled,
                     z_train,

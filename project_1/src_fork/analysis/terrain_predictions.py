@@ -8,10 +8,13 @@ from sklearn.preprocessing import StandardScaler
 from imageio import imread
 
 import sys
+
 sys.path.insert(0, "../")
 import linear_regression
 import utils
 import stat_tools
+import crossvalidation
+import bootstrap
 
 utils.plot_settings()  # LaTeX fonts in Plots!
 

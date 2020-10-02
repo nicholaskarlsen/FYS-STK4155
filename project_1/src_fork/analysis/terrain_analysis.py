@@ -8,11 +8,15 @@ import sklearn.linear_model as skl
 from imageio import imread
 
 import sys
+
 sys.path.insert(0, "../")
 
 import linear_regression
 import utils
 import stat_tools
+import crossvalidation
+import bootstrap
+from FrankeFunction import FrankeFunction
 
 utils.plot_settings()  # LaTeX fonts in Plots!
 
@@ -123,7 +127,7 @@ for degree in range(max_degree):
 
     # CV, find best lambdas and get mse vs lambda for given degree.
 
-    lasso_cv_mse, ridge_cv_mse, ols_cv_mse_deg = stat_tools.k_fold_cv_all(
+    lasso_cv_mse, ridge_cv_mse, ols_cv_mse_deg = crossvalidation.k_fold_cv_all(
         X_scaled, z, n_lambdas, lambdas, k_folds
     )
     best_lasso_lambda[degree] = lambdas[np.argmin(lasso_cv_mse)]
@@ -140,7 +144,7 @@ for degree in range(max_degree):
     # lamb_lasso = best_lasso_lambda[degree]
     #
     # ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance, ols_mse, ols_bias, ols_variance = \
-    # stat_tools.bootstrap_all(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
+    # bootstrap.bootstrap_all(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
     #
     # ridge_best_lambda_boot_mse[degree], ridge_best_lambda_boot_bias[degree], \
     # ridge_best_lambda_boot_variance[degree] = ridge_mse, ridge_bias, ridge_variance
@@ -156,7 +160,7 @@ for degree in range(max_degree):
     # for lamb in subset_lambdas:
     #
     #     ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance = \
-    #     stat_tools.bootstrap_ridge_lasso(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
+    #     bootstrap.bootstrap_ridge_lasso(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
     #
     #     ridge_subset_lambda_boot_mse[degree, subset_lambda_index ], ridge_subset_lambda_boot_bias[degree, subset_lambda_index ], \
     #     ridge_subset_lambda_boot_variance[degree, subset_lambda_index ] = ridge_mse, ridge_bias, ridge_variance
