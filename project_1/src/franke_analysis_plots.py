@@ -20,8 +20,10 @@ def FrankeFunction(x, y):
     term4 = -0.2*np.exp(-(9*x-4)**2 - (9*y-7)**2)
     return term1 + term2 + term3 + term4
 
-def franke_analysis_plots(n=400,noise_scale=0.2,max_degree=10,n_bootstraps=100,k_folds=5,n_lambdas=30, do_boot=True, do_subset=True):
+def franke_analysis_plots(n=1000,noise_scale=0.2,max_degree=20,n_bootstraps=100,k_folds=5,n_lambdas=30, do_boot=True, do_subset=True):
 
+
+# Note that max_degrees is the number of degrees, i.e. including 0.
 
     # n = 500
     # noise_scale = 0.2
@@ -36,7 +38,6 @@ def franke_analysis_plots(n=400,noise_scale=0.2,max_degree=10,n_bootstraps=100,k
     # k_folds = 5
     lambdas = np.logspace(-5,0,n_lambdas)
     subset_lambdas = lambdas[::10]
-
 
     x_train, x_test, y_train, y_test, z_train, z_test = train_test_split(x, y, z, test_size = 0.2)
 
@@ -210,7 +211,7 @@ def franke_analysis_plots(n=400,noise_scale=0.2,max_degree=10,n_bootstraps=100,k
 
     # CV for lasso, best+low+middle+high lambdas
     plt.figure()
-    plt.semilogy(best_lasso_mse)
+    plt.semilogy(best_lasso_mse,legend='best lambda for each degree')
     plt.semilogy(lasso_lamb_deg_mse[:,0],label='lambda={}'.format(lambdas[0]))
     plt.semilogy(lasso_lamb_deg_mse[:,10],label='lambda={}'.format(lambdas[10]))
     plt.semilogy(lasso_lamb_deg_mse[:,20],label='lambda={}'.format(lambdas[20]))
@@ -237,6 +238,28 @@ def franke_analysis_plots(n=400,noise_scale=0.2,max_degree=10,n_bootstraps=100,k
     plt.semilogy(lasso_subset_lambda_boot_bias[2],label = 'bias, lamdbda = {}'.format(subset_lambdas[2]))
     plt.semilogy(lasso_subset_lambda_boot_variance[2],label = 'variance, lamdbda = {}'.format(subset_lambdas[2]))
     plt.title('Bias+variance for low, middle, high lasso lambdas')
+    plt.legend()
+    plt.show()
+
+    # For a couple of degrees, plot cv mse vs lambda for ridge, will break program if max_degrees < 8
+
+    plt.figure()
+    plt.plot(np.log10(lambdas), ridge_lamb_deg_mse[max_degree-1], label = 'degree = {}'.format(max_degree-1))
+    plt.plot(np.log10(lambdas), ridge_lamb_deg_mse[max_degree-2], label = 'degree = {}'.format(max_degree-2))
+    plt.plot(np.log10(lambdas), ridge_lamb_deg_mse[max_degree-3], label = 'degree = {}'.format(max_degree-3))
+    plt.plot(np.log10(lambdas), ridge_lamb_deg_mse[max_degree-5], label = 'degree = {}'.format(max_degree-5))
+    plt.plot(np.log10(lambdas), ridge_lamb_deg_mse[max_degree-7], label = 'degree = {}'.format(max_degree-7))
+    plt.legend()
+    plt.show()
+
+    # For a copule of degrees, plot cv mse vs lambda for lasso, will break program if max_degree < 8.
+
+    plt.figure()
+    plt.plot(np.log10(lambdas), lasso_lamb_deg_mse[max_degree-1], label = 'degree = {}'.format(max_degree-1))
+    plt.plot(np.log10(lambdas), lasso_lamb_deg_mse[max_degree-2], label = 'degree = {}'.format(max_degree-2))
+    plt.plot(np.log10(lambdas), lasso_lamb_deg_mse[max_degree-3], label = 'degree = {}'.format(max_degree-3))
+    plt.plot(np.log10(lambdas), lasso_lamb_deg_mse[max_degree-5], label = 'degree = {}'.format(max_degree-5))
+    plt.plot(np.log10(lambdas), lasso_lamb_deg_mse[max_degree-7], label = 'degree = {}'.format(max_degree-7))
     plt.legend()
     plt.show()
 
