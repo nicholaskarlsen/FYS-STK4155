@@ -1,18 +1,17 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.linear_model import LinearRegression, Ridge, Lasso
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.model_selection import train_test_split
-from sklearn.pipeline import make_pipeline
-from sklearn.utils import resample
-from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import linear_regression
 import utils
 import stat_tools
 from sklearn.preprocessing import StandardScaler
 import sklearn.linear_model as skl
-from imageio import imread
+
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
+from sklearn.utils import resample
 
 def design_matrix_1D(x, degree):
 
@@ -25,16 +24,20 @@ def own_bias_variance(seed):
 
     # Seems to be identical with the lecture notes code. up to degree 25.
     # The deviations from that point on, though, are not of completely obvious origin.
+    # Aha, using the same pipeline for the model gives the exact same bias-variance-curves.
+    # Must be something where sklearn are clever with numerical errors, while we are not.
+    # This does at least show that our bias and variance computations are CORRECT!!!!
+    # Note, our compute_mse_bias_variance assumes the first argument to be a flat array.
 
     np.random.seed(seed)
 
     n = 400
     n_bootstraps = 100
     max_degree = 30
-
+    n_boostraps = 100
 
     # Make data set.
-    x = np.linspace(-3, 3, n)
+    x = np.linspace(-3, 3, n).reshape(-1,1)
     y = np.exp(-x**2) + 1.5 * np.exp(-(x-2)**2)+ np.random.normal(0, 0.1, x.shape)
     z = y
     # y = np.zeros(n)
@@ -60,16 +63,16 @@ def own_bias_variance(seed):
         # X_train = linear_regression.design_matrix_2D(x_train,y_train,degree)
         # X_test = linear_regression.design_matrix_2D(x_test,y_test,degree)
         # Scaling and feeding to CV.
-        X = design_matrix_1D(x,degree)
-        X_train = design_matrix_1D(x_train,degree)
-        X_test = design_matrix_1D(x_test,degree)
-        scaler = StandardScaler()
-        scaler.fit(X)
-        X = scaler.transform(X)
-        X[:,0] = 1
-
-        X_train_scaled = X_train
-        X_test_scaled = X_test
+        # X = design_matrix_1D(x,degree)
+        # X_train = design_matrix_1D(x_train,degree)
+        # X_test = design_matrix_1D(x_test,degree)
+        # scaler = StandardScaler()
+        # scaler.fit(X)
+        # X = scaler.transform(X)
+        # X[:,0] = 1
+        #
+        # X_train_scaled = X_train
+        # X_test_scaled = X_test
 
         # Scaling and feeding to bootstrap and OLS
         # scaler_boot = StandardScaler()
@@ -81,22 +84,15 @@ def own_bias_variance(seed):
 
         # OLS, get MSE for test and train set.
 
-        betas = linear_regression.OLS_SVD_2D(X_train_scaled, z_train)
-        z_test_model = X_test_scaled @ betas
-        z_train_model = X_train_scaled @ betas
-        mse_ols_train[degree] = stat_tools.MSE(z_train, z_train_model)
-        mse_ols_test[degree] = stat_tools.MSE(z_test, z_test_model)
+        model = make_pipeline(PolynomialFeatures(degree=degree), LinearRegression(fit_intercept=False))
+        y_pred = np.empty((z_test.shape[0], n_boostraps))
+        for i in range(n_boostraps):
+            x_, y_ = resample(x_train, z_train)
+            y_pred[:, i] = model.fit(x_, y_).predict(x_test).ravel()
 
-        z_boot_ols = np.zeros((len(z_test),n_bootstraps))
-        for i in range(n_bootstraps):
-            shuffle = np.random.randint(0,len(z_train),len(z_train))
-            X_boot, z_boot = X_train_scaled[shuffle] , z_train[shuffle]
-            betas_boot_ols = linear_regression.OLS_SVD_2D(X_boot, z_boot)
-
-            z_boot_ols[:,i] = X_test_scaled @ betas_boot_ols
 
         ols_boot_mse[degree], ols_boot_bias[degree], \
-        ols_boot_variance[degree] = stat_tools.compute_mse_bias_variance(z_test, z_boot_ols)
+        ols_boot_variance[degree] = stat_tools.compute_mse_bias_variance(z_test.flatten(), y_pred)
     print(ols_boot_mse)
     plt.plot(ols_boot_mse, label='Error')
     plt.plot(ols_boot_bias, label='Bias_squared')
@@ -104,13 +100,7 @@ def own_bias_variance(seed):
     plt.legend()
     plt.show()
 
-import matplotlib.pyplot as plt
-import numpy as np
-from sklearn.linear_model import LinearRegression, Ridge, Lasso
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.model_selection import train_test_split
-from sklearn.pipeline import make_pipeline
-from sklearn.utils import resample
+    return
 
 
 def lecture_note_bias_variance(seed):
@@ -153,3 +143,9 @@ def lecture_note_bias_variance(seed):
     plt.plot(polydegree, variance, label='Variance')
     plt.legend()
     plt.show()
+
+    return
+
+if __name__ == '__main__':
+    own_bias_variance(2018)
+    lecture_note_bias_variance(2018)

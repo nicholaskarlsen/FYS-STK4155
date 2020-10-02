@@ -1,0 +1,3 @@
+Here the ridge lambdas are usually between 1e-5 and 1e-1. For a couple of middling degrees they are smaller.
+
+The lasso continues its trend, always the lowest, until suddenly it prefers 1e-3 to 1e-1
