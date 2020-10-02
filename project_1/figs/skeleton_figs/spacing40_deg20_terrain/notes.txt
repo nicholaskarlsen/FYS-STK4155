@@ -1,0 +1,3 @@
+Hmm, the ridge lambdas get stuck very low for most degrees. Only a couple of the lower degrees give values above 1e-8. For the higher degrees, the lambdas flock towards the lowest test on the interval. This should be investigated.
+
+For lasso, the trend is clear, they are hitting 1e-12 which is the lowest lambda allowed. Only the absolutely highest polynomials give larger lambdas, in that case between 1e-3 and 1e-1.

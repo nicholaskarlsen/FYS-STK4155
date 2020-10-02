@@ -18,7 +18,7 @@ def FrankeFunction(x, y):
     term4 = -0.2*np.exp(-(9*x-4)**2 - (9*y-7)**2)
     return term1 + term2 + term3 + term4
 
-def franke_predictions(n=500, noise_scale=0.2, degree=20, ridge_lambda=1e-2, lasso_lambda=1e-10, plot_grid_size=2000):
+def franke_predictions(n=1000, noise_scale=0.2, degree=20, ridge_lambda=1e-2, lasso_lambda=1e-5, plot_grid_size=2000):
     """ For a given sample size n, noise_scale, max_degree and penalty parameters: produces ols,
         ridge and lasso predictions, as well as ground truth on a plotting meshgrid with input grid size.
 

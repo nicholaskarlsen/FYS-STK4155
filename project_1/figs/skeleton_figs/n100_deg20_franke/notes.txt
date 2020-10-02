@@ -1,0 +1,1 @@
+Note that optimal lambda for each degree is between 1e-5 and 1 for both ridge and lasso. The ridge lambdas are sometimes hitting 1, after we get more features than responses.

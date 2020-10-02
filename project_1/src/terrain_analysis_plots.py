@@ -13,7 +13,7 @@ from imageio import imread
 utils.plot_settings() # LaTeX fonts in Plots!
 
 
-def terrain_analysis_plots(spacing=40, max_degree = 25, n_lambdas=5, k_folds = 5, n_bootstraps=50, do_boot=False, do_subset=False):
+def terrain_analysis_plots(spacing=100, max_degree = 20, n_lambdas=30, k_folds = 5, n_bootstraps=50, do_boot=False, do_subset=False):
 
     # Setting up the terrain data:
     # Note structure! X-coordinates are on the rows of terrain_data
@@ -31,8 +31,8 @@ def terrain_analysis_plots(spacing=40, max_degree = 25, n_lambdas=5, k_folds = 5
     y_terrain_selection_flat = Y_coord_selection.flatten() # the first degree feature variables
 
 
-    lambdas = np.logspace(-5,0,n_lambdas)
-    subset_lambdas = lambdas[::10]
+    lambdas = np.logspace(-6,0,n_lambdas)
+    subset_lambdas = lambdas[::12]
 
 
     x = x_terrain_selection_flat
@@ -176,6 +176,35 @@ def terrain_analysis_plots(spacing=40, max_degree = 25, n_lambdas=5, k_folds = 5
     plt.title('CV MSE for OLS, Ridge and Lasso, with the best lambdas for each degree')
     plt.legend()
     plt.show()
+
+    # For a couple of degrees, plot cv mse vs lambda for ridge, will break program if max_degrees < 8
+
+    plt.figure()
+    plt.plot(np.log10(lambdas), ridge_lamb_deg_mse[max_degree-1], label = 'degree = {}'.format(max_degree-1))
+    plt.plot(np.log10(lambdas), ridge_lamb_deg_mse[max_degree-2], label = 'degree = {}'.format(max_degree-2))
+    plt.plot(np.log10(lambdas), ridge_lamb_deg_mse[max_degree-3], label = 'degree = {}'.format(max_degree-3))
+    plt.plot(np.log10(lambdas), ridge_lamb_deg_mse[max_degree-5], label = 'degree = {}'.format(max_degree-5))
+    plt.plot(np.log10(lambdas), ridge_lamb_deg_mse[max_degree-7], label = 'degree = {}'.format(max_degree-7))
+    plt.legend()
+    plt.show()
+
+    # For a copule of degrees, plot cv mse vs lambda for lasso, will break program if max_degree < 8.
+
+    plt.figure()
+    plt.plot(np.log10(lambdas), lasso_lamb_deg_mse[max_degree-1], label = 'degree = {}'.format(max_degree-1))
+    plt.plot(np.log10(lambdas), lasso_lamb_deg_mse[max_degree-2], label = 'degree = {}'.format(max_degree-2))
+    plt.plot(np.log10(lambdas), lasso_lamb_deg_mse[max_degree-3], label = 'degree = {}'.format(max_degree-3))
+    plt.plot(np.log10(lambdas), lasso_lamb_deg_mse[max_degree-5], label = 'degree = {}'.format(max_degree-5))
+    plt.plot(np.log10(lambdas), lasso_lamb_deg_mse[max_degree-7], label = 'degree = {}'.format(max_degree-7))
+    plt.legend()
+    plt.show()
+
+
+    print('best ridge lambdas:')
+    print(best_ridge_lambda)
+    print('best lasso lambda')
+    print(best_lasso_lambda)
+
     return
 if __name__ == '__main__':
     terrain_analysis_plots()
