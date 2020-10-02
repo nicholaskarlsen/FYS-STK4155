@@ -28,7 +28,7 @@ utils.plot_settings()  # LaTeX fonts in Plots!
 # this should make z(x,y).reshape(length_y,length_x) be consistent with terrain_data
 
 
-terrain_data = imread("../datafiles/SRTM_data_Norway_1.tif")
+terrain_data = imread("../../datafiles/SRTM_data_Norway_1.tif")
 point_selection = terrain_data[:1801:10, :1801:10]  # Make quadratic and downsample
 x_terrain_selection = np.linspace(0, 1, point_selection.shape[1])
 y_terrain_selection = np.linspace(0, 1, point_selection.shape[0])

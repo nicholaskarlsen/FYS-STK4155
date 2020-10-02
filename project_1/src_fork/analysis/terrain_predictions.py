@@ -43,7 +43,7 @@ def terrain_predictions(spacing=40, degree=20, ridge_lambda=1e-2, lasso_lambda=1
     # Point_selection.flatten() moves most rapidly over the x-coordinates
     # Meshgrids flattened also move most rapidly over the x-coordinates. Thus
     # this should make z(x,y).reshape(length_y,length_x) be consistent with terrain_data
-    terrain_data = imread("../datafiles/SRTM_data_Norway_1.tif")
+    terrain_data = imread("../../datafiles/SRTM_data_Norway_1.tif")
     point_selection = terrain_data[:1801:spacing, :1801:spacing]  # Make quadratic and downsample
     x_terrain_selection = np.linspace(0, 1, point_selection.shape[1])
     y_terrain_selection = np.linspace(0, 1, point_selection.shape[0])
