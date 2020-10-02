@@ -35,8 +35,7 @@ def franke_analysis_plots(n=500,noise_scale=0.2,max_degree=15,n_bootstraps=100,k
     # n_bootstraps = 100
     # k_folds = 5
     lambdas = np.logspace(-5,0,n_lambdas)
-    #subset_lambdas = lambdas[::60]
-    subset_lambdas = np.array([lambdas[0],lambdas[14],[lambdas[29]]])
+    subset_lambdas = lambdas[::15]
 
 
     x_train, x_test, y_train, y_test, z_train, z_test = train_test_split(x, y, z, test_size = 0.2)
@@ -146,7 +145,7 @@ def franke_analysis_plots(n=500,noise_scale=0.2,max_degree=15,n_bootstraps=100,k
 
         if do_subset:
             # Bootstrapping for a selection of lambdas for ridge and lasso
-            # subset_lambda_index = 0
+            subset_lambda_index = 0
             for lamb in subset_lambdas:
 
                 ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance = \
