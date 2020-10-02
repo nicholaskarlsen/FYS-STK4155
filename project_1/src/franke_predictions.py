@@ -18,7 +18,7 @@ def FrankeFunction(x, y):
     term4 = -0.2*np.exp(-(9*x-4)**2 - (9*y-7)**2)
     return term1 + term2 + term3 + term4
 
-def franke_predictions(n=500, noise_scale=0.2, max_degree=20, ridge_lambda=1e-2, lasso_lambda=1e-5, plot_grid_size=2000):
+def franke_predictions(n=500, noise_scale=0.2, degree=20, ridge_lambda=1e-2, lasso_lambda=1e-10, plot_grid_size=2000):
     """ For a given sample size n, noise_scale, max_degree and penalty parameters: produces ols,
         ridge and lasso predictions, as well as ground truth on a plotting meshgrid with input grid size.
 
@@ -51,6 +51,11 @@ def franke_predictions(n=500, noise_scale=0.2, max_degree=20, ridge_lambda=1e-2,
     y_plot = np.linspace(0,1,plot_grid_size)
     x_plot_mesh, y_plot_mesh = np.meshgrid(x_plot,y_plot)
     x_plot_mesh_flat, y_plot_mesh_flat = x_plot_mesh.flatten(), y_plot_mesh.flatten()
+
+    X_plot_design = linear_regression.design_matrix_2D(x_plot_mesh_flat,y_plot_mesh_flat,degree)
+    X_plot_design_scaled = scaler.transform(X_plot_design)
+
+
     z_plot_franke = FrankeFunction(x_plot_mesh, y_plot_mesh)
 
     # OLS
@@ -65,8 +70,50 @@ def franke_predictions(n=500, noise_scale=0.2, max_degree=20, ridge_lambda=1e-2,
     z_predict_ridge = z_predict_flat_ridge.reshape(plot_grid_size,-1)
     # Lasso
 
-    clf_Lasso = skl.Lasso(alpha=lasso_lambda,fit_intercept=False).fit(X_scaled,z)
+    clf_Lasso = skl.Lasso(alpha=lasso_lambda,fit_intercept=False, max_iter=10000).fit(X_scaled,z)
     z_predict_flat_lasso = clf_Lasso.predict(X_plot_design_scaled) + z_intercept
     z_predict_lasso = z_predict_flat_lasso.reshape(plot_grid_size,-1)
 
     return x_plot_mesh, y_plot_mesh, z_predict_ols, z_predict_ridge, z_predict_lasso, z_plot_franke
+
+if __name__ == '__main__':
+    x_plot_mesh, y_plot_mesh, z_predict_ols, z_predict_ridge, \
+    z_predict_lasso, z_plot_franke = franke_predictions()
+
+    fig = plt.figure()
+
+    # Plot the analytic curve
+    ax = fig.add_subplot(1, 4, 1, projection="3d")
+    ax.set_title("Franke Function")
+    ax.view_init(azim=45)
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+    surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_plot_franke, cmap=cm.coolwarm)
+
+    # Plot the OLS prediction
+    ax = fig.add_subplot(1, 4, 2, projection="3d")
+    ax.set_title("OLS")
+    ax.view_init(azim=45)
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+    surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_predict_ols, cmap=cm.coolwarm)
+
+    ax = fig.add_subplot(1, 4, 3, projection="3d")
+    ax.set_title("Ridge")
+    ax.view_init(azim=45)
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+    surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_predict_ridge, cmap=cm.coolwarm)
+
+    ax = fig.add_subplot(1, 4, 4, projection="3d")
+    ax.set_title("Lasso")
+    ax.view_init(azim=45)
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+    surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_predict_lasso, cmap=cm.coolwarm)
+
+    plt.show()

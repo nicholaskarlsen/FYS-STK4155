@@ -86,3 +86,45 @@ def terrain_predictions(spacing=10, degree=25, ridge_lambda=1e-2, lasso_lambda=1
     z_predict_lasso = z_predict_flat_lasso.reshape(-1,1801)
 
     return x_plot_mesh, y_plot_mesh, z_predict_ols, z_predict_ridge, z_predict_lasso, z_true
+
+if __name__ == '__main__':
+    x_plot_mesh, y_plot_mesh, z_predict_ols, z_predict_ridge, \
+    z_predict_lasso, z_truth = terrain_predictions()
+
+    fig = plt.figure()
+
+    # Plot the true terrain data
+    ax = fig.add_subplot(1, 4, 1, projection="3d")
+    ax.set_title("True terrain data")
+    ax.view_init(azim=0, elev=90)
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+    surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_truth, cmap=cm.coolwarm)
+
+    # Plot the OLS prediction
+    ax = fig.add_subplot(1, 4, 2, projection="3d")
+    ax.set_title("OLS")
+    ax.view_init(azim=0, elev=90)
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+    surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_predict_ols, cmap=cm.coolwarm)
+
+    ax = fig.add_subplot(1, 4, 3, projection="3d")
+    ax.set_title("Ridge")
+    ax.view_init(azim=0, elev=90)
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+    surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_predict_ridge, cmap=cm.coolwarm)
+
+    ax = fig.add_subplot(1, 4, 4, projection="3d")
+    ax.set_title("Lasso")
+    ax.view_init(azim=0, elev=90)
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+    surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_predict_lasso, cmap=cm.coolwarm)
+
+    plt.show()
