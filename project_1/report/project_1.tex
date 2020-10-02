@@ -270,7 +270,7 @@
         &=  \frac{1}{n} \sum^{n}_{i} (\textup{Bias}^2[f_i,\tilde{y}_{i}] + \textup{Var}[\tilde{y}_{i}]) + \sigma^2
         \end{split}
         \end{align}
-        Here $\sigma_{i}^2$ is the variance of the noise for each test point. Since all test points are assumed to have the same noise distribution, their variances will be equal.  To be perfectly clear, the random variables for both of the preceding calculations are the model predictions $\tilde{y}_{i}$ and the noise $\varepsilon_{i}$, which are considered to be independent of each other.
+        Here $\sigma_{i}^2$ is the variance of the noise for each test point. Since all test points are assumed to have the same noise distribution, their variances will be equal.  To be perfectly clear, the random variables for both of the preceding calculations are the model predictions $\tilde{y}_{i}$ and the test point noises $\varepsilon_{i}$, which are considered to be independent of each other. As an annotation aside; similar derivations may be found in most, if indeed not all, textbooks on machine learning, though they are often less than explicit in defining what domains the expectation values are taken over. For a refreshingly clear presentation, complete with pointing arrows and textboxes, the reader is referred to the set of lecture notes by Professor W. Cohen \cite{cohen}.
 
         In practical terms, we use the bootstrap re-sampling to estimate the bias and variance of the model. This is achieved by replacing $\tilde{y}_{i}$ with $\tilde{y}_{i,B}$ in Eqn.~\ref{mse_bias_variance}. The expectation values will then be computed over all the bootstrap iterations. Furthermore, we are not able to extract the noise from the response values, and must then use the bias estimate $\textup{Bias}^2[y_{i},\tilde{y}_{i,B}]$. Explicitly, the MSE, the bias and the variance estimates obtained from the bootstrap re-sampling become, for a test set with size $n$ and a number $M$ bootstrap iterations:
 
@@ -315,7 +315,7 @@ The stated goal of this paper is to study the application of the three different
 \label{Franke_equation}
 \end{equation}
 
-The terrain data, on the other hand, is a collection of measured elevation heights as a function of x- and y-coordinates, which has been downloaded from \cite{lecture_notes}.
+The terrain data, on the other hand, is a collection of measured elevation heights as a function of x- and y-coordinates, which has been downloaded from \cite{4155_repo}.
 
 We aim to model both the Franke function and the terrain data as sums of polynomials in x and y. Our overarching goal is to determine which regression method performs the best (i.e. most faithfully reproduces the full data-set on which they are sampled) in both cases, and for which degree of the polynomial model and which value of the penalty parameter $\lambda$.
 
