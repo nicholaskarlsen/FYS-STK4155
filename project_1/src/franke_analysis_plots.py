@@ -20,7 +20,7 @@ def FrankeFunction(x, y):
     term4 = -0.2*np.exp(-(9*x-4)**2 - (9*y-7)**2)
     return term1 + term2 + term3 + term4
 
-def franke_analysis_plots(n=1000,noise_scale=0.2,max_degree=20,n_bootstraps=100,k_folds=5,n_lambdas=30, do_boot=True, do_subset=True):
+def franke_analysis_plots(n=500,noise_scale=0.2,max_degree=15,n_bootstraps=100,k_folds=5,n_lambdas=30, do_boot=True, do_subset=True):
 
 
 # Note that max_degrees is the number of degrees, i.e. including 0.
