@@ -20,7 +20,7 @@ def FrankeFunction(x, y):
     term4 = -0.2*np.exp(-(9*x-4)**2 - (9*y-7)**2)
     return term1 + term2 + term3 + term4
 
-def franke_analysis_plots(n=500,noise_scale=0.2,max_degree=15,n_bootstraps=100,k_folds=5,n_lambdas=30, do_boot=True, do_subset=True):
+def franke_analysis_plots(n=400,noise_scale=0.2,max_degree=10,n_bootstraps=100,k_folds=5,n_lambdas=30, do_boot=True, do_subset=True):
 
 
     # n = 500
@@ -35,7 +35,7 @@ def franke_analysis_plots(n=500,noise_scale=0.2,max_degree=15,n_bootstraps=100,k
     # n_bootstraps = 100
     # k_folds = 5
     lambdas = np.logspace(-5,0,n_lambdas)
-    subset_lambdas = lambdas[::15]
+    subset_lambdas = lambdas[::10]
 
 
     x_train, x_test, y_train, y_test, z_train, z_test = train_test_split(x, y, z, test_size = 0.2)
@@ -169,74 +169,75 @@ def franke_analysis_plots(n=500,noise_scale=0.2,max_degree=15,n_bootstraps=100,k
 
     # Bootstrap for OLS:
     plt.figure()
-    plt.semilogy(ols_boot_mse)
-    plt.semilogy(ols_boot_bias)
-    plt.semilogy(ols_boot_variance)
+    plt.semilogy(ols_boot_mse,label='mse')
+    plt.semilogy(ols_boot_bias,label='bias')
+    plt.semilogy(ols_boot_variance, label='variance')
     plt.title('OLS bias-variance-MSE by bootstrap')
+    plt.legend()
     plt.show()
 
     # CV for Ridge, best+low+middle+high lambdas
     plt.figure()
-    plt.semilogy(best_ridge_mse)
-    plt.semilogy(ridge_lamb_deg_mse[:,0])
-    plt.semilogy(ridge_lamb_deg_mse[:,14])
-    plt.semilogy(ridge_lamb_deg_mse[:,29])
+    plt.semilogy(best_ridge_mse, label='best for each degree')
+    plt.semilogy(ridge_lamb_deg_mse[:,0], label='lambda={}'.format(lambdas[0]))
+    plt.semilogy(ridge_lamb_deg_mse[:,10], label='lambda={}'.format(lambdas[10]))
+    plt.semilogy(ridge_lamb_deg_mse[:,20], label='lambda={}'.format(lambdas[20]))
     plt.title('Ridge CV MSE for best lambda at each degree, plus for given lambdas across all degrees')
+    plt.legend()
     plt.show()
 
     # Bootstrap for the best ridge lambdas:
     plt.figure()
-    plt.semilogy(ridge_best_lambda_boot_mse)
-    plt.semilogy(ridge_best_lambda_boot_bias)
-    plt.semilogy(ridge_best_lambda_boot_variance)
+    plt.semilogy(ridge_best_lambda_boot_mse, label='mse')
+    plt.semilogy(ridge_best_lambda_boot_bias, label ='bias')
+    plt.semilogy(ridge_best_lambda_boot_variance, label='variance')
     plt.title('Best ridge lambdas for each degree bootstrap')
+    plt.legend()
     plt.show()
 
     # Bootstrap only bias and variance for low+middle+high ridge lambdas
 
     plt.figure()
-    plt.semilogy(ridge_subset_lambda_boot_mse[0])
-    plt.semilogy(ridge_subset_lambda_boot_bias[0])
-    plt.semilogy(ridge_subset_lambda_boot_variance[0])
-    plt.semilogy(ridge_subset_lambda_boot_mse[1])
-    plt.semilogy(ridge_subset_lambda_boot_bias[1])
-    plt.semilogy(ridge_subset_lambda_boot_variance[1])
-    plt.semilogy(ridge_subset_lambda_boot_mse[2])
-    plt.semilogy(ridge_subset_lambda_boot_bias[2])
-    plt.semilogy(ridge_subset_lambda_boot_variance[2])
+    plt.semilogy(ridge_subset_lambda_boot_bias[0], label = 'bias, lamdbda = {}'.format(subset_lambdas[0]))
+    plt.semilogy(ridge_subset_lambda_boot_variance[0], label = 'variance, lamdbda = {}'.format(subset_lambdas[0]))
+    plt.semilogy(ridge_subset_lambda_boot_bias[1],label = 'bias, lamdbda = {}'.format(subset_lambdas[1]))
+    plt.semilogy(ridge_subset_lambda_boot_variance[1],label = 'variance, lamdbda = {}'.format(subset_lambdas[1]))
+    plt.semilogy(ridge_subset_lambda_boot_bias[2],label = 'bias, lamdbda = {}'.format(subset_lambdas[2]))
+    plt.semilogy(ridge_subset_lambda_boot_variance[2],label = 'variance, lamdbda = {}'.format(subset_lambdas[2]))
     plt.title('Bias+variance for low, middle, high ridge lambdas')
+    plt.legend()
     plt.show()
 
-    # CV for Ridge, best+low+middle+high lambdas
+    # CV for lasso, best+low+middle+high lambdas
     plt.figure()
     plt.semilogy(best_lasso_mse)
-    plt.semilogy(lasso_lamb_deg_mse[:,0])
-    plt.semilogy(lasso_lamb_deg_mse[:,14])
-    plt.semilogy(lasso_lamb_deg_mse[:,29])
+    plt.semilogy(lasso_lamb_deg_mse[:,0],label='lambda={}'.format(lambdas[0]))
+    plt.semilogy(lasso_lamb_deg_mse[:,10],label='lambda={}'.format(lambdas[10]))
+    plt.semilogy(lasso_lamb_deg_mse[:,20],label='lambda={}'.format(lambdas[20]))
     plt.title('Lasso CV MSE for best lambda at each degree, plus for given lambdas across all degrees')
+    plt.legend()
     plt.show()
 
-    # Bootstrap for the best ridge lambdas:
+    # Bootstrap for the best lasso lambdas:
     plt.figure()
-    plt.semilogy(lasso_best_lambda_boot_mse)
-    plt.semilogy(lasso_best_lambda_boot_bias)
-    plt.semilogy(lasso_best_lambda_boot_variance)
+    plt.semilogy(lasso_best_lambda_boot_mse, label='mse')
+    plt.semilogy(lasso_best_lambda_boot_bias, label='bias')
+    plt.semilogy(lasso_best_lambda_boot_variance, label='variance')
     plt.title('Best lasso lambdas for each degree bootstrap')
+    plt.legend()
     plt.show()
 
-    # Bootstrap only bias and variance for low+middle+high ridge lambdas
+    # Bootstrap only bias and variance for low+middle+high lasso lambdas
 
     plt.figure()
-    plt.semilogy(lasso_subset_lambda_boot_mse[0])
-    plt.semilogy(lasso_subset_lambda_boot_bias[0])
-    plt.semilogy(lasso_subset_lambda_boot_variance[0])
-    plt.semilogy(lasso_subset_lambda_boot_mse[1])
-    plt.semilogy(lasso_subset_lambda_boot_bias[1])
-    plt.semilogy(lasso_subset_lambda_boot_variance[1])
-    plt.semilogy(lasso_subset_lambda_boot_mse[1])
-    plt.semilogy(lasso_subset_lambda_boot_bias[1])
-    plt.semilogy(lasso_subset_lambda_boot_variance[1])
+    plt.semilogy(lasso_subset_lambda_boot_bias[0],label = 'bias, lamdbda = {}'.format(subset_lambdas[0]))
+    plt.semilogy(lasso_subset_lambda_boot_variance[0],label = 'variance, lamdbda = {}'.format(subset_lambdas[0]))
+    plt.semilogy(lasso_subset_lambda_boot_bias[1],label = 'bias, lamdbda = {}'.format(subset_lambdas[1]))
+    plt.semilogy(lasso_subset_lambda_boot_variance[1],label = 'variance, lamdbda = {}'.format(subset_lambdas[1]))
+    plt.semilogy(lasso_subset_lambda_boot_bias[2],label = 'bias, lamdbda = {}'.format(subset_lambdas[2]))
+    plt.semilogy(lasso_subset_lambda_boot_variance[2],label = 'variance, lamdbda = {}'.format(subset_lambdas[2]))
     plt.title('Bias+variance for low, middle, high lasso lambdas')
+    plt.legend()
     plt.show()
 
     return

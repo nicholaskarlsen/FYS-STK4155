@@ -13,7 +13,7 @@ from imageio import imread
 utils.plot_settings() # LaTeX fonts in Plots!
 
 
-def terrain_analysis_plots(spacing=40, max_degree = 25, n_lambdas=30, k_folds = 5, n_bootstraps=50, do_boot=False, do_subset=False):
+def terrain_analysis_plots(spacing=40, max_degree = 25, n_lambdas=5, k_folds = 5, n_bootstraps=50, do_boot=False, do_subset=False):
 
     # Setting up the terrain data:
     # Note structure! X-coordinates are on the rows of terrain_data
@@ -32,7 +32,7 @@ def terrain_analysis_plots(spacing=40, max_degree = 25, n_lambdas=30, k_folds = 
 
 
     lambdas = np.logspace(-5,0,n_lambdas)
-    subset_lambdas = lambdas[::15]
+    subset_lambdas = lambdas[::10]
 
 
     x = x_terrain_selection_flat
@@ -170,11 +170,12 @@ def terrain_analysis_plots(spacing=40, max_degree = 25, n_lambdas=30, k_folds = 
 
 
     plt.figure()
-    plt.semilogy(ols_cv_mse)
-    plt.semilogy(best_ridge_mse)
-    plt.semilogy(best_lasso_mse)
+    plt.semilogy(ols_cv_mse, label='ols')
+    plt.semilogy(best_ridge_mse, label='ridge')
+    plt.semilogy(best_lasso_mse, label='lasso')
     plt.title('CV MSE for OLS, Ridge and Lasso, with the best lambdas for each degree')
-
+    plt.legend()
+    plt.show()
     return
 if __name__ == '__main__':
     terrain_analysis_plots()
