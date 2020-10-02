@@ -36,7 +36,7 @@
 \section{Theory}
     \subsection{Linear Regression}
         \noindent
-        Consider a set of data points $\{(x_1, y_n), \dots, (x_N, y_N)\}$ which we wish to fit to some linear model $\pmb{\tilde y}(\pmb \beta)$ where $\pmb\beta$ is a vector containing the free parameters of the model. The model $\pmb{\tilde y}$ will then be related to the true data points $\pmb y$ by
+        Consider a set of data points $\{(x_1, y_i), \dots, (x_N, y_N)\}$ which we wish to fit to some linear model $\pmb{\tilde y}(\pmb \beta)$ where $\pmb\beta$ is a vector containing the free parameters of the model. The model $\pmb{\tilde y}$ will then be related to the true data points $\pmb y$ by
         \begin{equation}
             \pmb y = \pmb{\tilde y}(\pmb\beta) + \pmb\varepsilon
         \end{equation}
@@ -359,12 +359,12 @@ Subsequent parts:
 %
 %Av bias-varians plottet ser vi at det skjer ved at OLS får stor varians, mens ridge og lasso holder seg stabile. Vi ser at eksplosjonen skjer ved høyere grad når vi har flere punkter. Og vi ser at eksplosjonen ikke er (like mye, hvis i det hele tatt) til stede uten støy.
 %
-%Ved de predikerte plottene ser vi at lav polynomgrad ikke ligner særlig, selv om MSE er lav. For høy grad ser vi at OLS går dunken med støy, men klarer seg gjerne best uten støy. Vi ser at Ridge redder de høye polynomene når du har støy. Lasso ser vi at prøver å glatte ut hele plottet; ikke rart siden prediktorene våre er sterkt korrelerte. 
+%Ved de predikerte plottene ser vi at lav polynomgrad ikke ligner særlig, selv om MSE er lav. For høy grad ser vi at OLS går dunken med støy, men klarer seg gjerne best uten støy. Vi ser at Ridge redder de høye polynomene når du har støy. Lasso ser vi at prøver å glatte ut hele plottet; ikke rart siden prediktorene våre er sterkt korrelerte.
 %Vi ser at det meste blir bedre med flere punkter, og at høy polynomgrad kanskje ikke hjelper hvis man har for få datapunkter, selv med hjelp fra Ridge.
 %
-%Av de lambda-relaterte plottene ser vi at begge metodene kverker variansen, og ikke gir store forskjeller i MSE over et stort lambda-intervall. De største farene er ved veldig liten (numeriske feil), eller veldig stor lambda (stor effekt av penalty). Der kverker Lasso alt, og gir oss et skråplan, mens Ridge prøver å gjøre det samme uten helt å flate alt. 
+%Av de lambda-relaterte plottene ser vi at begge metodene kverker variansen, og ikke gir store forskjeller i MSE over et stort lambda-intervall. De største farene er ved veldig liten (numeriske feil), eller veldig stor lambda (stor effekt av penalty). Der kverker Lasso alt, og gir oss et skråplan, mens Ridge prøver å gjøre det samme uten helt å flate alt.
 %
-%Litt den samme karusellen gjør vi med terrengdataene. Der ser vi av de kryss-validerte MSE-ene at Lasso og Ridge stabiliserer seg som lave, selv vedhøye polynomer, mens OLS sprenges kraftig ved få punkter, og potensielt også ved mange punkter, men ved høyere polynomgrad. 
+%Litt den samme karusellen gjør vi med terrengdataene. Der ser vi av de kryss-validerte MSE-ene at Lasso og Ridge stabiliserer seg som lave, selv vedhøye polynomer, mens OLS sprenges kraftig ved få punkter, og potensielt også ved mange punkter, men ved høyere polynomgrad.
 %
 %Av bias-varians-bootstrappen ser vi OLS mislykkes pga. varians. Da kan Ridge være til hjelp.
 %
@@ -372,7 +372,7 @@ Subsequent parts:
 %
 %Vi ser at lav polynomgrad i alle tilfeller gjør oss ute av stand til å fange noe særlig av landskapet ruglethet. Med mange punkter kan vi gå opp til høye polynomgrader og fremdeles bruke OLS, som er mest sensitiv til landskapets variasjon. Det er likevel en risiko for at OLS prediksjonen blir fordreid, og da kan det være bedre å enten gå ned noen grader, eller bruke Ridge. Alt blir bedre med flere punkter.
 %
-%Oppsummert: Ikke bruk Lasso på denne typen terremgprediksjon med polynomer som basis. For god gjenskapning av terrenget trengs høy polynomgrad. Har man da ikke nok datapunkter blåser OLS opp som den store, stygge ulven i en ballongblåser-konkurrqnse. Ved ustabil OLS kan Ridge hjelpe, men går på bekostningen av detaljer i terrenget. 
+%Oppsummert: Ikke bruk Lasso på denne typen terremgprediksjon med polynomer som basis. For god gjenskapning av terrenget trengs høy polynomgrad. Har man da ikke nok datapunkter blåser OLS opp som den store, stygge ulven i en ballongblåser-konkurrqnse. Ved ustabil OLS kan Ridge hjelpe, men går på bekostningen av detaljer i terrenget.
 
 
 
