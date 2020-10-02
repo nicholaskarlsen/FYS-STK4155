@@ -13,7 +13,7 @@ from imageio import imread
 utils.plot_settings() # LaTeX fonts in Plots!
 
 
-def terrain_data_plots(spacing=40, max_degree = 25, n_lambdas=30, k_folds = 5, n_bootstraps=50):
+def terrain_analysis_plots(spacing=40, max_degree = 25, n_lambdas=30, k_folds = 5, n_bootstraps=50, do_boot=False, do_subset=False):
 
     # Setting up the terrain data:
     # Note structure! X-coordinates are on the rows of terrain_data
@@ -128,39 +128,42 @@ def terrain_data_plots(spacing=40, max_degree = 25, n_lambdas=30, k_folds = 5, n
         lasso_lamb_deg_mse[degree] = lasso_cv_mse
         ridge_lamb_deg_mse[degree] = ridge_cv_mse
         ols_cv_mse[degree] = ols_cv_mse_deg
-        # # All regression bootstraps at once
-        #
-        #
-        # lamb_ridge = best_ridge_lambda[degree]
-        # lamb_lasso = best_lasso_lambda[degree]
-        #
-        # ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance, ols_mse, ols_bias, ols_variance = \
-        # stat_tools.bootstrap_all(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
-        #
-        # ridge_best_lambda_boot_mse[degree], ridge_best_lambda_boot_bias[degree], \
-        # ridge_best_lambda_boot_variance[degree] = ridge_mse, ridge_bias, ridge_variance
-        #
-        # lasso_best_lambda_boot_mse[degree], lasso_best_lambda_boot_bias[degree], \
-        # lasso_best_lambda_boot_variance[degree] = lasso_mse, lasso_bias, lasso_variance
-        #
-        # ols_boot_mse[degree], ols_boot_bias[degree], \
-        # ols_boot_variance[degree] = ols_mse, ols_bias, ols_variance
 
-        # Bootstrapping for a selection of lambdas for ridge and lasso
-        # subset_lambda_index = 0
-        # for lamb in subset_lambdas:
-        #
-        #     ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance = \
-        #     stat_tools.bootstrap_ridge_lasso(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
-        #
-        #     ridge_subset_lambda_boot_mse[degree, subset_lambda_index ], ridge_subset_lambda_boot_bias[degree, subset_lambda_index ], \
-        #     ridge_subset_lambda_boot_variance[degree, subset_lambda_index ] = ridge_mse, ridge_bias, ridge_variance
-        #
-        #     lasso_subset_lambda_boot_mse[degree, subset_lambda_index ], lasso_subset_lambda_boot_bias[degree, subset_lambda_index ], \
-        #     lasso_subset_lambda_boot_variance[degree, subset_lambda_index ] = lasso_mse, lasso_bias, lasso_variance
-        #
-        #     subset_lambda_index  += 1
-        #
+
+        if do_boot:
+            # All regression bootstraps at once
+
+            lamb_ridge = best_ridge_lambda[degree]
+            lamb_lasso = best_lasso_lambda[degree]
+
+            ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance, ols_mse, ols_bias, ols_variance = \
+            stat_tools.bootstrap_all(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
+
+            ridge_best_lambda_boot_mse[degree], ridge_best_lambda_boot_bias[degree], \
+            ridge_best_lambda_boot_variance[degree] = ridge_mse, ridge_bias, ridge_variance
+
+            lasso_best_lambda_boot_mse[degree], lasso_best_lambda_boot_bias[degree], \
+            lasso_best_lambda_boot_variance[degree] = lasso_mse, lasso_bias, lasso_variance
+
+            ols_boot_mse[degree], ols_boot_bias[degree], \
+            ols_boot_variance[degree] = ols_mse, ols_bias, ols_variance
+
+        if do_subset:
+            # Bootstrapping for a selection of lambdas for ridge and lasso
+            subset_lambda_index = 0
+            for lamb in subset_lambdas:
+
+                ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance = \
+                stat_tools.bootstrap_ridge_lasso(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
+
+                ridge_subset_lambda_boot_mse[degree, subset_lambda_index ], ridge_subset_lambda_boot_bias[degree, subset_lambda_index ], \
+                ridge_subset_lambda_boot_variance[degree, subset_lambda_index ] = ridge_mse, ridge_bias, ridge_variance
+
+                lasso_subset_lambda_boot_mse[degree, subset_lambda_index ], lasso_subset_lambda_boot_bias[degree, subset_lambda_index ], \
+                lasso_subset_lambda_boot_variance[degree, subset_lambda_index ] = lasso_mse, lasso_bias, lasso_variance
+
+                subset_lambda_index  += 1
+
 
 
     # Plots go here.
@@ -173,3 +176,5 @@ def terrain_data_plots(spacing=40, max_degree = 25, n_lambdas=30, k_folds = 5, n
     plt.title('CV MSE for OLS, Ridge and Lasso, with the best lambdas for each degree')
 
     return
+if __name__ == '__main__':
+    terrain_analysis_plots()

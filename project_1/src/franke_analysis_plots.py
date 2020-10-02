@@ -20,7 +20,7 @@ def FrankeFunction(x, y):
     term4 = -0.2*np.exp(-(9*x-4)**2 - (9*y-7)**2)
     return term1 + term2 + term3 + term4
 
-def franke_analysis_plots(n=500,noise_scale=0.2,max_degree=15,n_bootstraps=100,k_folds=5,n_lambdas=30):
+def franke_analysis_plots(n=500,noise_scale=0.2,max_degree=15,n_bootstraps=100,k_folds=5,n_lambdas=30, do_boot=True, do_subset=True):
 
 
     # n = 500
@@ -127,36 +127,38 @@ def franke_analysis_plots(n=500,noise_scale=0.2,max_degree=15,n_bootstraps=100,k
         ridge_lamb_deg_mse[degree] = ridge_cv_mse
         ols_cv_mse[degree] = ols_cv_mse_deg
 
-        # All regression bootstraps at once
-        lamb_ridge = best_ridge_lambda[degree]
-        lamb_lasso = best_lasso_lambda[degree]
+        if do_boot:
+            # All regression bootstraps at once
+            lamb_ridge = best_ridge_lambda[degree]
+            lamb_lasso = best_lasso_lambda[degree]
 
-        ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance, ols_mse, ols_bias, ols_variance = \
-        stat_tools.bootstrap_all(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
+            ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance, ols_mse, ols_bias, ols_variance = \
+            stat_tools.bootstrap_all(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
 
-        ridge_best_lambda_boot_mse[degree], ridge_best_lambda_boot_bias[degree], \
-        ridge_best_lambda_boot_variance[degree] = ridge_mse, ridge_bias, ridge_variance
+            ridge_best_lambda_boot_mse[degree], ridge_best_lambda_boot_bias[degree], \
+            ridge_best_lambda_boot_variance[degree] = ridge_mse, ridge_bias, ridge_variance
 
-        lasso_best_lambda_boot_mse[degree], lasso_best_lambda_boot_bias[degree], \
-        lasso_best_lambda_boot_variance[degree] = lasso_mse, lasso_bias, lasso_variance
+            lasso_best_lambda_boot_mse[degree], lasso_best_lambda_boot_bias[degree], \
+            lasso_best_lambda_boot_variance[degree] = lasso_mse, lasso_bias, lasso_variance
 
-        ols_boot_mse[degree], ols_boot_bias[degree], \
-        ols_boot_variance[degree] = ols_mse, ols_bias, ols_variance
+            ols_boot_mse[degree], ols_boot_bias[degree], \
+            ols_boot_variance[degree] = ols_mse, ols_bias, ols_variance
 
-        # Bootstrapping for a selection of lambdas for ridge and lasso
-        # subset_lambda_index = 0
-        for lamb in subset_lambdas:
+        if do_subset:
+            # Bootstrapping for a selection of lambdas for ridge and lasso
+            # subset_lambda_index = 0
+            for lamb in subset_lambdas:
 
-            ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance = \
-            stat_tools.bootstrap_ridge_lasso(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
+                ridge_mse, ridge_bias, ridge_variance, lasso_mse, lasso_bias, lasso_variance = \
+                stat_tools.bootstrap_ridge_lasso(X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge)
 
-            ridge_subset_lambda_boot_mse[degree, subset_lambda_index ], ridge_subset_lambda_boot_bias[degree, subset_lambda_index ], \
-            ridge_subset_lambda_boot_variance[degree, subset_lambda_index ] = ridge_mse, ridge_bias, ridge_variance
+                ridge_subset_lambda_boot_mse[degree, subset_lambda_index ], ridge_subset_lambda_boot_bias[degree, subset_lambda_index ], \
+                ridge_subset_lambda_boot_variance[degree, subset_lambda_index ] = ridge_mse, ridge_bias, ridge_variance
 
-            lasso_subset_lambda_boot_mse[degree, subset_lambda_index ], lasso_subset_lambda_boot_bias[degree, subset_lambda_index ], \
-            lasso_subset_lambda_boot_variance[degree, subset_lambda_index ] = lasso_mse, lasso_bias, lasso_variance
+                lasso_subset_lambda_boot_mse[degree, subset_lambda_index ], lasso_subset_lambda_boot_bias[degree, subset_lambda_index ], \
+                lasso_subset_lambda_boot_variance[degree, subset_lambda_index ] = lasso_mse, lasso_bias, lasso_variance
 
-            subset_lambda_index  += 1
+                subset_lambda_index  += 1
 
     # Plots go here.
 
@@ -239,3 +241,7 @@ def franke_analysis_plots(n=500,noise_scale=0.2,max_degree=15,n_bootstraps=100,k
     plt.show()
 
     return
+
+
+if __name__ == '__main__':
+    franke_analysis_plots()
