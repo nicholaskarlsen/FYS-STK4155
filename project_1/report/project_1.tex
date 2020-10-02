@@ -34,23 +34,22 @@
     \noindent
     In essence, Linear Regression is the process of taking points from a function, or a set of measurements and mapping them to coordinates in a chosen basis in order to create an approximation, or model of the original dataset.
 \section{Theory}
-    See \textcite{hastie}
     \subsection{Linear Regression}
         \noindent
         Consider a set of data points $\{(x_1, y_n), \dots, (x_N, y_N)\}$ which we wish to fit to some linear model $\pmb{\tilde y}(\pmb \beta)$ where $\pmb\beta$ is a vector containing the free parameters of the model. The model $\pmb{\tilde y}$ will then be related to the true data points $\pmb y$ by
         \begin{equation}
             \pmb y = \pmb{\tilde y}(\pmb\beta) + \pmb\varepsilon
         \end{equation}
-        where $\pmb\varepsilon = (\epsilon_1, \dots, \epsilon_N)$ represents the error of the model. The aim of Linear regression models is thus to find the optimal parameters $\pmb\beta$ such that not only the error of the model on some particular dataset is minimized, but also the error of the model applied to different data sets sampled in the same domain is minimized, such that we may use our model to make predictions.
+        where $\pmb\varepsilon = (\varepsilon_1, \dots, \varepsilon_N)$ represents the error of the model. The aim of Linear regression models is thus to find the optimal parameters $\pmb\beta$ such that not only the error of the model on some particular dataset is minimized, but also the error of the model applied to different data sets sampled in the same domain is minimized such that we may use our model to make predictions about new datasets.
 
         \subsubsection{The Design Matrix}
             \noindent
             When constructing a model, we first have to chose a set of basis functions. A popular choice for which is $\mathbb P_n$, which models a wide range of different phenomena and is also the choice we will make for this paper. But in principle, any set of linear basis functions may be chosen.
-            Our model will then be in the form
+            For a single variate polynomial, a model would then take the form
             \begin{equation}
-                \tilde y (x) = \beta_0 + \beta_1 x + \dots \beta_n x^n
+                \tilde y (x) = \beta_0 + \beta_1 x+ \dots + \beta_n x^n
             \end{equation}
-            when trying to find the optimal $\pmb \beta$, a useful quantity is the so-called Design Matrix, which for our chosen basis takes the form
+            When trying to find the optimal $\pmb \beta$, a useful construct is the so-called Design Matrix, which for a polynomial basis takes the form
             \begin{equation}
                 \textup{X} = \qty[
                 \begin{matrix}
@@ -67,19 +66,30 @@
             \end{equation}
             leaving us with a linear algebra problem to solve in finding the $\pmb\beta$ which optimizes $\pmb{\tilde y}$.
 
-            \begin{itemize}
-                \item Scaling
-            \end{itemize}
+            This also extends directly to multivariate cases where we have more than one independent variable. In particular for two dimensional polynomials, our choice of basis for this article, we have that an $n$-th degree polynomial is constructed by all permutations of $x^p y^q$ where $p+q \leq n$ which means that the total number of predictors for degree $n$ is given by
+            \begin{equation}
+                \qty(
+                \begin{matrix}
+                    2 + n \\ n
+                \end{matrix}
+                )
+                =\frac{(2+n)!}{n!(2+n-n)!} = \frac{(n+1)(n+2)}{2}
+            \end{equation}
 
         \subsubsection{Model assessment}
+            \noindent
+            Once we have constructed a model, we a also need a way to quantitatively evaluate its performance. Here, we will focus on two statistical measures; First, we have the \textit{mean squared error} (MSE) defined as
+            \begin{equation}
+                \textup{MSE}(\pmb y, \pmb{\tilde y}) = \frac{1}{n}\sum_i \qty(y_i - \tilde y_i)^2
+            \end{equation}
+            which as the name suggests is a measure of the mean square distance the model $\pmb{\tilde y}$ has from the data set $\pmb y$. We also have the \textit{coefficient of determination}, defined as
+            \begin{equation}
+                \textup{R}^2(\pmb y, \tilde{\pmb{y}}) = 1 -
+                \frac{\sum_i(y_i - \tilde y_i)^2}{\sum_i \qty(y_i - \mathbb E\qty[\pmb y])^2}
+            \end{equation}
+            which loosely speaking is a measure of well the proposed model predicts the variance of the data set, where R$^2 = 1$ corresponds to a perfect fit and R$^2 < 1$ an increasingly worse fit.
 
-        \begin{equation}
-            \textup{MSE}(\pmb y, \pmb{\tilde y}) = \frac{1}{n}\sum_i \qty(y_i - \tilde y_i)^2
-        \end{equation}
-        \begin{equation}
-            \textup{R}^2(\pmb y, \tilde{\pmb{y}}) = 1 -
-            \frac{\sum_i(y_i - \tilde y_i)^2}{\sum_i \qty(y_i - \mathbb E\qty[\pmb y])^2}
-        \end{equation}
+            A particularly important point to make when considering these measures is that they will both generally favor increasingly higher degree polynomials when looking at some particular data set. Whilst yielding good MSE \& R$^2$ scores this leads to over-fitting, where the model becomes too specialized to one particular sample which means that the overall predictive capabilities of the model actually decreases. We will look closer at the details of this in a later section. For now, we simply note that this problem motivates us to split our data sets into training and test sets. Where we train our model using the training set, and subsequently validate the model by computing the MSE \& R$^2$ scores on the test sets. Thus, if our model becomes too specialized to the training set, this will lower MSE R$^2$ scores in the test set, giving us a much better indication on the predictive capabilities of our model.
 
         \subsubsection{Ordinary Least Squares}
             \noindent
@@ -92,7 +102,7 @@
                 C_{OLS}(\pmb \beta)
                 = \qty(\pmb y - \textup{X}\pmb \beta)^T(\pmb y - \textup{X}\pmb \beta)
             \end{equation}
-            In order to find its minima, we differentiate wrt to $\pmb\beta$ and assert that $\partial_{\pmb\beta}C_{OLS} = 0$ for the optimal predictor. Taking the partial derivative yields
+            In order to find the minima, we differentiate wrt to $\pmb\beta$ and assert that $\partial_{\pmb\beta}C_{OLS} = 0$ for the optimal predictor. Taking the partial derivative yields
             \begin{align}
                 \begin{split}
                 \pdv{\pmb\beta}C_{OLS}(\pmb\beta) = -2\textup{X}^T\qty(\pmb y - \textup X\pmb \beta)
@@ -106,40 +116,44 @@
             \begin{equation}\label{eqn:OLS optimal beta}
                 \hat{\pmb \beta}_{\textup{OLS}} = (\textup{X}^T\textup{X})^{-1}\textup{X}^T\pmb y
             \end{equation}
-            which mathematically is the best projection of the data-points to our model. However, this may not actually yield the best predictive model. OLS may suffer from over-fitting to the particular sample, and as such will not always perform very well on new data points for which the model has not been trained. As such, we instead look at alternate regression methods with additional turning parameters which allow us to account for the variance between different sets of data as to yield a model with better predictive abilities compared to the OLS.
+            which mathematically is the best projection of the data-points to our model. However, this may not actually yield the best predictive model. OLS may suffer from over-fitting to the particular sample, and will therefore not always perform very well on new data points for which the model has not been trained. As such, we instead look at alternate regression methods with additional turning parameters which allow us to account for the variance between different sets of data as to yield a model with better predictive abilities compared to the OLS.
 
         \subsubsection{Ridge Regression}
             \noindent
-            One such method is the Ridge regression, where the cost function is given as
+            One such method is the Ridge regression where we instead try to minimize $\norm{\pmb y - \textup{X}\pmb \beta}_2 + \lambda\norm{\pmb \beta}_2$, from which we define our cost function as
             \begin{equation}
                 C_{R}(\pmb \beta)
                 = (\pmb y - \textup{X}\pmb\beta)^T(\pmb y - \textup{X}\pmb\beta)
                 + \lambda \pmb\beta^T\pmb\beta
             \end{equation}
-            Similar for what we did for OLS, we take the partial derivative wrt. $\pmb \beta$, in which the only difference recides in the last term, which gives
+            Similar for what we did for OLS, we take the partial derivative wrt. $\pmb \beta$, where the only difference in finding the minima resides in the additional term
             \begin{equation}
                 \pdv{\pmb \beta} \lambda \pmb\beta^T\pmb\beta = 2\lambda\pmb\beta
             \end{equation}
-            if we again assert that the optimal $\pmb\beta$ is given by $\partial_{\pmb\beta}C_R(\pmb\beta)$ and rearange we get
+            if we again assert that the optimal $\pmb\beta$ is given by $\partial_{\pmb\beta}C_R(\pmb\beta)$ and rearrange we get
             \begin{equation}
                 \pmb{\hat\beta}_R = \qty(\textup{X}^T\textup{X}  + \lambda)^{-1}\textup{X}^T\pmb{\tilde y}
             \end{equation}
             As the optimal $\beta$ for Ridge regression.
             So we see that the only difference between OLS and Ridge regression is the addition of the "penalty" parameter $\lambda$ to the $L^2$ norm of the coefficients $\pmb{\beta}$. The main point of introducing this parameter is to reduce the variance of the regression coefficients $\pmb{\beta}$. It introduces a constraint on the allowable values of $\pmb{\beta}$, which means that the method no longer is unbiased. The aim is that the reduction of the variance outweighs the increase of the method's bias, leading to an overall lower test error, cf. the later discussion of the Bias-Variance Trade-off.
-        \subsubsection{Lasso Regression}
+        \subsubsection{LASSO Regression}
+            The cost function for the \textit{least absolute shrinkage and selection operator} (LASSO) method is defined as
             \begin{equation}
                 C_L(\pmb \beta) =
                 \norm{\pmb y - \textup{X}\pmb{\beta}}_2^2
                 + \lambda\norm{\pmb{\beta}}_1
             \end{equation}
-           The Lasso method is distinguished from the Ridge regression by which norm of $\pmb{\beta}$ is penalized. While the Ridge regression applies the penalty to the $L^2$ norm, the Lasso aims to shrink the $L^1$ norm. Two important consequences arise from this: firstly, it is no longer possible to obtain a closed-form solution to the minimization problem; secondly, the regression coefficients may be shrunk far more unevenly. In contrast to the Ridge regression, Lasso regression may shrink individual $\beta_{i}$ toward zero. This is an extremely useful property of the method, since it allows unimportant predictors to be identified and discarded. The drawback, of course, is that the bias of the Lasso method is expected to exceed the bias of the Ridge method.
+            Which as opposed to OLS and Ridge has no analytical solution for finding the optimal $\pmb \beta$, which is instead found by optimization methods such as gradient descent. The specifics of this is beyond the scope of this article, and we will simply use the existing libraries provided by scikit-learn~\cite{scikit-learn} to perform the regression.
+
+            Qualitatively the Lasso method is distinguished from the Ridge regression by how the norm of $\pmb{\beta}$ is penalized. While the Ridge regression applies the penalty to the $L^2$ norm, the Lasso aims to shrink the $L^1$ norm. Two important consequences arise from this: firstly, it is no longer possible to obtain a closed-form solution to the minimization problem; secondly, the regression coefficients may be shrunk far more unevenly. In contrast to the Ridge regression, Lasso regression may shrink individual $\beta_{i}$ toward zero. This is an extremely useful property of the method, since it allows unimportant predictors to be identified and discarded. The drawback, of course, is that the bias of the Lasso method is expected to exceed the bias of the Ridge method.
+
     \subsection{Singular Value Decomposition}
         \noindent
         Consider an $m\times n$ matrix $\textup X$ of rank $r$. The singular values of $\textup X$ are then defined as the root of the eigenvalues of the diagonal matrix $\textup X^T\textup X$. We may also express $\textup X$ in the so-called singular value decomposition (SVD)
         \begin{equation}
             \textup X = \textup{U}\Sigma\textup{V}^T
         \end{equation}
-        where $\textup{U, V}$ are orthogonal matrices and
+        where $\textup{U, V}$ are unitary matrices and
         \begin{equation}
             \Sigma =
             \qty[
@@ -162,29 +176,22 @@
         \end{equation}
         which by convention is ordered such that $\sigma_1 \geq \dots \geq \sigma_n$.
 
-        \subsubsection{Application to OLS and Ridge}
+        \subsubsection{Application to OLS}
             We may use the SVD to re-express the expression for $\hat{\pmb \beta}$ in OLS given by Eqn.~\ref{eqn:OLS optimal beta}
             by writing
             \begin{equation}
                 \textup{X}^T\textup{X} = \qty(\textup{U}\Sigma\textup{V}^T)^T\qty(\textup{U}\Sigma\textup{V}^T)
                 = \textup{V}\Sigma^T\textup{U}^T\textup{U}\Sigma\textup{V}^T
             \end{equation}
-            Since $\textup{U}$ is an orthogonal matrix, it follows that $\textup{U}^T\textup{U} = \mathbb{1}$, further we have that $\Sigma^T = \Sigma$ since it is a diagonal matrix. We therefore end up with
+            Since $\textup{U}$ is unitary, it follows that $\textup{U}^T\textup{U} = \mathbb I$, further we have that $\Sigma^T = \Sigma$ since it is a diagonal matrix. We therefore end up with
             \begin{equation}
                 \textup{X}^T\textup{X} = \textup{V}\Sigma^2\textup{V}^T
             \end{equation}
             inserting this into Eqn.~\ref{eqn:OLS optimal beta} gives us
             \begin{equation}
-                \pmb{\hat{\beta}}_{\textup{OLS}} = \qty(\textup{V}\Sigma^2\textup{V}^T)^{-1} \textup{X}^T\pmb{\beta}
+                \pmb{\hat{\beta}}_{\textup{OLS}} = \qty(\textup{V}\Sigma^2\textup{V}^T)^{-1} \textup{V}\Sigma\textup{U}^T\pmb{y}
             \end{equation}
-            we may also give a similar treatment to the Ridge regression
-
-
-
-        \begin{itemize}
-            \item Discuss problems of $X^T X$ becoming singular in OLS, and how we use SVD to work around it.
-        \end{itemize}
-
+            This gives an alternate way of solving the OLS problem, which becomes particularly useful in situations where we have a large amount of data sampled from a relatively small domain, increasing the chance of X having linearly dependent columns which in turns leads to X, and by extension X$^T$X no longer being invertible.
     \subsection{Re-sampling}
         \noindent
         Re-sampling methods are ways in which we can generate new statistics from our existing data, which as the name suggests implies sampling new data sets from our already existing data. By doing so, we may gain new insights about our data which may not be available through regular analysis, particularly in situations where we are limited by the number of data points.
@@ -208,11 +215,7 @@
             \end{itemize}
         \subsubsection{Bootstrap}
             \noindent
-            In the bootstrap resampling method, we sample our data set $S = \{s_1, \dots s_N\}$ $N$-number of times, in particular, we allow sampling the same $s_i$ multiple times. In this way, we generate new datasets in which some points are underweighted and others overweighted with respect to the original dataset $S$. Loosely speaking, the concept corresponds to evenly sampling the ensemble of all possible input data sets to our regression method, in order to estimate the variance and expectation values of our model predictions over the ensemble. The idea is that if our training set representatively covers the domain of inputs, each resampled regression computation will give a certain prediction $\pmb{\tilde{y}_{B}}$ and these $\pmb{\tilde{y}_{B}}$ will appear with a frequency corresponding to their  underlying probability distribution. When we later try to compute statistics of the predictions, we will then be able to use point-estimators on the computed $\pmb{\tilde{y}_{B}}$ to obtain estimates of, for instance, the variance of the predictions or the mean value of the predictions over the ensemble of all possible inputs in the domain spanned by our data.
-
-            \begin{itemize}
-                \item touch on rates of convergence
-            \end{itemize}
+            In the bootstrap re-sampling method, we sample our data set $S = \{s_1, \dots s_N\}$ $N$-number of times, in particular, we allow sampling the same $s_i$ multiple times. In this way, we generate new datasets in which some points are under-weighted and others overweighted with respect to the original dataset $S$. Loosely speaking, the concept corresponds to evenly sampling the ensemble of all possible input data sets to our regression method, in order to estimate the variance and expectation values of our model predictions over the ensemble. The idea is that if our training set representatively covers the domain of inputs, each re-sampled regression computation will give a certain prediction $\pmb{\tilde{y}_{B}}$ and these $\pmb{\tilde{y}_{B}}$ will appear with a frequency corresponding to their  underlying probability distribution. When we later try to compute statistics of the predictions, we will then be able to use point-estimators on the computed $\pmb{\tilde{y}_{B}}$ to obtain estimates of, for instance, the variance of the predictions or the mean value of the predictions over the ensemble of all possible inputs in the domain spanned by our data.
 
     \subsection{The Bias-Variance Trade-off}
         %%%NICHOLAS' DRAFT START
@@ -222,7 +225,7 @@
         % As such, finding the optimal complexity implies weighing the benefits of having a high complexity model which yields good results on your test data vs having low complexity model which applies more generally across samples. Where the optimal model is one which balances the bias and variance contributions to the MSE.
         %%% NICHOLAS' WEEKEND DRAFT END
         \noindent
-        A key concept in much of machine learning is the so-called Bias-Variance Tradeoff. Simply put the test error of a learned prediction method can be viewed as being partly the sum of two distinct quantities, the bias of the method and the variance of the method. The bias can be thought of as errors due to inflexible assumptions and constraints on the model, while the variance, quite opposingly, is the actual statistical variance of the procedure. Crucially, the variance is connected with the model having too much flexibility, overfitting on the training data while giving very spread results on the test data. Naturally, the relative sizes of the errors due to bias and the errors due to variance change with the flexibility/complexity of the model. For an inflexible model, e.g. a polynomial regression model of low degree, the bias is expected to be the dominant contribution to the test error. On the other side of the spectrum, for a very flexible model, e.g. a polynomial regression model of high degree, the variance would be anticipated to be the dominating source of the test error. Importantly, the relative effects of the bias and the variance won't necessarily change at the same rate. Thus, one could hope to find an optimally flexible model which minimizes the combined error due to variance and bias. This is the essence of the Bias-Variance Tradeoff; one could, for instance, try to slightly increase the bias of a method in the hopes of reducing the variance far more.
+        A key concept in much of machine learning is the so-called Bias-Variance Trade-off. Simply put the test error of a learned prediction method can be viewed as being partly the sum of two distinct quantities, the bias of the method and the variance of the method. The bias can be thought of as errors due to inflexible assumptions and constraints on the model, while the variance, quite opposingly, is the actual statistical variance of the procedure. Crucially, the variance is connected with the model having too much flexibility, over-fitting on the training data while giving very spread results on the test data. Naturally, the relative sizes of the errors due to bias and the errors due to variance change with the flexibility/complexity of the model. For an inflexible model, e.g. a polynomial regression model of low degree, the bias is expected to be the dominant contribution to the test error. On the other side of the spectrum, for a very flexible model, e.g. a polynomial regression model of high degree, the variance would be anticipated to be the dominating source of the test error. Importantly, the relative effects of the bias and the variance won't necessarily change at the same rate. Thus, one could hope to find an optimally flexible model which minimizes the combined error due to variance and bias. This is the essence of the Bias-Variance Trade-off; one could, for instance, try to slightly increase the bias of a method in the hopes of reducing the variance far more.
 
         Concretely for the problem at hand in this article, we use the expected MSE of our models on the test data to assess our models. This expected MSE can be explicitly decomposed into a bias term, a variance term and an irreducible error \cite{hastie}. We assume that our  response values $\pmb{y}$ are given by a "true" function $\pmb{f}$ with the addition of normally distributed noise $\pmb{\varepsilon}$ with zero mean:
 
@@ -269,23 +272,40 @@
         \end{align}
         Here $\sigma_{i}^2$ is the variance of the noise for each test point. Since all test points are assumed to have the same noise distribution, their variances will be equal.  To be perfectly clear, the random variables for both of the preceding calculations are the model predictions $\tilde{y}_{i}$ and the noise $\varepsilon_{i}$, which are considered to be independent of each other.
 
-        In practical terms, we use the bootstrap resampling to estimate the bias and variance of the model. This is achieved by replacing $\tilde{y}_{i}$ with $\tilde{y}_{i,B}$ in Eqn.~\ref{mse_bias_variance}. The expectation values will then be computed over all the bootstrap iterations. Furthermore, we are not able to extract the noise from the response values, and must then use the bias estimate $\textup{Bias}^2[y_{i},\tilde{y}_{i,B}]$. Explicitly, the MSE, the bias and the variance estimates obtained from the bootstrap resampling become, for a test set with size $n$ and a number $M$ bootstrap iterations:
+        In practical terms, we use the bootstrap re-sampling to estimate the bias and variance of the model. This is achieved by replacing $\tilde{y}_{i}$ with $\tilde{y}_{i,B}$ in Eqn.~\ref{mse_bias_variance}. The expectation values will then be computed over all the bootstrap iterations. Furthermore, we are not able to extract the noise from the response values, and must then use the bias estimate $\textup{Bias}^2[y_{i},\tilde{y}_{i,B}]$. Explicitly, the MSE, the bias and the variance estimates obtained from the bootstrap re-sampling become, for a test set with size $n$ and a number $M$ bootstrap iterations:
 
         \begin{equation}
         \label{bootstrap_mse}
-        \textup{MSE}_{bootstrap} = \frac{1}{n} \sum^{n}_{i} \qty(\frac{1}{M}\sum^{M}_{B} \qty(y_{i} - \tilde{y}_{i,B})^2)
+        \textup{MSE}_{B} = \frac{1}{n} \sum^{n}_{i} \qty(\frac{1}{M}\sum^{M}_{B} \qty(y_{i} - \tilde{y}_{i,B})^2)
         \end{equation}
 
         \begin{equation}
         \label{bootstrap_bias}
-        \textup{Bias}^2_{bootstrap} = \frac{1}{n} \sum^{n}_{i} \qty(y_{i} - \frac{1}{M}\sum^{M}_{B} \tilde{y}_{i,B})^2
+        \textup{Bias}^2_{B} = \frac{1}{n} \sum^{n}_{i} \qty(y_{i} - \frac{1}{M}\sum^{M}_{B} \tilde{y}_{i,B})^2
         \end{equation}
 
         \begin{equation}
         \label{bootstrap_variance}
-        \textup{Var}_{bootstrap} = \frac{1}{n} \sum^{n}_{i} \qty(\frac{1}{M}\sum^{M}_{B} \qty(\tilde{y}_{i,B} - \frac{1}{M}\sum^{M}_{B} \tilde{y}_{i,B})^2)
+        \textup{Var}_{B} = \frac{1}{n} \sum^{n}_{i} \qty(\frac{1}{M}\sum^{M}_{B} \qty(\tilde{y}_{i,B} - \frac{1}{M}\sum^{M}_{B} \tilde{y}_{i,B})^2)
         \end{equation}
 
+    \subsection{The Franke Function}
+        The Franke function is defined as
+        \begin{align}
+            \begin{split}
+                f(x, y)
+                &= \frac{3}{4}\exp\qty(-\frac{(9x - 2)^2}{4} - \frac{(9y - 2)}{4})      \\
+                &+ \frac{3}{4}\exp\qty(-\frac{(9x + 1)^2}{49} - \frac{(9y - 21}{10})    \\
+                &+ \frac{1}{2}\exp\qty(-\frac{(9x - 7)^2}{4} - \frac{(9y - 3)}{4})      \\
+                &- \frac{1}{5}\exp\qty(-\qty(9x - 2)^2 - \qty(9y - 2))
+            \end{split}
+        \end{align}
+        and will serve as function on which we test the performance of our models and build an understanding before we tackle the real terrain data, which we do not have direct control over in the same way. For reference sake, we have plotted the Franke function for values $[0, 1]\times[0,1]$ which can be seen in Fig.~\ref{fig:FrankeFunction}.
+        \begin{figure}[h!tb]
+            \center
+            \includegraphics[width=\columnwidth]{frankefunc.pdf}
+            \caption{\label{fig:FrankeFunction}The Franke Function}
+        \end{figure}
 
 \section{Results \& Discussion}
 
