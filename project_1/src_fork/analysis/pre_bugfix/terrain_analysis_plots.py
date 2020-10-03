@@ -30,7 +30,7 @@ def terrain_analysis_plots(
     do_boot=False,
     do_subset=False,
 ):
-    np.random.seed(2018)
+
     # Setting up the terrain data:
     # Note structure! X-coordinates are on the rows of terrain_data
     # Point_selection.flatten() moves most rapidly over the x-coordinates
@@ -97,8 +97,7 @@ def terrain_analysis_plots(
     lasso_subset_lambda_boot_variance = np.zeros((max_degree, len(subset_lambdas)))
 
     # Actual computations
-    for degree_index in range(max_degree):
-        degree = degree_index + 1 # Little sense in doing stuff for 0 degrees.
+    for degree in range(max_degree):
         X = linear_regression.design_matrix_2D(x, y, degree)
         X_train = linear_regression.design_matrix_2D(x_train, y_train, degree)
         X_test = linear_regression.design_matrix_2D(x_test, y_test, degree)
@@ -107,7 +106,6 @@ def terrain_analysis_plots(
         scaler = StandardScaler()
         scaler.fit(X)
         X_scaled = scaler.transform(X)
-        X_scaled = X_scaled[:,1:]
         #    X_scaled[:,0] = 1 # Probably should not have this.
 
         # Scaling and feeding to bootstrap and OLS
@@ -115,8 +113,6 @@ def terrain_analysis_plots(
         scaler_boot.fit(X_train)
         X_train_scaled = scaler_boot.transform(X_train)
         X_test_scaled = scaler_boot.transform(X_test)
-        X_train_scaled = X_train_scaled[:,1:]
-        X_test_scaled = X_test_scaled[:,1:]
         #    X_train_scaled[:,0] = 1 # Probably actually not
         #    X_test_scaled[:,0] = 1 # Have a bad feeling about how this might affect ridge/lasso.
 
@@ -125,27 +121,27 @@ def terrain_analysis_plots(
         betas = linear_regression.OLS_SVD_2D(X_train_scaled, z_train)
         z_test_model = X_test_scaled @ betas
         z_train_model = X_train_scaled @ betas
-        mse_ols_train[degree_index] = stat_tools.MSE(z_train, z_train_model)
-        mse_ols_test[degree_index] = stat_tools.MSE(z_test, z_test_model)
+        mse_ols_train[degree] = stat_tools.MSE(z_train, z_train_model)
+        mse_ols_test[degree] = stat_tools.MSE(z_test, z_test_model)
 
         # CV, find best lambdas and get mse vs lambda for given degree.
 
         lasso_cv_mse, ridge_cv_mse, ols_cv_mse_deg = crossvalidation.k_fold_cv_all(
             X_scaled, z, n_lambdas, lambdas, k_folds
         )
-        best_lasso_lambda[degree_index] = lambdas[np.argmin(lasso_cv_mse)]
-        best_ridge_lambda[degree_index] = lambdas[np.argmin(ridge_cv_mse)]
-        best_lasso_mse[degree_index] = np.min(lasso_cv_mse)
-        best_ridge_mse[degree_index] = np.min(ridge_cv_mse)
-        lasso_lamb_deg_mse[degree_index] = lasso_cv_mse
-        ridge_lamb_deg_mse[degree_index] = ridge_cv_mse
-        ols_cv_mse[degree_index] = ols_cv_mse_deg
+        best_lasso_lambda[degree] = lambdas[np.argmin(lasso_cv_mse)]
+        best_ridge_lambda[degree] = lambdas[np.argmin(ridge_cv_mse)]
+        best_lasso_mse[degree] = np.min(lasso_cv_mse)
+        best_ridge_mse[degree] = np.min(ridge_cv_mse)
+        lasso_lamb_deg_mse[degree] = lasso_cv_mse
+        ridge_lamb_deg_mse[degree] = ridge_cv_mse
+        ols_cv_mse[degree] = ols_cv_mse_deg
 
         if do_boot:
             # All regression bootstraps at once
 
-            lamb_ridge = best_ridge_lambda[degree_index]
-            lamb_lasso = best_lasso_lambda[degree_index]
+            lamb_ridge = best_ridge_lambda[degree]
+            lamb_lasso = best_lasso_lambda[degree]
 
             (
                 ridge_mse,
@@ -162,18 +158,18 @@ def terrain_analysis_plots(
             )
 
             (
-                ridge_best_lambda_boot_mse[degree_index],
-                ridge_best_lambda_boot_bias[degree_index],
-                ridge_best_lambda_boot_variance[degree_index],
+                ridge_best_lambda_boot_mse[degree],
+                ridge_best_lambda_boot_bias[degree],
+                ridge_best_lambda_boot_variance[degree],
             ) = (ridge_mse, ridge_bias, ridge_variance)
 
             (
-                lasso_best_lambda_boot_mse[degree_index],
-                lasso_best_lambda_boot_bias[degree_index],
-                lasso_best_lambda_boot_variance[degree_index],
+                lasso_best_lambda_boot_mse[degree],
+                lasso_best_lambda_boot_bias[degree],
+                lasso_best_lambda_boot_variance[degree],
             ) = (lasso_mse, lasso_bias, lasso_variance)
 
-            ols_boot_mse[degree_index], ols_boot_bias[degree_index], ols_boot_variance[degree_index] = (
+            ols_boot_mse[degree], ols_boot_bias[degree], ols_boot_variance[degree] = (
                 ols_mse,
                 ols_bias,
                 ols_variance,
@@ -202,25 +198,25 @@ def terrain_analysis_plots(
                 )
 
                 (
-                    ridge_subset_lambda_boot_mse[degree_index, subset_lambda_index],
-                    ridge_subset_lambda_boot_bias[degree_index, subset_lambda_index],
-                    ridge_subset_lambda_boot_variance[degree_index, subset_lambda_index],
+                    ridge_subset_lambda_boot_mse[degree, subset_lambda_index],
+                    ridge_subset_lambda_boot_bias[degree, subset_lambda_index],
+                    ridge_subset_lambda_boot_variance[degree, subset_lambda_index],
                 ) = (ridge_mse, ridge_bias, ridge_variance)
 
                 (
-                    lasso_subset_lambda_boot_mse[degree_index, subset_lambda_index],
-                    lasso_subset_lambda_boot_bias[degree_index, subset_lambda_index],
-                    lasso_subset_lambda_boot_variance[degree_index, subset_lambda_index],
+                    lasso_subset_lambda_boot_mse[degree, subset_lambda_index],
+                    lasso_subset_lambda_boot_bias[degree, subset_lambda_index],
+                    lasso_subset_lambda_boot_variance[degree, subset_lambda_index],
                 ) = (lasso_mse, lasso_bias, lasso_variance)
 
                 subset_lambda_index += 1
 
     # Plots go here.
-    degree_values = np.arange(1,max_degree+1)
+
     plt.figure()
-    plt.semilogy(degree_values, ols_cv_mse, label="ols")
-    plt.semilogy(degree_values, best_ridge_mse, label="ridge")
-    plt.semilogy(degree_values, best_lasso_mse, label="lasso")
+    plt.semilogy(ols_cv_mse, label="ols")
+    plt.semilogy(best_ridge_mse, label="ridge")
+    plt.semilogy(best_lasso_mse, label="lasso")
     plt.title("CV MSE for OLS, Ridge and Lasso, with the best lambdas for each degree")
     plt.legend()
     plt.show()
@@ -231,27 +227,27 @@ def terrain_analysis_plots(
     plt.plot(
         np.log10(lambdas),
         ridge_lamb_deg_mse[max_degree - 1],
-        label="degree = {}".format(max_degree),
-    )
-    plt.plot(
-        np.log10(lambdas),
-        ridge_lamb_deg_mse[max_degree - 2],
         label="degree = {}".format(max_degree - 1),
     )
     plt.plot(
         np.log10(lambdas),
-        ridge_lamb_deg_mse[max_degree - 3],
+        ridge_lamb_deg_mse[max_degree - 2],
         label="degree = {}".format(max_degree - 2),
     )
     plt.plot(
         np.log10(lambdas),
+        ridge_lamb_deg_mse[max_degree - 3],
+        label="degree = {}".format(max_degree - 3),
+    )
+    plt.plot(
+        np.log10(lambdas),
         ridge_lamb_deg_mse[max_degree - 5],
-        label="degree = {}".format(max_degree - 4),
+        label="degree = {}".format(max_degree - 5),
     )
     plt.plot(
         np.log10(lambdas),
         ridge_lamb_deg_mse[max_degree - 7],
-        label="degree = {}".format(max_degree - 6),
+        label="degree = {}".format(max_degree - 7),
     )
     plt.legend()
     plt.show()
@@ -262,27 +258,27 @@ def terrain_analysis_plots(
     plt.plot(
         np.log10(lambdas),
         lasso_lamb_deg_mse[max_degree - 1],
-        label="degree = {}".format(max_degree),
-    )
-    plt.plot(
-        np.log10(lambdas),
-        lasso_lamb_deg_mse[max_degree - 2],
         label="degree = {}".format(max_degree - 1),
     )
     plt.plot(
         np.log10(lambdas),
-        lasso_lamb_deg_mse[max_degree - 3],
+        lasso_lamb_deg_mse[max_degree - 2],
         label="degree = {}".format(max_degree - 2),
     )
     plt.plot(
         np.log10(lambdas),
+        lasso_lamb_deg_mse[max_degree - 3],
+        label="degree = {}".format(max_degree - 3),
+    )
+    plt.plot(
+        np.log10(lambdas),
         lasso_lamb_deg_mse[max_degree - 5],
-        label="degree = {}".format(max_degree - 4),
+        label="degree = {}".format(max_degree - 5),
     )
     plt.plot(
         np.log10(lambdas),
         lasso_lamb_deg_mse[max_degree - 7],
-        label="degree = {}".format(max_degree - 6),
+        label="degree = {}".format(max_degree - 7),
     )
     plt.legend()
     plt.show()

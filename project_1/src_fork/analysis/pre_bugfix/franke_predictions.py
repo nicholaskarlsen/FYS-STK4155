@@ -34,7 +34,7 @@ def franke_predictions(
         z_plot_franke: Actual Franke values on the meshgrid.
 
     """
-    np.random.seed(2018)
+
     x = np.random.uniform(0, 1, n)
     y = np.random.uniform(0, 1, n)
     z = FrankeFunction(x, y)
@@ -48,7 +48,6 @@ def franke_predictions(
     scaler = StandardScaler()
     scaler.fit(X)
     X_scaled = scaler.transform(X)
-    X_scaled = X_scaled[:,1:]
 
     # Setting up plotting grid
     x_plot = np.linspace(0, 1, plot_grid_size)
@@ -58,7 +57,6 @@ def franke_predictions(
 
     X_plot_design = linear_regression.design_matrix_2D(x_plot_mesh_flat, y_plot_mesh_flat, degree)
     X_plot_design_scaled = scaler.transform(X_plot_design)
-    X_plot_design_scaled = X_plot_design_scaled[:,1:]
 
     z_plot_franke = FrankeFunction(x_plot_mesh, y_plot_mesh)
 

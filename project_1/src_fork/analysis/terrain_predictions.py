@@ -37,7 +37,7 @@ def terrain_predictions(spacing=40, degree=20, ridge_lambda=1e-2, lasso_lambda=1
     # degree = 25
     # ridge_lambda = 1e-2
     # lasso_lambda = 1e-5
-
+    np.random.seed(2018)
     # Setting up the terrain data:
     # Note structure! X-coordinates are on the rows of terrain_data
     # Point_selection.flatten() moves most rapidly over the x-coordinates
@@ -64,6 +64,7 @@ def terrain_predictions(spacing=40, degree=20, ridge_lambda=1e-2, lasso_lambda=1
     scaler = StandardScaler()
     scaler.fit(X)
     X_scaled = scaler.transform(X)
+    X_scaled = X_scaled[:,1:]
 
     x_plot = np.linspace(0, 1, 1801)
     y_plot = np.linspace(0, 1, 1801)
@@ -72,7 +73,7 @@ def terrain_predictions(spacing=40, degree=20, ridge_lambda=1e-2, lasso_lambda=1
 
     X_plot_design = linear_regression.design_matrix_2D(x_plot_mesh_flat, y_plot_mesh_flat, degree)
     X_plot_design_scaled = scaler.transform(X_plot_design)
-
+    X_plot_design_scaled = X_plot_design_scaled[:,1:]
     # Ground truth
 
     z_true = terrain_data[:1801, :1801]
@@ -110,7 +111,7 @@ if __name__ == "__main__":
     # Plot the true terrain data
     ax = fig.add_subplot(1, 4, 1, projection="3d")
     ax.set_title("True terrain data")
-    ax.view_init(azim=0, elev=90)
+    ax.view_init(azim=45, elev=60)
     ax.set_xlabel("x")
     ax.set_ylabel("y")
     ax.set_zlabel("z")
@@ -119,7 +120,7 @@ if __name__ == "__main__":
     # Plot the OLS prediction
     ax = fig.add_subplot(1, 4, 2, projection="3d")
     ax.set_title("OLS")
-    ax.view_init(azim=0, elev=90)
+    ax.view_init(azim=45, elev=60)
     ax.set_xlabel("x")
     ax.set_ylabel("y")
     ax.set_zlabel("z")
@@ -127,7 +128,7 @@ if __name__ == "__main__":
 
     ax = fig.add_subplot(1, 4, 3, projection="3d")
     ax.set_title("Ridge")
-    ax.view_init(azim=0, elev=90)
+    ax.view_init(azim=45, elev=60)
     ax.set_xlabel("x")
     ax.set_ylabel("y")
     ax.set_zlabel("z")
@@ -135,7 +136,7 @@ if __name__ == "__main__":
 
     ax = fig.add_subplot(1, 4, 4, projection="3d")
     ax.set_title("Lasso")
-    ax.view_init(azim=0, elev=90)
+    ax.view_init(azim=45, elev=60)
     ax.set_xlabel("x")
     ax.set_ylabel("y")
     ax.set_zlabel("z")

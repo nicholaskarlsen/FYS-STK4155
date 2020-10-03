@@ -20,7 +20,7 @@ from FrankeFunction import FrankeFunction
 
 utils.plot_settings()  # LaTeX fonts in Plots!
 
-np.random.seed(2018)
+
 n = 500
 noise_scale = 0.2
 x = np.random.uniform(0, 1, n)
@@ -81,7 +81,6 @@ lasso_subset_lambda_boot_variance = np.zeros((max_degree, len(subset_lambdas)))
 
 # Actual computations
 for degree in range(max_degree):
-    degree = degree_index + 1 # Little sense in doing stuff for 0 degrees.
     X = linear_regression.design_matrix_2D(x, y, degree)
     X_train = linear_regression.design_matrix_2D(x_train, y_train, degree)
     X_test = linear_regression.design_matrix_2D(x_test, y_test, degree)
@@ -89,7 +88,6 @@ for degree in range(max_degree):
     scaler = StandardScaler()
     scaler.fit(X)
     X_scaled = scaler.transform(X)
-    X_scaled = X_scaled[:,1:]
     #    X_scaled[:,0] = 1 # Maybe not for ridge+lasso. Don't want to penalize constants...
 
     # Scaling and feeding to bootstrap and OLS
@@ -97,8 +95,6 @@ for degree in range(max_degree):
     scaler_boot.fit(X_train)
     X_train_scaled = scaler_boot.transform(X_train)
     X_test_scaled = scaler_boot.transform(X_test)
-    X_train_scaled = X_train_scaled[:,1:]
-    X_test_scaled = X_test_scaled[:,1:]
     #    X_train_scaled[:,0] = 1 #maybe not for ridge+lasso
     #    X_test_scaled[:,0] = 1 #maybe not for ridge+lasso
 
