@@ -65,7 +65,7 @@ def terrain_analysis_plots(
 
     ##### Setup of problem is completede above.
 
-    # Quantities of interest:
+    # Quantities of interest: note the indexing, element 0 is polynomial degree 1
     mse_ols_test = np.zeros(max_degree)
     mse_ols_train = np.zeros(max_degree)
     ols_cv_mse = np.zeros(max_degree)

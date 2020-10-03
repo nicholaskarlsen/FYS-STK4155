@@ -65,7 +65,7 @@ z_test = z_test - z_train_intercept
 ##### Setup of problem is completede above.
 
 
-# Quantities of interest:
+# Quantities of interest: note the indexing, element 0 is polynomial degree 1
 mse_ols_test = np.zeros(max_degree)
 mse_ols_train = np.zeros(max_degree)
 ols_cv_mse = np.zeros(max_degree)
@@ -98,7 +98,7 @@ lasso_subset_lambda_boot_variance = np.zeros((max_degree, len(subset_lambdas)))
 
 
 # Actual computations
-for degree in range(max_degree):
+for degree_index in range(max_degree):
     degree = degree_index + 1 # Little sense in doing stuff for 0 degrees.
     X = linear_regression.design_matrix_2D(x, y, degree)
     X_train = linear_regression.design_matrix_2D(x_train, y_train, degree)
