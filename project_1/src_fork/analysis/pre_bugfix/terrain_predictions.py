@@ -1,29 +1,27 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import sklearn.linear_model as skl
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-import sklearn.linear_model as skl
 from imageio import imread
 
 import sys
 
 sys.path.insert(0, "../")
-
 import linear_regression
 import utils
 import stat_tools
 import crossvalidation
 import bootstrap
-from FrankeFunction import FrankeFunction
+
+utils.plot_settings()  # LaTeX fonts in Plots!
 
 
-def franke_predictions(
-    n=1000, noise_scale=0.2, degree=20, ridge_lambda=1e-2, lasso_lambda=1e-5, plot_grid_size=2000
-):
-    """For a given sample size n, noise_scale, max_degree and penalty parameters: produces ols,
-    ridge and lasso predictions, as well as ground truth on a plotting meshgrid with input grid size.
+def terrain_predictions(spacing=40, degree=20, ridge_lambda=1e-2, lasso_lambda=1e-5):
+    """For a given sampling spacing, degree and penalty parameters: produces ols,
+    ridge and lasso predictions, as well as ground truth on a plotting meshgrid.
 
     output:
         x_plot_mesh: meshgrid of x-coordinates
@@ -31,16 +29,34 @@ def franke_predictions(
         z_predict_ols: ols prediction of z on the meshgrid
         z_predict_ridge: ridge prediction of z on the meshgrid
         z_predict_lasso: lasso prediction of z on the meshgrid
-        z_plot_franke: Actual Franke values on the meshgrid.
+        z_true: Actual terrain values on the meshgrid.
 
     """
-    np.random.seed(2018)
-    x = np.random.uniform(0, 1, n)
-    y = np.random.uniform(0, 1, n)
-    z = FrankeFunction(x, y)
-    # Adding standard normal noise:
-    z = z + noise_scale * np.random.normal(0, 1, len(z))
-    #   Centering the response
+    # #control variables, resticted to upper half of plot currently.
+    # spacing = 10
+    # degree = 25
+    # ridge_lambda = 1e-2
+    # lasso_lambda = 1e-5
+
+    # Setting up the terrain data:
+    # Note structure! X-coordinates are on the rows of terrain_data
+    # Point_selection.flatten() moves most rapidly over the x-coordinates
+    # Meshgrids flattened also move most rapidly over the x-coordinates. Thus
+    # this should make z(x,y).reshape(length_y,length_x) be consistent with terrain_data
+    terrain_data = imread("../../datafiles/SRTM_data_Norway_1.tif")
+    point_selection = terrain_data[:1801:spacing, :1801:spacing]  # Make quadratic and downsample
+    x_terrain_selection = np.linspace(0, 1, point_selection.shape[1])
+    y_terrain_selection = np.linspace(0, 1, point_selection.shape[0])
+    X_coord_selection, Y_coord_selection = np.meshgrid(x_terrain_selection, y_terrain_selection)
+    z_terrain_selection = point_selection.flatten()  # the response values
+    x_terrain_selection_flat = X_coord_selection.flatten()  # the first degree feature variables
+    y_terrain_selection_flat = Y_coord_selection.flatten()  # the first degree feature variables
+
+    x = x_terrain_selection_flat
+    y = y_terrain_selection_flat
+    z = z_terrain_selection
+
+    # Centering
     z_intercept = np.mean(z)
     z = z - z_intercept
     # Scaling
@@ -48,37 +64,35 @@ def franke_predictions(
     scaler = StandardScaler()
     scaler.fit(X)
     X_scaled = scaler.transform(X)
-    X_scaled = X_scaled[:,1:]
 
-    # Setting up plotting grid
-    x_plot = np.linspace(0, 1, plot_grid_size)
-    y_plot = np.linspace(0, 1, plot_grid_size)
+    x_plot = np.linspace(0, 1, 1801)
+    y_plot = np.linspace(0, 1, 1801)
     x_plot_mesh, y_plot_mesh = np.meshgrid(x_plot, y_plot)
     x_plot_mesh_flat, y_plot_mesh_flat = x_plot_mesh.flatten(), y_plot_mesh.flatten()
 
     X_plot_design = linear_regression.design_matrix_2D(x_plot_mesh_flat, y_plot_mesh_flat, degree)
     X_plot_design_scaled = scaler.transform(X_plot_design)
-    X_plot_design_scaled = X_plot_design_scaled[:,1:]
 
-    z_plot_franke = FrankeFunction(x_plot_mesh, y_plot_mesh)
+    # Ground truth
+
+    z_true = terrain_data[:1801, :1801]
 
     # OLS
     betas = linear_regression.OLS_SVD_2D(X_scaled, z)
     z_predict_flat_ols = (X_plot_design_scaled @ betas) + z_intercept
-    z_predict_ols = z_predict_flat_ols.reshape(plot_grid_size, -1)
+    z_predict_ols = z_predict_flat_ols.reshape(-1, 1801)
 
     # Ridge
-
     betas_ridge = linear_regression.Ridge_2D(X_scaled, z, ridge_lambda)
     z_predict_flat_ridge = (X_plot_design_scaled @ betas_ridge) + z_intercept
-    z_predict_ridge = z_predict_flat_ridge.reshape(plot_grid_size, -1)
+    z_predict_ridge = z_predict_flat_ridge.reshape(-1, 1801)
     # Lasso
 
-    clf_Lasso = skl.Lasso(alpha=lasso_lambda, fit_intercept=False, max_iter=10000).fit(X_scaled, z)
+    clf_Lasso = skl.Lasso(alpha=lasso_lambda, fit_intercept=False).fit(X_scaled, z)
     z_predict_flat_lasso = clf_Lasso.predict(X_plot_design_scaled) + z_intercept
-    z_predict_lasso = z_predict_flat_lasso.reshape(plot_grid_size, -1)
+    z_predict_lasso = z_predict_flat_lasso.reshape(-1, 1801)
 
-    return x_plot_mesh, y_plot_mesh, z_predict_ols, z_predict_ridge, z_predict_lasso, z_plot_franke
+    return x_plot_mesh, y_plot_mesh, z_predict_ols, z_predict_ridge, z_predict_lasso, z_true
 
 
 if __name__ == "__main__":
@@ -88,24 +102,24 @@ if __name__ == "__main__":
         z_predict_ols,
         z_predict_ridge,
         z_predict_lasso,
-        z_plot_franke,
-    ) = franke_predictions()
+        z_truth,
+    ) = terrain_predictions()
 
     fig = plt.figure()
 
-    # Plot the analytic curve
+    # Plot the true terrain data
     ax = fig.add_subplot(1, 4, 1, projection="3d")
-    ax.set_title("Franke Function")
-    ax.view_init(azim=45)
+    ax.set_title("True terrain data")
+    ax.view_init(azim=0, elev=90)
     ax.set_xlabel("x")
     ax.set_ylabel("y")
     ax.set_zlabel("z")
-    surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_plot_franke, cmap=cm.coolwarm)
+    surf = ax.plot_surface(x_plot_mesh, y_plot_mesh, z_truth, cmap=cm.coolwarm)
 
     # Plot the OLS prediction
     ax = fig.add_subplot(1, 4, 2, projection="3d")
     ax.set_title("OLS")
-    ax.view_init(azim=45)
+    ax.view_init(azim=0, elev=90)
     ax.set_xlabel("x")
     ax.set_ylabel("y")
     ax.set_zlabel("z")
@@ -113,7 +127,7 @@ if __name__ == "__main__":
 
     ax = fig.add_subplot(1, 4, 3, projection="3d")
     ax.set_title("Ridge")
-    ax.view_init(azim=45)
+    ax.view_init(azim=0, elev=90)
     ax.set_xlabel("x")
     ax.set_ylabel("y")
     ax.set_zlabel("z")
@@ -121,7 +135,7 @@ if __name__ == "__main__":
 
     ax = fig.add_subplot(1, 4, 4, projection="3d")
     ax.set_title("Lasso")
-    ax.view_init(azim=45)
+    ax.view_init(azim=0, elev=90)
     ax.set_xlabel("x")
     ax.set_ylabel("y")
     ax.set_zlabel("z")

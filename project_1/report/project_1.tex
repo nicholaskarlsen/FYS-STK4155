@@ -33,7 +33,15 @@
 
 \section{Introduction}
     \noindent
-    In essence, Linear Regression is the process of taking points from a function, or a set of measurements and mapping them to coordinates in a chosen basis in order to create an approximation, or model of the original dataset.
+    In essence, Linear Regression is the process of taking points from a function, or a set of measurements, and mapping them to coordinates in a chosen basis in order to create an approximation, or model, of the original dataset.
+    % Maybe not original dataset, but underlying function/process/phenomena?
+     That is, from a limited set of data try to infer a functional relationship between some chosen prediction variables and the measured/sampled responses, and use this functional relationship to predict new data points in the domain. Typically, one is either interested in extracting the functional relationship between the measured responses and the prediction variables in order to say something about the relative importance of the conjectured predictors; or one wants to create a "best possible" predictive map of the (mostly unmeasured) response variables as a function of the (mostly unmeasured) prediction variables. In both cases what one really wants is a some form of optimal mapping from prediction variables to response variables, and that can be provided by the use of linear regression methods.
+     
+     Obviously, this way of doing predictions and inferences has an enormous selection of possible applications. In this paper we investigate two illustrative and similar applications: The reconstruction of the Franke function from sampled values, and the (re-)construction of an elevation map from a donwsampled set of terrain data. In a way, our data sets are "low-resolution images" of the Franke function and the terrain. Our goal is then to find the best possible "high-resolution images" by using different regression methods and resampling techniques on the sampled data, using tow-dimensional polynomials as basis functions. In other words, we want to find the most faithful recreation of the original terrain data and the Franke function, in the basis of two-dimensional polynomials.
+     
+     We begin with a theoretical discussion of the regression and resampling methods that will be used, as well as some comments on the significance of the so-called Bias-Variance-Tradeoff in the context of linear regression. We then proceed to investigate the application of ordinary-least-squares (OLS), Ridge regression and LASSO regression to samplings of the Franke function. We use k-fold cross-validation to assess the mean-squared-error (MSE) of our different models, and we use bootstrap resampling in order to estimate the bias and variance of our models. We discuss the influence of the number of points sampled, the polynomial degree we try to fit, the values of the hyper-parameter lambda for the Ridge and LASSO regressions and the presence/absence of noise in our samplings. Afterwards we will move on to the terrain data, where we perform much of the same analysis as for the Franke function. We then try to evaluate which regression methods perform the best for different use cases, and which resulting models might be considered the 'best'.
+     
+     
 \section{Theory}
     \subsection{Linear Regression}
         \noindent
@@ -136,7 +144,9 @@
                 \pmb{\hat\beta}_R = \qty(\textup{X}^T\textup{X}  + \lambda)^{-1}\textup{X}^T\pmb{\tilde y}
             \end{equation}
             As the optimal $\beta$ for Ridge regression.
-            So we see that the only difference between OLS and Ridge regression is the addition of the "penalty" parameter $\lambda$ to the $L^2$ norm of the coefficients $\pmb{\beta}$. The main point of introducing this parameter is to reduce the variance of the regression coefficients $\pmb{\beta}$. It introduces a constraint on the allowable values of $\pmb{\beta}$, which means that the method no longer is unbiased. The aim is that the reduction of the variance outweighs the increase of the method's bias, leading to an overall lower test error, cf. the later discussion of the Bias-Variance Trade-off.
+            So we see that the only difference between OLS and Ridge regression is the addition of the "penalty" parameter $\lambda$ to the $L^2$ norm of the coefficients $\pmb{\beta}$. The main point of introducing this parameter is to reduce the variance of the regression coefficients $\pmb{\beta}$. It introduces a constraint on the allowable values of $\pmb{\beta}$, which means that the method no longer is unbiased. The aim is that the reduction of the variance outweighs the increase of the method's bias, leading to an overall lower test error, cf. the later discussion of the Bias-Variance Trade-off. As a techincal note, during our computations we center our response-variable and scale plus center our predictors. This has the effect of removing the constant column in the design, so that penalty term doesn't apply to $\beta_{0}$.
+            
+            
         \subsubsection{LASSO Regression}
             The cost function for the \textit{least absolute shrinkage and selection operator} (LASSO) method is defined as
             \begin{equation}
@@ -146,7 +156,7 @@
             \end{equation}
             Which as opposed to OLS and Ridge has no analytical solution for finding the optimal $\pmb \beta$, which is instead found by optimization methods such as gradient descent. The specifics of this is beyond the scope of this article, and we will simply use the existing libraries provided by scikit-learn~\cite{scikit-learn} to perform the regression.
 
-            Qualitatively the Lasso method is distinguished from the Ridge regression by how the norm of $\pmb{\beta}$ is penalized. While the Ridge regression applies the penalty to the $L^2$ norm, the Lasso aims to shrink the $L^1$ norm. Two important consequences arise from this: firstly, it is no longer possible to obtain a closed-form solution to the minimization problem; secondly, the regression coefficients may be shrunk far more unevenly. In contrast to the Ridge regression, Lasso regression may shrink individual $\beta_{i}$ toward zero. This is an extremely useful property of the method, since it allows unimportant predictors to be identified and discarded. The drawback, of course, is that the bias of the Lasso method is expected to exceed the bias of the Ridge method.
+            Qualitatively the Lasso method is distinguished from the Ridge regression by how the norm of $\pmb{\beta}$ is penalized. While the Ridge regression applies the penalty to the $L^2$ norm, the Lasso aims to shrink the $L^1$ norm. Two important consequences arise from this: firstly, it is no longer possible to obtain a closed-form solution to the minimization problem; secondly, the regression coefficients may be shrunk far more unevenly. In contrast to the Ridge regression, Lasso regression may shrink individual $\beta_{i}$ toward zero. This is an extremely useful property of the method, since it allows unimportant predictors to be identified and discarded. The drawback, of course, is that the bias of the Lasso method is expected to exceed the bias of the Ridge method. Once again, by  centering we remove the constant column from the design matrix to avoid penalizing the constant term through $\beta_{0}$.
 
     \subsection{Singular Value Decomposition}
         \noindent
@@ -291,8 +301,10 @@
         \end{equation}
 
     \subsection{The Franke Function}
+
         The Franke function is defined as
         \begin{align}
+        \label{eq:franke}
             \begin{split}
                 f(x, y)
                 &= \frac{3}{4}\exp\qty(-\frac{(9x - 2)^2}{4} - \frac{(9y - 2)}{4})      \\
@@ -310,15 +322,18 @@
 
 \section{Results \& Discussion}
 
-The stated goal of this paper is to study the application of the three different regression methods (OLS, Ridge and LASSO) first to samplings of the Franke function, then to samplings of a certain set of terrain-data. The Franke function is defined on an interval $INTERVAL$ by:
+We aim to model both the Franke function and the terrain data as sums of polynomials in x and y. Our overarching goal is to determine which regression method performs the best (i.e. most faithfully reproduces the full data-set on which they are sampled) in both cases, and for which degree of the polynomial model and which value of the penalty parameter $\lambda$. The Franke function is given as in Eqn. \ref{eq:franke} over the domain $x,y \in [0,1]$.
 
-\begin{equation}
-\label{Franke_equation}
-\end{equation}
+The terrain data,  which has been downloaded from \cite{4155_repo}, is a collection of measured elevation heights at a discrete set, size $[3601,1801]$, of pixel coordinates. For ease of interpretation and computation, we parameterize the pixel indices as linearly spaced $x,y \in [0,1]$, and restrict ourselves to the first square of the terrain map, i.e. the first $[1801,1801]$ pixels.
 
-The terrain data, on the other hand, is a collection of measured elevation heights as a function of x- and y-coordinates, which has been downloaded from \cite{4155_repo}.
+% Below is basically a repetition of abstract/introduction, but with slightly more details.
+% I don't like it, even though I wrote it. -TEM
 
-We aim to model both the Franke function and the terrain data as sums of polynomials in x and y. Our overarching goal is to determine which regression method performs the best (i.e. most faithfully reproduces the full data-set on which they are sampled) in both cases, and for which degree of the polynomial model and which value of the penalty parameter $\lambda$.
+We will first consider samplings of the Franke function. We will analyze the performance of the different regression methods for various models (polynomial degrees) and penalty parameters. We will investigate the bias-variance behaviour of the methods, and the effect of the sampling size. We will see that the addition of normally distributed noise to the sample values has a dramatic impact on the performance of the various methods. Finally we will compare various 'best predictions' for the different regression methods, in order to visualize the significance of their different approaches. These predictions will be learned on the same randomly sampled set of points in $x,y \in [0,1]$, and applied to a grid of 2000 points in each direction, with their resulting predictions being compared amongst the methods and with the ground truth of the Franke function evaluated on that grid. 
+
+Armed with insights from the investigation of the Franke function, we will subsequently do much of the same analysis for the terrain data. Ultimately we will compare the best predictions for each method (learned on the same downsampled data set) with each other and with the ground truth of the full $[1801,1801]$ terrain map we downsampled from.
+
+%%%The above two paragraphs could probably be cut. -TEM
 
 \subsection{The Franke function}
 
@@ -396,6 +411,7 @@ Subsequent parts:
 
 
 \subsection{The terrain data}
+
 
 
     \begin{figure}[h!tb]
