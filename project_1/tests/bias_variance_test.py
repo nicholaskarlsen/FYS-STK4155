@@ -10,11 +10,12 @@ from sklearn.pipeline import make_pipeline
 from sklearn.utils import resample
 
 import sys
-sys.path.insert(0,"../src/")
+sys.path.insert(0,"../src_fork/")
 
 import linear_regression
 import utils
 import stat_tools
+import bootstrap
 
 
 def design_matrix_1D(x, degree):
@@ -100,7 +101,7 @@ def own_bias_variance(seed):
             ols_boot_mse[degree],
             ols_boot_bias[degree],
             ols_boot_variance[degree],
-        ) = stat_tools.compute_mse_bias_variance(z_test.flatten(), y_pred)
+        ) = bootstrap.compute_mse_bias_variance(z_test.flatten(), y_pred)
     print(ols_boot_mse)
     plt.plot(ols_boot_mse, label="Error")
     plt.plot(ols_boot_bias, label="Bias_squared")

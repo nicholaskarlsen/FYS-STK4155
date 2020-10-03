@@ -21,4 +21,4 @@ def var_beta(X, sigma=1):
     Returns:
         Array: Covariance Matrix (diagonal elements)
     """
-    return np.sqrt(np.linalg.inv(X.T @ X).diagonal()) * sigma ** 2
+    return np.sqrt(np.linalg.pinv(X.T @ X).diagonal()) * sigma**2

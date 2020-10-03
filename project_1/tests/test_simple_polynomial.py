@@ -5,11 +5,13 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
 import sys
-sys.path.insert(0,"../src/")
+sys.path.insert(0,"../src_fork/")
 
 import linear_regression
 import utils
 import stat_tools
+import crossvalidation
+import bootstrap
 
 utils.plot_settings()  # LaTeX fonts in Plots!
 
@@ -106,7 +108,7 @@ for degree in range(max_degree):
     # CV, find best lambdas and get mse vs lambda for given degree. Also, gets
     # ols_CV_MSE
 
-    lasso_cv_mse, ridge_cv_mse, ols_cv_mse_deg = stat_tools.k_fold_cv_all(
+    lasso_cv_mse, ridge_cv_mse, ols_cv_mse_deg = crossvalidation.k_fold_cv_all(
         X_scaled, z, n_lambdas, lambdas, k_folds
     )
     best_lasso_lambda[degree] = lambdas[np.argmin(lasso_cv_mse)]
@@ -131,7 +133,7 @@ for degree in range(max_degree):
         ols_mse,
         ols_bias,
         ols_variance,
-    ) = stat_tools.bootstrap_all(
+    ) = bootstrap.bootstrap_all(
         X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge
     )
 
@@ -164,7 +166,7 @@ for degree in range(max_degree):
             lasso_mse,
             lasso_bias,
             lasso_variance,
-        ) = stat_tools.bootstrap_ridge_lasso(
+        ) = bootstrap.bootstrap_ridge_lasso(
             X_train_scaled, X_test_scaled, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge
         )
 

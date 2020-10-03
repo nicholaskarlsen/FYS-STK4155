@@ -29,6 +29,40 @@ def compute_mse_bias_variance(y_data, y_model):
     return mse, mean_squared_bias, mean_variance
 
 
+def bootstrap(X_train, X_test, z_train, z_test, n_bootstraps, regression):
+    """
+    performs bootstrap for OLS & Ridge. Not lasso due to difference of interface.
+    """
+    N = z_train.size
+    z_boot= np.empty((z_test.size, n_bootstraps))
+
+    for i in range(n_bootstraps):
+        shuffle = np.random.randint(0, N, N)
+        X_boot, z_boot = X_train[shuffle], z_train[shuffle]
+        betas = regression(X_boot, z_boot)
+        z_model_test[:, i] = X_test @ beta
+
+    mse, bias, var = compute_mse_bias_variance(z_test, z_boot)
+    return
+
+
+def bootstrap_lasso(X_train, X_test, z_train, z_test, n_bootstraps, lambd):
+    """
+    Performs bootstrap for LASSO.
+    """
+    N = z_train.size
+    z_boot= np.empty((z_test.size, n_bootstraps))
+
+    for i in range(n_bootstraps):
+        shuffle = np.random.randint(0, N, N)
+        X_boot, z_boot = X_train[shuffle], z_train[shuffle]
+        clf_Lasso = skl.Lasso(alpha=lambd,fit_intercept=False).fit(X_boot, z_boot)
+        z_model_test[:, i] = clf_Lasso.predict(X_test)
+
+    mse, bias, var = compute_mse_bias_variance(z_test, z_boot)
+    return
+
+
 def bootstrap_all(X_train, X_test, z_train, z_test, n_bootstraps, lamb_lasso, lamb_ridge):
     """Performs the bootstrapped bias variance analysis for OLS, Ridge and Lasso, given input
     training and test data, the number of bootstrap iterations and the lambda values for

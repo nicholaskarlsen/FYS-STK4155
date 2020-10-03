@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression, Ridge
 
 import sys
-sys.path.insert(0,"../src/")
+sys.path.insert(0,"../src_fork/")
 
 import linear_regression
 from main import FrankeFunction
@@ -70,7 +70,7 @@ def OLS_SVD_unit_test(min_deg=2, max_deg=5, tol=1e-6):
     return
 
 
-def Ridge_2D_unit_test(min_deg=2, max_deg=5, tol=1e-6):
+def Ridge_unit_test(min_deg=2, max_deg=5, tol=1e-6):
     """
     Tests our implementation of Ridge against sci-kit learn up to a given tolerance
     """
@@ -104,4 +104,4 @@ def Ridge_2D_unit_test(min_deg=2, max_deg=5, tol=1e-6):
 if __name__ == "__main__":
     OLS_unit_test()
     OLS_SVD_unit_test()
-    Ridge_2D_unit_test()
+    Ridge_unit_test()

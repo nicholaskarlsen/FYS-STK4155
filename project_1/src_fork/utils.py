@@ -28,6 +28,9 @@ def polynomial_form(n):
             print(f"c_{q + k} : x^{i-k} * y^{k}")
     return
 
+def polynomial_no_terms(n):
+    return int((n + 1) * (n + 2) / 2)
+
 
 if __name__ == "__main__":
     polynomial_form(2)
