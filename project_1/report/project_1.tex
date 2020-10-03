@@ -8,6 +8,7 @@
 \usepackage{amssymb}
 \usepackage{amsbsy}
 %\usepackage{bbold}
+\usepackage{subfig}
 
 \usepackage{blindtext}
 \usepackage{tikzducks}
@@ -326,6 +327,18 @@ We aim to model both the Franke function and the terrain data as sums of polynom
         \includegraphics[width=\columnwidth]{OLS_R2_noise.pdf}
         \caption{R$^2$ measured for $N=1000$ random samples of the Franke function with added noise in the form $\delta \cdot \mathcal N(0, 1)$ modeled with complexities 0 to 5.}
     \end{figure}
+
+    \begin{figure*}
+         \centering
+         \subfloat[][Ridge regression]{
+            \includegraphics[width=\columnwidth]{RIDGE_CV_Franke_contour.pdf}\label{<figure1>}
+         }
+         \subfloat[][LASSO regression]{
+            \includegraphics[width=\columnwidth]{LASSO_CV_Franke_contour.pdf}\label{<figure2>}
+         }
+         \caption{$\log_{10}(\textup{MSE})$ for $k=5$ crossvalidated Rige \& LASSO regression performed on $n=100$ samples of the Franke Function with added random noise in the form $0.2 * \mathcal N(0, 1)$}
+         \label{contour plots}
+    \end{figure*}
 
 PART A:
 
