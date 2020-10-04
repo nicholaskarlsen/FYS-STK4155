@@ -344,10 +344,20 @@ Armed with insights from the investigation of the Franke function, we will subse
 
 \subsection{The Franke function}
 
+    \begin{figure*}
+        \centering
+        \includegraphics[width=2\columnwidth]{beta_confidence_interval_size_OLS.pdf}
+        \includegraphics[width=2\columnwidth]{beta_confidence_interval_OLS.pdf}
+        \caption{\label{fig:confidence intervals}Predictors $\beta{i}$ for a $5^{\textup{th}}$ degree polynomial modeled with OLS on random samples of the Franke Function with noise $\mathcal{N}(0, 0.2)$}
+    \end{figure*}
+
+
+
+
     \begin{figure}[h!tb]
         \center
         \includegraphics[width=\columnwidth]{OLS_R2_noise.pdf}
-        \caption{R$^2$ measured for $N=1000$ random samples of the Franke function with added noise in the form $\delta \cdot \mathcal N(0, 1)$ modeled with complexities 0 to 5.}
+        \caption{R$^2$ measured for $N=500$ random samples of the Franke function with added noise in the form $\mathcal N(0, 0.2)$ modeled with complexities 0 to 5.}
     \end{figure}
 
     \begin{figure*}
@@ -358,7 +368,7 @@ Armed with insights from the investigation of the Franke function, we will subse
          \subfloat[][LASSO regression]{
             \includegraphics[width=\columnwidth]{LASSO_CV_Franke_contour.pdf}\label{<figure2>}
          }
-         \caption{$\log_{10}(\textup{MSE})$ for $k=5$ crossvalidated Rige \& LASSO regression performed on $n=100$ samples of the Franke Function with added random noise in the form $0.2 \cdot \mathcal N(0, 1)$}
+         \caption{$\log_{10}(\textup{MSE})$ for $k=5$ crossvalidated Rige \& LASSO regression performed on $N=500$ samples of the Franke Function with added random noise in the form $\mathcal N(0, 0.2)$}
          \label{contour plots}
     \end{figure*}
 
@@ -374,7 +384,7 @@ Armed with insights from the investigation of the Franke function, we will subse
          \subfloat[][Ridge]{
             \includegraphics[width=0.666\columnwidth]{Franke_LASSO_bootstrap.pdf}\label{<figure2>}
          }
-         \caption{$M = 100$ Bootstrapped MSE for OLS, Ridge and LASSO regression on $n=500$ random samples of the Franke Function.}
+         \caption{$M = 100$ Bootstrapped MSE for OLS, Ridge and LASSO regression on $N=500$ random samples of the Franke Function.}
          \label{contour plots}
     \end{figure*}
 
@@ -452,7 +462,7 @@ Subsequent parts:
     \begin{figure}[h!tb]
         \center
         \includegraphics[width=\columnwidth]{../figs/OLS_MSE_Bootstrap_Hastie_211.pdf}
-        \caption{\label{fig:Hastie2.11 MSE Bootstrap}The MSE for both the testing and the training data performed with OLS regression on $n=500$ random samples of the Franke Function}
+        \caption{\label{fig:Hastie2.11 MSE Bootstrap}The MSE for both the testing and the training data performed with OLS regression on $N=500$ random samples of the Franke Function}
     \end{figure}
 
 %\section{Discussion}
