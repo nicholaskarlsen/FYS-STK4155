@@ -38,7 +38,7 @@
         In essence, Linear Regression is the process of taking points from a function, or a set of measurements, and mapping them linearly to coordinates in a chosen basis in order to create an approximation, or model, explaining the original dataset and estimating unseen points in the domain spanned by the original data set. That is, from a limited set of data try to infer a linear functional relationship between some chosen prediction variables and the measured/sampled responses, and use this functional relationship to predict new data points in the domain. Typically, one is either interested in extracting the functional relationship between the measured responses and the prediction variables in order to say something about the relative importance of the conjectured predictors; or one wants to create a "best possible" predictive map of the (mostly unmeasured) response variables as a function of the (mostly unmeasured) prediction variables. In both cases what one really wants is some form of optimal mapping from prediction variables to response variables, and that mapping can be estimated by the use of linear regression methods.
 
      Obviously, this way of doing predictions and inferences has an enormous range of possible applications; in basically every instance where one expects some linear relationship between selected prediction variables and a response variable one can, if one has a data set containting measurements of the variables, try to use regression methods to create an optimal model. Examples might be the construction of a model for housing prices as a function of distance from city center, living area, building year and whatever else one could imagine might affect the prices. Or one could wish to determine the best coefficients in a model for nuclear binding energy as a function of nucleon numbers.
-     
+
      In this paper we investigate two illustrative and similar applications: The reconstruction of the Franke function from sampled values, and the (re-)construction of an elevation map from a donwsampled set of terrain data. In a way, our data sets are "low-resolution images" of the Franke function and the terrain. Our goal is then to find the best possible "high-resolution images" by using different regression methods and resampling techniques on the sampled data, using tow-dimensional polynomials as basis functions. In other words, we want to find the most faithful recreation of the original terrain data and the Franke function, in the basis of two-dimensional polynomials.
 
      We begin with a theoretical discussion of the regression and resampling methods that will be used, as well as some comments on the significance of the so-called Bias-Variance-Tradeoff in the context of linear regression. We then proceed to investigate the application of ordinary-least-squares (OLS), Ridge regression and LASSO regression to samplings of the Franke function. We use k-fold cross-validation to assess the mean-squared-error (MSE) of our different models, and we use bootstrap resampling in order to estimate the bias and variance of our models. We discuss the influence of the number of points sampled, the polynomial degree we try to fit, the values of the hyper-parameter lambda for the Ridge and LASSO regressions and the presence/absence of noise in our samplings. Afterwards we will move on to the terrain data, where we perform much of the same analysis as for the Franke function. We then try to evaluate which regression methods perform the best for different use cases, and which resulting models might be considered the 'best'.
@@ -227,8 +227,8 @@
                 \item Discuss this in more detail $\rightarrow\Delta Err$ wrt to number of data points
             \end{itemize}
 % I think that might get too involved; I feel like it is sufficient to present the CV, and say why we use it (to get more reliable test-MSE's). -TEM
-            
-            
+
+
         \subsubsection{Bootstrap}
             \noindent
             In the bootstrap re-sampling method, we sample our data set $S = \{s_1, \dots s_N\}$ $N$-number of times, in particular, we allow sampling the same $s_i$ multiple times. In this way, we generate new datasets in which some points are under-weighted and others overweighted with respect to the original dataset $S$. Loosely speaking, the concept corresponds to evenly sampling the ensemble of all possible input data sets to our regression method, in order to estimate the variance and expectation values of our model predictions over the ensemble. The idea is that if our training set representatively covers the domain of inputs, each re-sampled regression computation will give a certain prediction $\pmb{\tilde{y}_{B}}$ and these $\pmb{\tilde{y}_{B}}$ will appear with a frequency corresponding to their  underlying probability distribution. When we later try to compute statistics of the predictions, we will then be able to use point-estimators on the computed $\pmb{\tilde{y}_{B}}$ to obtain estimates of, for instance, the variance of the predictions or the mean value of the predictions over the ensemble of all possible inputs in the domain spanned by our data.
@@ -464,6 +464,33 @@ Subsequent parts:
         \includegraphics[width=\columnwidth]{../figs/OLS_MSE_Bootstrap_Hastie_211.pdf}
         \caption{\label{fig:Hastie2.11 MSE Bootstrap}The MSE for both the testing and the training data performed with OLS regression on $N=500$ random samples of the Franke Function}
     \end{figure}
+
+
+    \begin{figure}[h!tb]
+        \center
+        \includegraphics[width=\columnwidth]{TerrainData.pdf}
+        \caption{\label{fig:terrain image}}
+    \end{figure}
+
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=\columnwidth]{TERRAIN_bootstrap_best_LASSO_Ridge.pdf}\label{<figure2>}
+        \caption{}
+    \end{figure}
+
+    \begin{figure*}
+         \centering
+         \subfloat[][Ridge regression]{
+            \includegraphics[width=\columnwidth]{RIDGE_CV_Terrain_contour.pdf}\label{<figure1>}
+         }
+         \subfloat[][LASSO regression]{
+            \includegraphics[width=\columnwidth]{LASSO_CV_Terrain_contour.pdf}\label{<figure2>}
+         }
+         \caption{$\log_{10}(\textup{MSE})$ for $k=5$ crossvalidated Rige \& LASSO regression performed on the terrrain data}
+         \label{contour plots}
+    \end{figure*}
+
 
 %\section{Discussion}
 
