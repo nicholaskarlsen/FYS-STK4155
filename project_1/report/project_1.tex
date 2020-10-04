@@ -36,12 +36,12 @@
     In essence, Linear Regression is the process of taking points from a function, or a set of measurements, and mapping them to coordinates in a chosen basis in order to create an approximation, or model, of the original dataset.
     % Maybe not original dataset, but underlying function/process/phenomena?
      That is, from a limited set of data try to infer a functional relationship between some chosen prediction variables and the measured/sampled responses, and use this functional relationship to predict new data points in the domain. Typically, one is either interested in extracting the functional relationship between the measured responses and the prediction variables in order to say something about the relative importance of the conjectured predictors; or one wants to create a "best possible" predictive map of the (mostly unmeasured) response variables as a function of the (mostly unmeasured) prediction variables. In both cases what one really wants is a some form of optimal mapping from prediction variables to response variables, and that can be provided by the use of linear regression methods.
-     
+
      Obviously, this way of doing predictions and inferences has an enormous selection of possible applications. In this paper we investigate two illustrative and similar applications: The reconstruction of the Franke function from sampled values, and the (re-)construction of an elevation map from a donwsampled set of terrain data. In a way, our data sets are "low-resolution images" of the Franke function and the terrain. Our goal is then to find the best possible "high-resolution images" by using different regression methods and resampling techniques on the sampled data, using tow-dimensional polynomials as basis functions. In other words, we want to find the most faithful recreation of the original terrain data and the Franke function, in the basis of two-dimensional polynomials.
-     
+
      We begin with a theoretical discussion of the regression and resampling methods that will be used, as well as some comments on the significance of the so-called Bias-Variance-Tradeoff in the context of linear regression. We then proceed to investigate the application of ordinary-least-squares (OLS), Ridge regression and LASSO regression to samplings of the Franke function. We use k-fold cross-validation to assess the mean-squared-error (MSE) of our different models, and we use bootstrap resampling in order to estimate the bias and variance of our models. We discuss the influence of the number of points sampled, the polynomial degree we try to fit, the values of the hyper-parameter lambda for the Ridge and LASSO regressions and the presence/absence of noise in our samplings. Afterwards we will move on to the terrain data, where we perform much of the same analysis as for the Franke function. We then try to evaluate which regression methods perform the best for different use cases, and which resulting models might be considered the 'best'.
-     
-     
+
+
 \section{Theory}
     \subsection{Linear Regression}
         \noindent
@@ -145,8 +145,8 @@
             \end{equation}
             As the optimal $\beta$ for Ridge regression.
             So we see that the only difference between OLS and Ridge regression is the addition of the "penalty" parameter $\lambda$ to the $L^2$ norm of the coefficients $\pmb{\beta}$. The main point of introducing this parameter is to reduce the variance of the regression coefficients $\pmb{\beta}$. It introduces a constraint on the allowable values of $\pmb{\beta}$, which means that the method no longer is unbiased. The aim is that the reduction of the variance outweighs the increase of the method's bias, leading to an overall lower test error, cf. the later discussion of the Bias-Variance Trade-off. As a techincal note, during our computations we center our response-variable and scale plus center our predictors. This has the effect of removing the constant column in the design, so that penalty term doesn't apply to $\beta_{0}$.
-            
-            
+
+
         \subsubsection{LASSO Regression}
             The cost function for the \textit{least absolute shrinkage and selection operator} (LASSO) method is defined as
             \begin{equation}
@@ -329,11 +329,13 @@ The terrain data,  which has been downloaded from \cite{4155_repo}, is a collect
 % Below is basically a repetition of abstract/introduction, but with slightly more details.
 % I don't like it, even though I wrote it. -TEM
 
-We will first consider samplings of the Franke function. We will analyze the performance of the different regression methods for various models (polynomial degrees) and penalty parameters. We will investigate the bias-variance behaviour of the methods, and the effect of the sampling size. We will see that the addition of normally distributed noise to the sample values has a dramatic impact on the performance of the various methods. Finally we will compare various 'best predictions' for the different regression methods, in order to visualize the significance of their different approaches. These predictions will be learned on the same randomly sampled set of points in $x,y \in [0,1]$, and applied to a grid of 2000 points in each direction, with their resulting predictions being compared amongst the methods and with the ground truth of the Franke function evaluated on that grid. 
+We will first consider samplings of the Franke function. We will analyze the performance of the different regression methods for various models (polynomial degrees) and penalty parameters. We will investigate the bias-variance behaviour of the methods, and the effect of the sampling size. We will see that the addition of normally distributed noise to the sample values has a dramatic impact on the performance of the various methods. Finally we will compare various 'best predictions' for the different regression methods, in order to visualize the significance of their different approaches. These predictions will be learned on the same randomly sampled set of points in $x,y \in [0,1]$, and applied to a grid of 2000 points in each direction, with their resulting predictions being compared amongst the methods and with the ground truth of the Franke function evaluated on that grid.
 
 Armed with insights from the investigation of the Franke function, we will subsequently do much of the same analysis for the terrain data. Ultimately we will compare the best predictions for each method (learned on the same downsampled data set) with each other and with the ground truth of the full $[1801,1801]$ terrain map we downsampled from.
 
 %%%The above two paragraphs could probably be cut. -TEM
+
+%%% Note on reproducability. Mention seed used, and refer to github to be able to reproduce the data
 
 \subsection{The Franke function}
 
@@ -352,6 +354,34 @@ Armed with insights from the investigation of the Franke function, we will subse
             \includegraphics[width=\columnwidth]{LASSO_CV_Franke_contour.pdf}\label{<figure2>}
          }
          \caption{$\log_{10}(\textup{MSE})$ for $k=5$ crossvalidated Rige \& LASSO regression performed on $n=100$ samples of the Franke Function with added random noise in the form $0.2 \cdot \mathcal N(0, 1)$}
+         \label{contour plots}
+    \end{figure*}
+
+
+    \begin{figure*}
+         \centering
+         \subfloat[][OLS]{
+            \includegraphics[width=0.666\columnwidth]{Franke_OLS_bootstrap.pdf}\label{<figure1>}
+         }
+         \subfloat[][Ridge]{
+            \includegraphics[width=0.666\columnwidth]{Franke_Ridge_bootstrap.pdf}\label{<figure2>}
+         }
+         \subfloat[][Ridge]{
+            \includegraphics[width=0.666\columnwidth]{Franke_LASSO_bootstrap.pdf}\label{<figure2>}
+         }
+         \caption{$M = 100$ Bootstrapped MSE for OLS, Ridge and LASSO regression on $n=500$ random samples of the Franke Function.}
+         \label{contour plots}
+    \end{figure*}
+
+    \begin{figure*}
+         \centering
+         \subfloat[][Ridge regression]{
+            \includegraphics[width=\columnwidth]{RIDGE_best_lambda_FRANKE.pdf}\label{<figure1>}
+         }
+         \subfloat[][LASSO regression]{
+            \includegraphics[width=\columnwidth]{LASSO_best_lambda_FRANKE.pdf}\label{<figure2>}
+         }
+         \caption{}
          \label{contour plots}
     \end{figure*}
 
@@ -417,7 +447,7 @@ Subsequent parts:
     \begin{figure}[h!tb]
         \center
         \includegraphics[width=\columnwidth]{../figs/OLS_MSE_Bootstrap_Hastie_211.pdf}
-        \caption{\label{fig:Hastie2.11 MSE Bootstrap}The mean MSE for testing and training data with a 1/4 split resampled 500 times with bootstrap for a OLS regression of 300 randomly sampled points of the Franke Function.}
+        \caption{\label{fig:Hastie2.11 MSE Bootstrap}The MSE for both the testing and the training data performed with OLS regression on $n=500$ random samples of the Franke Function}
     \end{figure}
 
 %\section{Discussion}
