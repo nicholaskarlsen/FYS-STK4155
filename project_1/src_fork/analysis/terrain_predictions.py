@@ -19,7 +19,7 @@ import bootstrap
 utils.plot_settings()  # LaTeX fonts in Plots!
 
 
-def terrain_predictions(spacing=40, degree=20, ridge_lambda=1e-2, lasso_lambda=1e-5):
+def terrain_predictions(spacing=40, degree=20, ridge_lambda=1e-2, lasso_lambda=1e-2):
     """For a given sampling spacing, degree and penalty parameters: produces ols,
     ridge and lasso predictions, as well as ground truth on a plotting meshgrid.
 
