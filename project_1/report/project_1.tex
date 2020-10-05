@@ -344,14 +344,14 @@ Armed with insights from the investigation of the Franke function, we will subse
 
 \subsection{The Franke function}
 
+    \subsubsection{OLS}
+
     \begin{figure*}
         \centering
         \includegraphics[width=2\columnwidth]{beta_confidence_interval_size_OLS.pdf}
         \includegraphics[width=2\columnwidth]{beta_confidence_interval_OLS.pdf}
         \caption{\label{fig:confidence intervals}Predictors $\beta{i}$ for a $5^{\textup{th}}$ degree polynomial modeled with OLS on random samples of the Franke Function with noise $\mathcal{N}(0, 0.2)$}
     \end{figure*}
-
-
 
 
     \begin{figure}[h!tb]
@@ -362,43 +362,67 @@ Armed with insights from the investigation of the Franke function, we will subse
 
     \begin{figure*}
          \centering
-         \subfloat[][Ridge regression]{
-            \includegraphics[width=\columnwidth]{RIDGE_CV_Franke_contour.pdf}\label{<figure1>}
+          \subfloat[][OLS, N=200]{
+            \includegraphics[width=0.5\columnwidth]{OLS_CV_Franke_N_200.pdf}\label{<figure1>}
          }
-         \subfloat[][LASSO regression]{
-            \includegraphics[width=\columnwidth]{LASSO_CV_Franke_contour.pdf}\label{<figure2>}
+         \subfloat[][Ridge, N=200]{
+            \includegraphics[width=0.75\columnwidth]{RIDGE_CV_Franke_contour_N_200.pdf}\label{<figure1>}
          }
-         \caption{$\log_{10}(\textup{MSE})$ for $k=5$ crossvalidated Rige \& LASSO regression performed on $N=500$ samples of the Franke Function with added random noise in the form $\mathcal N(0, 0.2)$}
+         \subfloat[][LASSO, N=200]{
+            \includegraphics[width=0.75\columnwidth]{LASSO_CV_Franke_contour_N_200.pdf}\label{<figure2>}
+         }
+         \\
+         \subfloat[][OLS, N=500]{
+            \includegraphics[width=0.5\columnwidth]{OLS_CV_Franke_N_500.pdf}\label{<figure1>}
+         }
+         \subfloat[][Ridge, N=500]{
+            \includegraphics[width=0.75\columnwidth]{RIDGE_CV_Franke_contour_N_500.pdf}\label{<figure1>}
+         }
+         \subfloat[][LASSO, N=500]{
+            \includegraphics[width=0.75\columnwidth]{LASSO_CV_Franke_contour_N_500.pdf}\label{<figure2>}
+         }
+         \caption{MSE for $k=5$ crossvalidated Rige \& LASSO regression performed on $N=500$ samples of the Franke Function with added random noise in the form $\mathcal N(0, 0.2)$}
          \label{contour plots}
     \end{figure*}
 
 
     \begin{figure*}
          \centering
-         \subfloat[][OLS]{
-            \includegraphics[width=0.666\columnwidth]{Franke_OLS_bootstrap.pdf}\label{<figure1>}
+        \subfloat[][OLS, N=200]{
+            \includegraphics[width=0.666\columnwidth]{Franke_OLS_bootstrap_N_200.pdf}\label{<figure1>}
          }
-         \subfloat[][Ridge]{
-            \includegraphics[width=0.666\columnwidth]{Franke_Ridge_bootstrap.pdf}\label{<figure2>}
+         \subfloat[][Ridge, N=200]{
+            \includegraphics[width=0.666\columnwidth]{Franke_Ridge_bootstrap_N_200.pdf}\label{<figure2>}
          }
-         \subfloat[][Ridge]{
-            \includegraphics[width=0.666\columnwidth]{Franke_LASSO_bootstrap.pdf}\label{<figure2>}
+         \subfloat[][LASSO, N=200]{
+            \includegraphics[width=0.666\columnwidth]{Franke_LASSO_bootstrap_N_200.pdf}\label{<figure2>}
          }
-         \caption{$M = 100$ Bootstrapped MSE for OLS, Ridge and LASSO regression on $N=500$ random samples of the Franke Function.}
+         \\
+         \subfloat[][OLS, N=500]{
+            \includegraphics[width=0.666\columnwidth]{Franke_OLS_bootstrap_N_500.pdf}\label{<figure1>}
+         }
+         \subfloat[][Ridge, N=500]{
+            \includegraphics[width=0.666\columnwidth]{Franke_Ridge_bootstrap_N_500.pdf}\label{<figure2>}
+         }
+         \subfloat[][LASSO, N=500]{
+            \includegraphics[width=0.666\columnwidth]{Franke_LASSO_bootstrap_N_500.pdf}\label{<figure2>}
+         }
+         \caption{$M = 100$ Bootstrapped MSE, Bias$^2$ and Variance for OLS, Ridge and LASSO regression on N random samples of the Franke Function.}
          \label{contour plots}
     \end{figure*}
 
-    \begin{figure*}
-         \centering
-         \subfloat[][Ridge regression]{
-            \includegraphics[width=\columnwidth]{RIDGE_best_lambda_FRANKE.pdf}\label{<figure1>}
-         }
-         \subfloat[][LASSO regression]{
-            \includegraphics[width=\columnwidth]{LASSO_best_lambda_FRANKE.pdf}\label{<figure2>}
-         }
-         \caption{}
-         \label{contour plots}
-    \end{figure*}
+
+   % \begin{figure*}
+   %      \centering
+   %      \subfloat[][Ridge regression]{
+   %         \includegraphics[width=\columnwidth]{RIDGE_best_lambda_FRANKE_N_500.pdf}\label{<figure1>}
+   %      }
+   %      \subfloat[][LASSO regression]{
+   %         \includegraphics[width=\columnwidth]{LASSO_best_lambda_FRANKE_N_500.pdf}\label{<figure2>}
+   %      }
+   %      \caption{The $k=5$ fold cross-validated MSE wrt. $\lambda$ for various polynomial degrees, $p$, for Ridge and LASSO regression on $N=500$ random samples of the Franke Function}
+   %      \label{contour plots}
+   % \end{figure*}
 
 PART A:
 
@@ -461,7 +485,7 @@ Subsequent parts:
 
     \begin{figure}[h!tb]
         \center
-        \includegraphics[width=\columnwidth]{../figs/OLS_MSE_Bootstrap_Hastie_211.pdf}
+        \includegraphics[width=\columnwidth]{../figs/OLS_MSE_Bootstrap_Hastie_211_N_500.pdf}
         \caption{\label{fig:Hastie2.11 MSE Bootstrap}The MSE for both the testing and the training data performed with OLS regression on $N=500$ random samples of the Franke Function}
     \end{figure}
 
@@ -473,21 +497,36 @@ Subsequent parts:
     \end{figure}
 
 
-    \begin{figure}
+
+   \begin{figure*}
         \centering
-        \includegraphics[width=\columnwidth]{TERRAIN_bootstrap_best_LASSO_Ridge.pdf}\label{<figure2>}
-        \caption{}
-    \end{figure}
+         \subfloat[][OLS, N=500]{
+            \includegraphics[width=0.666\columnwidth]{Terrain_bootstrap_OLS.pdf}\label{<figure1>}
+         }
+         \subfloat[][Ridge]{
+            \includegraphics[width=0.666\columnwidth]{Terrain_bootstrap_Ridge.pdf}\label{<figure2>}
+         }
+         \subfloat[][LASSO]{
+            \includegraphics[width=0.666\columnwidth]{Terrain_bootstrap_LASSO.pdf}\label{<figure2>}
+         }
+         \caption{\label{fig:}$M=100$ bootstrapped MSE for LASSO and Ridge regression on the Terrain data for the $\lambda$ parameters yielding the best results for $k=5$ fold cross-validation along with the $M = 100$ bootstrapped OLS.}
+         \label{contour plots}
+    \end{figure*}
+
+
 
     \begin{figure*}
          \centering
+        \subfloat[][OLS, Best Ridge \& LASSO]{
+            \includegraphics[width=0.5\columnwidth]{OLS_CV_Terrain.pdf}\label{<figure1>}
+         }
          \subfloat[][Ridge regression]{
-            \includegraphics[width=\columnwidth]{RIDGE_CV_Terrain_contour.pdf}\label{<figure1>}
+            \includegraphics[width=0.75\columnwidth]{RIDGE_CV_Terrain_contour.pdf}\label{<figure1>}
          }
          \subfloat[][LASSO regression]{
-            \includegraphics[width=\columnwidth]{LASSO_CV_Terrain_contour.pdf}\label{<figure2>}
+            \includegraphics[width=0.75\columnwidth]{LASSO_CV_Terrain_contour.pdf}\label{<figure2>}
          }
-         \caption{$\log_{10}(\textup{MSE})$ for $k=5$ crossvalidated Rige \& LASSO regression performed on the terrrain data}
+         \caption{MSE for $k=5$ crossvalidated Rige \& LASSO regression performed on the terrrain data}
          \label{contour plots}
     \end{figure*}
 
