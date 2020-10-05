@@ -98,7 +98,7 @@
                 \textup{R}^2(\pmb y, \tilde{\pmb{y}}) = 1 -
                 \frac{\sum_i(y_i - \tilde y_i)^2}{\sum_i \qty(y_i - \mathbb E\qty[\pmb y])^2}
             \end{equation}
-            which loosely speaking is a measure of well the proposed model predicts the variance of the data set, where R$^2 = 1$ corresponds to a perfect fit and R$^2 < 1$ an increasingly worse fit.
+            which loosely speaking is a measure of well the proposed model predicts the variance of the data set, where R$^2 = 1$ corresponds to a perfect fit and R$^2 < 1$ an increasingly worse fit. It is worth to note that the MSE and R$^2$ are essentially equivalent when measuring the performance of a model on a particular sample, which is ultimately determined by the $\sum_i(y_i - \tilde y_i)^2$ term in both cases. Thus they differ only in scaling \& centering. However, $R^2$ will notably yield results which translates somewhat more directly across different models.
 
             A particularly important point to make when considering these measures is that they will both generally favor increasingly higher degree polynomials when looking at some particular data set. Whilst yielding good MSE \& R$^2$ scores this leads to over-fitting, where the model becomes too specialized to one particular sample which means that the overall predictive capabilities of the model actually decreases. We will look closer at the details of this in a later section. For now, we simply note that this problem motivates us to split our data sets into training and test sets. Where we train our model using the training set, and subsequently validate the model by computing the MSE \& R$^2$ scores on the test sets. Thus, if our model becomes too specialized to the training set, this will lower MSE \& R$^2$ scores in the test set, giving us a much better indication on the predictive capabilities of our model.
 
@@ -127,7 +127,13 @@
             \begin{equation}\label{eqn:OLS optimal beta}
                 \hat{\pmb \beta}_{\textup{OLS}} = (\textup{X}^T\textup{X})^{-1}\textup{X}^T\pmb y
             \end{equation}
-            which mathematically is the best projection of the data-points to our model. However, this may not actually yield the best predictive model. OLS may suffer from over-fitting to the particular sample, and will therefore not always perform very well on new data points for which the model has not been trained. As such, we instead look at alternate regression methods with additional tuning parameters which allow us to account for the variance between different sets of data as to yield a model with better predictive abilities compared to the OLS.
+            which mathematically is the best projection of the data-points to our model. It can also be shown that the variance of these optimal predictors are given by \cite{hastie}
+            \begin{equation}\label{eqn:OLS beta variance}
+                \textup{Var}\qty(\pmb{\hat\beta}_{\textup{OLS}}) = \sigma^2 \qty(\textup{X}^T\textup{X})^{-1}
+            \end{equation}
+            Where $\sigma^2$ denotes the variance of the underlying noise of the sample.
+
+            While OLS yields the mathematically best model for some particular sample, it does not necessarily yield the best predictive model. OLS may suffer from over-fitting to the particular sample, and will therefore not always perform very well on new data points for which the model has not been trained. As such, we instead look at alternate regression methods with additional tuning parameters which allow us to account for the variance between different sets of data as to yield a model with better predictive abilities compared to the OLS.
 
         \subsubsection{Ridge Regression}
             \noindent
@@ -146,7 +152,7 @@
                 \pmb{\hat\beta}_R = \qty(\textup{X}^T\textup{X}  + \lambda)^{-1}\textup{X}^T\pmb{\tilde y}
             \end{equation}
             As the optimal $\beta$ for Ridge regression.
-            So we see that the only difference between OLS and Ridge regression is the addition of the "penalty" parameter $\lambda$ to the $L^2$ norm of the coefficients $\pmb{\beta}$. The main point of introducing this parameter is to reduce the variance of the regression coefficients $\pmb{\beta}$. It introduces a constraint on the allowable values of $\pmb{\beta}$, which means that the method no longer is unbiased. The aim is that the reduction of the variance outweighs the increase of the method's bias, leading to an overall lower test error, cf. the later discussion of the Bias-Variance Trade-off. As a techincal note, during our computations we center our response-variable and scale plus center our predictors. This has the effect of removing the constant column in the design matrix, so that penalty term doesn't apply to $\beta_{0}$.
+            So we see that the only difference between OLS and Ridge regression is the addition of the "penalty" parameter $\lambda$ to the $L^2$ norm of the coefficients $\pmb{\beta}$. The main point of introducing this parameter is to reduce the variance of the regression coefficients $\pmb{\beta}$. It introduces a constraint on the allowable values of $\pmb{\beta}$, which means that the method no longer is unbiased. The aim is that the reduction of the variance outweighs the increase of the method's bias, leading to an overall lower test error, cf. the later discussion of the Bias-Variance Trade-off. As a technical note, during our computations we center our response-variable and scale plus center our predictors. This has the effect of removing the constant column in the design matrix, so that penalty term doesn't apply to $\beta_{0}$.
 
 
         \subsubsection{LASSO Regression}
@@ -353,6 +359,12 @@ Armed with insights from the investigation of the Franke function, we will subse
         \caption{\label{fig:confidence intervals}Predictors $\beta{i}$ for a $5^{\textup{th}}$ degree polynomial modeled with OLS on random samples of the Franke Function with noise $\mathcal{N}(0, 0.2)$}
     \end{figure*}
 
+    \begin{figure}
+        \centering
+        \includegraphics[width=\columnwidth]{Franke_mean_confidence_interval.pdf}
+        \caption{Mean size of the 94\% confidence interval across all the predictors for polynomials up to the $5^{\textup{th}}$ order with OLS for $N=500$ random samples of the Franke Function. Where the dashed line indicates $2^\textup{nd}$ order polynomial regression of the points}
+    \end{figure}
+
 
     \begin{figure}[h!tb]
         \center
@@ -426,6 +438,14 @@ Armed with insights from the investigation of the Franke function, we will subse
 
 PART A:
 
+% Discuss how R^2 responds to noise. Justify why R^2 was choosen for this visualization over MSE
+% R^2 <-> MSE. The latter is easier to draw parallels with the Terrain data
+% Choose \sigma 0.2 as a noise scale for our analysis on the franke function cf. the section on Terrain data.
+% Confidence interval of beta seems to grow ~p^2 [ref to plot]
+% MSE plot -> refer to full plot later to reduce clutter?
+% Mention how data is scaled & split
+
+%% Later parts, connect Explosion at ~/10-/20 predictors to existing literature (Harrell)
 
 Subsequent parts:
 %Prosjektbeskrivelsen behandler de forskjellige metodene ganske separat, og ber jo om mer eller mindre den samme typen plott tre ganger. Jeg har mest lyst til å kombinere en del av dem. For Franke tenker jeg at vi bør ha:
