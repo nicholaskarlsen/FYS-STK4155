@@ -337,20 +337,38 @@ We aim to model both the Franke function and the terrain data as sums of polynom
 
 The terrain data,  which has been downloaded from \cite{4155_repo}, is a collection of measured elevation heights at a discrete set, size $[3601,1801]$, of pixel coordinates. For ease of interpretation and computation, we parameterize the pixel indices as linearly spaced $x,y \in [0,1]$, and restrict ourselves to the first square of the terrain map, i.e. the first $[1801,1801]$ pixels.
 
-% Below is basically a repetition of abstract/introduction, but with slightly more details.
-% I don't like it, even though I wrote it. -TEM
 
-We will first consider samplings of the Franke function. We will analyze the performance of the different regression methods for various models (polynomial degrees) and penalty parameters. We will investigate the bias-variance behaviour of the methods, and the effect of the sampling size. We will see that the addition of normally distributed noise to the sample values has a dramatic impact on the performance of the various methods. Finally we will compare various 'best predictions' for the different regression methods, in order to visualize the significance of their different approaches. These predictions will be learned on the same randomly sampled set of points in $x,y \in [0,1]$, and applied to a grid of 2000 points in each direction, with their resulting predictions being compared amongst the methods and with the ground truth of the Franke function evaluated on that grid.
+We will first consider samplings of the Franke function. We will analyze the performance of the different regression methods for various models (polynomial degrees) and penalty parameters. We will investigate the bias-variance behaviour of the methods, and the effect of the sampling size.  Finally we will compare various 'best predictions' for the different regression methods, in order to visualize the significance of their different approaches. These predictions will be learned on the same randomly sampled set of points in $x,y \in [0,1]$, and applied to a grid of 2000 points in each direction, with their resulting predictions being compared amongst the methods and with the ground truth of the Franke function evaluated on that grid.
 
 Armed with insights from the investigation of the Franke function, we will subsequently do much of the same analysis for the terrain data. Ultimately we will compare the best predictions for each method (learned on the same downsampled data set) with each other and with the ground truth of the full $[1801,1801]$ terrain map we downsampled from.
 
-%%%The above two paragraphs could probably be cut. -TEM
-
 %%% Note on reproducability. Mention seed used, and refer to github to be able to reproduce the data
-
 \subsection{The Franke function}
 
-    \subsubsection{OLS}
+
+For the Franke function, we will mostly be considering a data set containing n=500 uniformly distributed random points, though we will also briefly comment on some limited results from a set with n=200 points in order to illustrate the effects of sample size. The full set of our calculations and results can be found at our repository \cite{our_repo}. As a technical note, our predictors are always scaled and centered using scikit's StandardScaler, while our response-variables are centered by subtracting the mean.
+
+We start by looking at the behavior of the OLS regression up to a relatively modest complexity of polynomials with degree 5 with the 500 point sample. Figure \ref{fig:confidence intervals} shows the estimated variance and conifdence intervals for the different $\beta$ coefficients when a standard normal noise, with weight 0.2, has been added to the Franke function at each point. The variance and confidence intervals are estimated by:
+
+% Please add the formulas for variance and Confidence intervals.
+
+The interesting point to note is that we see the variance, and hence the confidence intervals, markedly increases as a function of the model's complexity/polynomial degree. This means that as we try to fit with higher order polynomials, we will at some point run into the issue of the variance becoming a worse problem for the fitting than the bias (underfiiting). We can see from figures \ref{fig:r2_vs_noise} and \ref{fig:mse_vs_noise} how the variance, which depends on the noise, impacts the R2-score and the MSE, even at fairly modest complexities; and we can see how increasing the size of the noise decreases the ability of OLS to fit the data.
+
+Keeping the noise at 0.2, we will move on trying to find an optimal model complexity for our n=500 data set. Splitting our data into a training and test set, with a test/training ratio 0.2, we can see how the MSE evolves as a function of polynomial degree in figure \ref{fig:Hastie2.11 MSE Bootstrap}. We might anticipate the rapid increase in the test-MSE being due to the larger variance at higher complexity. This motivates an application of Ridge and Lasso regression, which aim to reduces that variance at the cost of increased bias.
+
+Indeed, performing a bootstrap analysis (with M=100 bootstraps) shows, in figure \ref{mse_bias_variance}, estimates for the test-MSE, the bias squared and the variance for the three different methods. The bottom row of the figure shows the situation for our original n=500 data set. We do confirm that the explosion in the test-MSE is due to the increased variance for higher polynomial degrees. Comparatively, we see that both Ridge and Lasso regression successfully manage to keep the variance down, with seemingly little increase in bias. On the top row we see the same type of bootstrap analysis for a data-set of n=200 points. There, the behavior is qualitatively similar, but the variance is higher for all methods, and it explodes the OLS at a lower polynomial degree.
+
+We want to have a high enough complexity to be able to accommodate the peaks and valleys of the Franke function, while still not overfitting to the noise. In order to find a suitable polynomial degree, we apply k-fold cross-validation, with k=5, to our full data set in order to get a more reliable estimate of the test-MSE than that provided by the bootstrap. For the Ridge and Lasso regressions, the k-fold cross-validation is also performed for a grid (with size 30) of possible values for the regularization parameter $\lambda \in logspace[-6,0]$ in order to select the best value (giving the lowest test-MSE) for a given degree. 
+
+We see, from figure \ref{contour plots}, that while the OLS solution still blows up past a certain complexity, the Ridge and Lasso solutions keep a very stable MSE-score. Looking at the contour-plots of MSE versus $\lambda$ and complexity, we find that there is little change in the test-MSE for Ridge and Lasso over a wide range of $\lambda$ values and polynomial degrees. Though not shown here, we have investigated and found that, with the exception of for very high $\lambda$-values, the bias and variance versus complexity for both ridge and lambda does not vary appreciably with $\lambda$, nor do the actual predictions resulting from those methods trained on our 500-point data set.
+
+Just looking at the MSE-scores one might be tempted to simply pick the method and complexity with the lowest MSE-score. This is not always a good idea. As we will see, a low MSE-score does not guarantee that predictions will be good. In fact, low complexity models, while having small MSE-scores, fail to reproduce more than the main peak of the Franke function. They simply do not have the necessary degrees of freedom to incorporate the finer details. In figure \ref{fig:3d_plots_franke} we show the Franke function and the predictions learned on our n=500 points for OLS, Ridge and Lasso, for the highest complexity OLS manages before the variance becomes large enough to ruin it. This is notedly NOT the highest degree that still keeps a low MSE-score, but rather the highest degree before the variance becomes appreciable in our bootstrap plots. 
+
+We see that the OLS solution clearly most resembles the actual Franke function, even though our error estimates give it a larger MSE than the Ridge and Lasso methods. We find that, while the Ridge and Lasso methods reproduce the main feature (the peak), their attempts at killing of the variance also kills of the actual variations in the underlying Franke function! We do not show it here, but we have tested these predictions for higher polynomial degrees on the exact same data. Those tests reveal that rapidly the OLS solution becomes dominated by the noise, even while keeping a low MSE, while the Ridge and Lasso solutions remain more or less unchanged.
+
+This leads us then to conclude that the "best" fit to this kind of "terrain" data, if the goal is to actually reproduce the qualitative features of the "terrain", is the highest degree of OLS that is not overpowered by the variance. If one insists on using a higher complexity, Ridge and Lasso will remain stable, but might be markedly worse at reproducing the underlying features than a lower degree OLS. As might be imagined after our earlier discussion regarding the effect of the sample size, a larger sample size allows for the use of higher degrees before OLS meets a variance barrier; conversely, with fewer data points the highest "safe" complexity decreases. In the unfortunate case that one has so few data-points that variance becomes an issue even for say polynomial degree 4, then one might actually prefer a higher order Ridge or Lasso fit, to at least capture the main "feel" of the terrain.
+
+
 
     \begin{figure*}
         \centering
@@ -449,60 +467,17 @@ PART A:
 %% Later parts, connect Explosion at ~/10-/20 predictors to existing literature (Harrell pp 74-75)
 
 
-Subsequent parts:
-%Prosjektbeskrivelsen behandler de forskjellige metodene ganske separat, og ber jo om mer eller mindre den samme typen plott tre ganger. Jeg har mest lyst til å kombinere en del av dem. For Franke tenker jeg at vi bør ha:
-%
-%For n=100 og for n=1000, max-degree = 20, med og uten støy
-%
-%- Kryssvalidert MSE for OLS og beste Ridge og beste Lasso som funksjon av polynomgrad.
-%- Bootstrappet bias, varians og MSE for OLS, beste Ridge og beste lambda som funksjon av polynomgrad.
-%- Predikerte plott av typen som ligger i franke_prediction_plots for beste grad (lavest MSE), og for en rimelig høy grad (med nesten like lav MSE)
-%
-%Da får vi allerede 4x4 = 16 plott. Vi bør kanskje ta med et par plott som viser den generelle lambda-avhengigheten, f.eks.
-%
-%For n=1000, max-degree = 20, med støy.
-%- Kryssvalidert MSE for en håndfull Ridge-lambdaer som funksjon av polynomgrad.
-%- Bootstrappet bias, varians og MSE for en håndfull Ridge-lambdaer som funksjon av polynomgrad
-%- Kryssvalidert MSE for en håndfull Lasso-lambdaer som funksjon av polynomgrad.
-%- Bootstrappet bias, varians og MSE for en håndfull Lasso-lambdaer som funksjon av polynomgrad.
-%- Lasso og Ridge kryssvalider MSE for høyeste polynomgrad (19, siden max_degree teller med 0) og for en lavere polynomgrad (f.eks. 8), som en funksjon av lambda
-%
-%Da er vi oppe i 21 figurer.
-%
-%For terrengdataene tenker jeg:
-%
-%For spacing = 40 og for spacing = 100 (tilsvarer 2025 og 324 punkter), med max-degree = 20
-%- Kryssvalidert MSE for OLS og beste Ridge og beste Lasso som funksjon av polynomgrad.
-%- Bootstrappet MSE for OLS og beste Ridge og beste Lasso som funksjon av polynomgrad.
-%-  Predikerte plott av typen som ligger i terrain_prediction_plots for beste grad (lavest MSE), og for en rimelig høy grad (som fremdeles har en rimelig lav MSE).
-%
-%Da får vi 2x4 plott til, og ender opp med 28 plott! I tillegg kunne jeg ha lagt til en haug som viser hvordan polynomenes MSE forandrer seg versus lambda, resultater med forskjellige lambda-intervaller og så videre for stor og liten n, stor og liten spacing, med og uten støy. Rett ut en kombinatorisk eksplosjon.
-%
-%Hovedhistorien, derimot, tenker jeg blir ca. som følger:
-%
-%Vi ser på kryssvalidert MSE for å finne beste polynomgrad. Der ser vi at de tre metodene er omtrent jevnbyrdige inntil OLS eksploderer.
-%
-%Av bias-varians plottet ser vi at det skjer ved at OLS får stor varians, mens ridge og lasso holder seg stabile. Vi ser at eksplosjonen skjer ved høyere grad når vi har flere punkter. Og vi ser at eksplosjonen ikke er (like mye, hvis i det hele tatt) til stede uten støy.
-%
-%Ved de predikerte plottene ser vi at lav polynomgrad ikke ligner særlig, selv om MSE er lav. For høy grad ser vi at OLS går dunken med støy, men klarer seg gjerne best uten støy. Vi ser at Ridge redder de høye polynomene når du har støy. Lasso ser vi at prøver å glatte ut hele plottet; ikke rart siden prediktorene våre er sterkt korrelerte.
-%Vi ser at det meste blir bedre med flere punkter, og at høy polynomgrad kanskje ikke hjelper hvis man har for få datapunkter, selv med hjelp fra Ridge.
-%
-%Av de lambda-relaterte plottene ser vi at begge metodene kverker variansen, og ikke gir store forskjeller i MSE over et stort lambda-intervall. De største farene er ved veldig liten (numeriske feil), eller veldig stor lambda (stor effekt av penalty). Der kverker Lasso alt, og gir oss et skråplan, mens Ridge prøver å gjøre det samme uten helt å flate alt.
-%
-%Litt den samme karusellen gjør vi med terrengdataene. Der ser vi av de kryss-validerte MSE-ene at Lasso og Ridge stabiliserer seg som lave, selv vedhøye polynomer, mens OLS sprenges kraftig ved få punkter, og potensielt også ved mange punkter, men ved høyere polynomgrad.
-%
-%Av bias-varians-bootstrappen ser vi OLS mislykkes pga. varians. Da kan Ridge være til hjelp.
-%
-%De predikerte plottene viser at grunnen til at Ridge og Lasso gir liten MSE ved høye grader og få punkter, er at de flater ut alt. OLS er best på å gjenskape landskapets ‘ruglethet’, men kan fordreies kraftig ved få punkter.
-%
-%Vi ser at lav polynomgrad i alle tilfeller gjør oss ute av stand til å fange noe særlig av landskapet ruglethet. Med mange punkter kan vi gå opp til høye polynomgrader og fremdeles bruke OLS, som er mest sensitiv til landskapets variasjon. Det er likevel en risiko for at OLS prediksjonen blir fordreid, og da kan det være bedre å enten gå ned noen grader, eller bruke Ridge. Alt blir bedre med flere punkter.
-%
-%Oppsummert: Ikke bruk Lasso på denne typen terremgprediksjon med polynomer som basis. For god gjenskapning av terrenget trengs høy polynomgrad. Har man da ikke nok datapunkter blåser OLS opp som den store, stygge ulven i en ballongblåser-konkurrqnse. Ved ustabil OLS kan Ridge hjelpe, men går på bekostningen av detaljer i terrenget.
-
 
 
 \subsection{The terrain data}
 
+We then proceed to treat the terrain data in an almost identical fashion. We will be using a data set containing 2116 pixels/points created by picking only every 40th point in x and y from the original [1801, 1801] map. That is, we downsample into a map off [46, 46] pixels. 
+
+Once again using k-fold cross-validation, with k=5, on our complete data set, we try to estimate what the optimal complexities and penalty parameters might be for the three methods. The results are shown in \ref{fig:terrain_contour_plots}. We see, once again, that the MSE-scores keep fairly for Ridge and Lasso, and that there is little dependence on $\lambda$ outside the very largest values. Here, the MSE for OLS is actually decreasing with complexity, until it blows up past a certain point. 
+
+A bootstrapped bias-variance analysis of a train-test split, with test/train ratio 0.2, is then performed, in order to see whether the exploding OLS-MSE is due to variance and whether Ridge and Lasso manage to keep the variance down. Figure \ref{fig:terrain_bootstrap} shows this to be the case. Ridge and Lasso do keep the variance in check, so that most of their errors are due to bias. For OLS we see that it performs quite well, according to MSE, until the variance kicks in and poisons the solutions.
+
+Keeping in mind our previous lesson about MSE-scores not being the whole picture, we try to recreate our original terrain data with predictions learned on our 2116 points. We try the highest polynomial degree before the OLS solution blows up, and find that the variance is still significantly high to severely disfigure our predictions, even though the MSE-score is actually at its lowest. Going down in complexity until the variance becomes a sufficiently minor component of the error leads us to what we consider the best prediction for the given number of 2116 data points. This is shown in figure \ref{fig:3d_terrain}. We see that only the OLS method really manages to capture the variability of the terrain, the other two mainly identify a peak and a bottom and smooth out the paths between.
 
 
     \begin{figure}[h!tb]
@@ -563,6 +538,12 @@ Subsequent parts:
 %\section{Discussion}
 
 \section{Conclusion}
+
+
+We have analyzed the performance of OLS, Ridge and Lasso regression on 'terrain-like' types of data, where the regression model was two-dimensional polynomials of varying degrees. We find that in order to qualitatively predict finer features of the terrain, only OLS is really useful; the other two methods smooth out the actual terrain variations in an effort to be stable against variance. The best qualitative description, for a given number of input sample points, is given by the highest degree OLS-solution where the variance remains insignificant. At higher degrees the variance becomes strong enough to completely mar the predictions, even though the MSE-score may remain deceptively low. Should the number of input data-points be so low that the highest "safe" OLS solution is such an exceedingly low degree as to be useless, then Ridge or Lasso at higher complexities may at least predict the main features of the terrain. 
+
+As a concluding observation, the authors conjecture that the use of a different type of basis functions might be appropriate for these kind of 'terrain-like' data sets. For instance orthogonal polynomials, or a Fourier-type basis set, could be global basis sets that allow Ridge and Lasso to be more discerning in their regularizations, than with the highly correlated polynomials that have been used in the present study. Or basis functions with compact support, which are only non-zero on limited domains, such as B-splines could provide more freedom to adapt to the actual variations in the terrains, without having overfitting ramifications outside their support.
+
 
 \onecolumngrid
 \bibliography{bibfile}
