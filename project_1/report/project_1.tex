@@ -98,7 +98,7 @@
                 \textup{R}^2(\pmb y, \tilde{\pmb{y}}) = 1 -
                 \frac{\sum_i(y_i - \tilde y_i)^2}{\sum_i \qty(y_i - \mathbb E\qty[\pmb y])^2}
             \end{equation}
-            which loosely speaking is a measure of well the proposed model predicts the variance of the data set, where R$^2 = 1$ corresponds to a perfect fit and R$^2 < 1$ an increasingly worse fit. It is worth to note that the MSE and R$^2$ are essentially equivalent when measuring the performance of a model on a particular sample, which is ultimately determined by the $\sum_i(y_i - \tilde y_i)^2$ term in both cases. Thus they differ only in scaling \& centering. However, $R^2$ will notably yield results which translates somewhat more directly across different models.
+            which loosely speaking is a measure of well the proposed model predicts the variance of the data set, where R$^2 = 1$ corresponds to a perfect fit and R$^2 < 1$ an increasingly worse fit. It is worth to note that the MSE and R$^2$ are essentially equivalent when measuring the performance of a model on a particular sample, which is ultimately determined by the $\sum_i(y_i - \tilde y_i)^2$ term in both cases. Thus they differ mainly in scaling \& centering. However, $R^2$ will notably yield results which translates somewhat more directly across different models.
 
             A particularly important point to make when considering these measures is that they will both generally favor increasingly higher degree polynomials when looking at some particular data set. Whilst yielding good MSE \& R$^2$ scores this leads to over-fitting, where the model becomes too specialized to one particular sample which means that the overall predictive capabilities of the model actually decreases. We will look closer at the details of this in a later section. For now, we simply note that this problem motivates us to split our data sets into training and test sets. Where we train our model using the training set, and subsequently validate the model by computing the MSE \& R$^2$ scores on the test sets. Thus, if our model becomes too specialized to the training set, this will lower MSE \& R$^2$ scores in the test set, giving us a much better indication on the predictive capabilities of our model.
 
@@ -362,7 +362,7 @@ Armed with insights from the investigation of the Franke function, we will subse
     \begin{figure}
         \centering
         \includegraphics[width=\columnwidth]{Franke_mean_confidence_interval.pdf}
-        \caption{Mean size of the 94\% confidence interval across all the predictors for polynomials up to the $5^{\textup{th}}$ order with OLS for $N=500$ random samples of the Franke Function. Where the dashed line indicates $2^\textup{nd}$ order polynomial regression of the points}
+        \caption{Mean size of the $4\sigma$ (95\%) confidence interval across all the predictors for polynomials up to the $5^{\textup{th}}$ order with OLS for $N=500$ random samples of the Franke Function. Where the dashed line indicates $2^\textup{nd}$ order polynomial regression of the points}
     \end{figure}
 
 
@@ -444,8 +444,10 @@ PART A:
 % Confidence interval of beta seems to grow ~p^2 [ref to plot]
 % MSE plot -> refer to full plot later to reduce clutter?
 % Mention how data is scaled & split
+% ~94% confidence interval is well justified, supported by Hastie (pp. 49)
 
-%% Later parts, connect Explosion at ~/10-/20 predictors to existing literature (Harrell)
+%% Later parts, connect Explosion at ~/10-/20 predictors to existing literature (Harrell pp 74-75)
+
 
 Subsequent parts:
 %Prosjektbeskrivelsen behandler de forskjellige metodene ganske separat, og ber jo om mer eller mindre den samme typen plott tre ganger. Jeg har mest lyst til å kombinere en del av dem. For Franke tenker jeg at vi bør ha:
