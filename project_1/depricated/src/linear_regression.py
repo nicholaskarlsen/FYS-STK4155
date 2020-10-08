@@ -1,8 +1,6 @@
 import numpy as np
-import numba
 
 
-@numba.jit(nopython=True)
 def design_matrix_2D(x, y, n):
     """Constructs a design matrix for 2D input data i.e f: (x, y) -> z where the target function
     is an n-th degree polynomial.
@@ -15,14 +13,14 @@ def design_matrix_2D(x, y, n):
     Returns:
         [Array] : Design matrix yielding the least-squares solution
     """
-    N = x.size  # Number of data points
-    d = int((n + 1) * (n + 2) / 2.0)  # d.o.f for n-th degree polynomial
-    X = np.empty((N, d))  # Design matrix
+    N = len(x)                          # Number of data points
+    d = int((n + 1) * (n + 2) / 2.0)    # d.o.f for n-th degree polynomial
+    X = np.zeros([N, d])                # Design matrix
 
-    X[:, 0] = 1  # Set the first column to ones
+    X[:, 0] = 1
 
     for i in range(1, n + 1):
-        q = int(i * (i + 1) / 2)  # Number of terms with degree < i
+        q = int(i * (i + 1) / 2)       # Number of terms with degree < i
         for k in range(i + 1):
             X[:, q + k] = x ** (i - k) * y ** k
 
@@ -44,9 +42,9 @@ def evaluate_poly_2D(x, y, beta, n):
     z = np.zeros(x.shape)
     z += beta[0]
     for i in range(1, n + 1):
-        q = int(i * (i + 1) / 2)  # Number of terms with degree < i
+        q = int(i * (i + 1) / 2)        # Number of terms with degree < i
         for k in range(i + 1):
-            z += beta[q + k] * x ** (i - k) * y ** k
+            z += beta[q + k]  * x ** (i - k) * y**k
 
     return z
 
@@ -65,8 +63,7 @@ def OLS_2D(X, z):
 
     return beta
 
-
-def OLS_SVD_2D(X, z, use_np_pinv=True):
+def OLS_SVD_2D(X, z, use_np_pinv = True):
     """Computes the ordinary least squares solution of X -> (z) where X is the design
         matrix for an p-th degree polynomial fitting, using the SVD-inversion.
     Args:
@@ -83,19 +80,18 @@ def OLS_SVD_2D(X, z, use_np_pinv=True):
     else:
 
         U, s, V = np.linalg.svd(X)
-        tolerance = s[0] * 1e-14
+        tolerance = s[0]*1e-14
         if U.shape[0] >= V.shape[0]:
-            reciprocal_s = np.where(s > tolerance, 1 / s, 0)
+            reciprocal_s = np.where(s>tolerance,1/s,0)
         else:
-            reciprocal_s = np.where(s > tolerance, 1 / s, 0).reshape(-1, 1)
+            reciprocal_s = np.where(s>tolerance,1/s,0).reshape(-1,1) 
 
-        D = np.eye(len(U), len(V)) * reciprocal_s
+        D = np.eye(len(U),len(V)) * reciprocal_s
 
         pseudo_inv = V.T @ D.T @ U.T
-        beta = pseudo_inv @ z
+        beta =  pseudo_inv @ z
 
     return beta
-
 
 def Ridge_2D(X, z, lamb):
     """Computes the ordinary least squares solution of X -> (z) where X is the design
@@ -107,8 +103,8 @@ def Ridge_2D(X, z, lamb):
     Returns:
         beta (Array): The beta vector
     """
-    p_feat = len(X[0, :])  # number of columns/features in X
-    I = np.eye(p_feat, p_feat)
+    p_feat = len(X[0,:]) #number of columns/features in X
+    I = np.eye(p_feat,p_feat)
     beta = np.linalg.inv(X.T @ X + lamb * I) @ X.T @ z
 
     return beta
