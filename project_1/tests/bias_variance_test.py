@@ -10,7 +10,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.utils import resample
 
 import sys
-sys.path.insert(0,"../src_fork/")
+sys.path.insert(0,"../src/")
 
 import linear_regression
 import utils

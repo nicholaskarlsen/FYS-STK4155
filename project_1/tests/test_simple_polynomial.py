@@ -5,7 +5,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
 import sys
-sys.path.insert(0,"../src_fork/")
+sys.path.insert(0,"../src/")
 
 import linear_regression
 import utils
@@ -14,6 +14,8 @@ import crossvalidation
 import bootstrap
 
 utils.plot_settings()  # LaTeX fonts in Plots!
+
+######### THIS IS OLD STUFF! ############
 
 
 def test_function(x, y):
