@@ -217,9 +217,9 @@
 
         Here, we will focus on two of many such techniques.
 
-        \subsubsection{Cross Validation}
+        \subsubsection{k-fold Cross Validation}
             \noindent
-            In the cross-validation re-sampling method, we split our data set $S$ into $k$ equally sized subsets $s_1, \dots, s_k$.
+            In the $k$-fold cross-validation re-sampling method, we split our data set $S$ into $k$ equally sized subsets $s_1, \dots, s_k$.
             We then for each $i = 1,\dots, k$ assign the $i$-th subset as the test set and the remaining $k-1$ subsets as the training set and compute the statistics in the usual way. Then at the end, we compute the mean value of the $k$ sets of statistics. A visual representation of this process can be seen in Fig.~\ref{fig: Cross Validation}.
             \begin{figure}[h!tb]
                 \center
@@ -229,8 +229,6 @@
             \end{figure}
             When doing cross-validation, typical choices of $k$ are $5$ and $10$ \cite{hastie}. Which one is better will depend on how the error scales with the size of the training set, as such, choosing a suitable $k$ requires some analysis.
             The cross-validation re-sampling provides a good estimate for the mean error of our estimates.
-% I think that might get too involved; I feel like it is sufficient to present the CV, and say why we use it (to get more reliable test-MSE's). -TEM
-
 
         \subsubsection{Bootstrap}
             \noindent
@@ -384,23 +382,25 @@ Here, we present the above analysis performed for two datasets consisting of $N=
 As we saw in Fig.~\ref{fig:Hastie2.11 MSE Bootstrap}, once the complexity of our model reaches approximately the $8^{\textup{th}}$ order, the MSE of our test set begins to grow rapidly. Looking then at Fig.~\ref{fig:franke ols bootstrap n 500}, we observe at the same complexity that the variance overtakes the square bias, and thus becomes the dominating term. Hence, this rapid growth of the MSE observed in \ref{fig:Hastie2.11 MSE Bootstrap} is an indication of the model being over-fitted to the data sample.
 This problem motivates the usage of Ridge and LASSO regression, which as we can see in Fig.~\ref{fig:franke ols bootstrap n 500} and Fig.~\ref{fig:franke lasso bootstrap n 500} successfully suppresses the variance from becoming dominant for higher complexities. Furthermore, in both cases this is accomplished without affecting the bias of the model to a significant extent thus keeping the MSE relatively stable.
 
-We turn then to Fig.~\ref{fig:franke ols bootstrap n 200}, \ref{fig:franke ridge bootstrap n 200}, \ref{fig:franke lasso bootstrap n 200} for the same analysis performed in a situation where the number of data samples has been limited to $N=200$. Here, we observe the same problem but shifted to an earlier complexity and to a much greater extent. Furthermore, the problem of overfitting is apparanlty much greater in this case. We may explain this by considering how the number of data points in our sample related to the total number of predictors in our model for each complexity. Using Eqn.~\ref{eqn:number of predictors wrt complexity}, we may compute easily the number of predictors, which for convenience we list here in the following table for a range of complexities
+We turn then to Fig.~\ref{fig:franke ols bootstrap n 200}, \ref{fig:franke ridge bootstrap n 200}, \ref{fig:franke lasso bootstrap n 200} for the same analysis performed in a situation where the number of data samples has been limited to $N=200$. Here, we observe the same problem but shifted to an earlier complexity and to a much greater extent. Furthermore, the problem of overfitting is apparanlty much greater in this case. We may explain this by considering how the number of data points in our sample related to the total number of predictors in our model for each complexity. Using Eqn.~\ref{eqn:number of predictors wrt complexity}, we may compute easily the number of predictors, which for convenience we list here in the table \ref{tab: no predictors wrt complexity} for a range of complexities
+
 \begin{table}[h!]
-\begin{tabular}{|c | c | c | c | c | c | c | c | c | c | c | c | c | c |}
-\hline
- Complexity     & 3  & 4  & 5  & 6  & 7  & 8  & 9  & 10 & 11 & 12 & 13 & 14 & 15 \\
- No. Predictors & 10 & 15 & 21 & 28 & 36 & 45 & 55 & 66 & 78 & 91 & 105 & 120 & 136
- \\ \hline
-\end{tabular}
+    \caption{\label{tab: no predictors wrt complexity}}
+    \begin{tabular}{|c | c | c | c | c | c | c | c | c | c | c | c | c | c |}
+    \hline
+     Complexity     & 3  & 4  & 5  & 6  & 7  & 8  & 9  & 10 & 11 & 12 & 13 & 14 & 15 \\
+     No. Predictors & 10 & 15 & 21 & 28 & 36 & 45 & 55 & 66 & 78 & 91 & 105 & 120 & 136
+     \\ \hline
+    \end{tabular}
 \end{table}
+
 Looking at Fig.~\ref{fig:franke ols bootstrap n 200}, we observe the variance to become problematic at around the $5^{\textup{th}}-7^{\textup{th}}$ order. Corresponding to 21-36 predictors. Similarly, in the case of $N=500$ the same problem begins to occur at the around the $8^{\textup{th}}$ order. Common to both of these cases are that the variance begins to increase rapidly once the number of predictors starts to approach $\sim 10\%$ the number of data points. This observation is supported by \textcite{Harell}, in which limiting the complexity to $20\%-10\%$ is proposed as a safe limit for the number of predictors, depending on the situation.
 
-
-
-% Mention number of predictors
-% Cite harell
-
-%Indeed, performing a bootstrap analysis (with M=100 bootstraps) shows, in Fig.~\ref{mse_bias_variance}, estimates for the test-MSE, the bias squared and the variance for the three different methods. The bottom row of the figure shows the situation for our original n=500 data set. We do confirm that the explosion in the test-MSE is due to the increased variance for higher polynomial degrees. Comparatively, we see that both Ridge and Lasso regression successfully manage to keep the variance down, with seemingly little increase in bias. On the top row we see the same type of bootstrap analysis for a data-set of n=200 points. There, the behavior is qualitatively similar, but the variance is higher for all methods, and it explodes the OLS at a lower polynomial degree.
+We then move on to the $5-$fold cross-validation (CV), which is summarized for all the regression methods and both of the datasets in Fig.~\ref{fig:franke_contour_plots}. Here, we note in particular for OLS that the CV yields a relatively low estimate of the MSE compared to the bootstrap.
+% COME BACK TO THIS
+%We make an attempt at explaining this discrepancy by considering more closely the differences between the two re-sampling techniques.
+%Starting with the cross-validation; here we are testing our models performance with data points which all come from the original data set.
+%Conversely, when performing the bootstrapped re-sample, we generate a training data set which is in essence a small perturbation of our input training data set, where as the testing set is kept static across all iterations. Thus, when testing the performance of the bootstrapped model, for each iteration we test a model generated from a slightly perturbed sample space which introduces an inherent additional error to the computed MSE compared to the CV.
 
 %We want to have a high enough complexity to be able to accommodate the peaks and valleys of the Franke function, while still not over-fitting to the noise. In order to find a suitable polynomial degree, we apply k-fold cross-validation, with k=5, to our full data set in order to get a more reliable estimate of the test-MSE than that provided by the bootstrap. For the Ridge and Lasso regressions, the k-fold cross-validation is also performed for a grid (with size 30) of possible values for the regularization parameter $\lambda \in [10^{-6},10^{0}]$ in order to select the best value (giving the lowest test-MSE) for a given degree.
 
@@ -411,8 +411,6 @@ Looking at Fig.~\ref{fig:franke ols bootstrap n 200}, we observe the variance to
 %We see that the OLS solution clearly most resembles the actual Franke function, even though our error estimates give it a larger MSE than the Ridge and Lasso methods. We find that, while the Ridge and Lasso methods reproduce the main feature (the peak), their attempts at killing of the variance also kills of the actual variations in the underlying Franke function! We do not show it here, but we have tested these predictions for higher polynomial degrees on the exact same data. Those tests reveal that rapidly the OLS solution becomes dominated by the noise, even while keeping a low MSE, while the Ridge and Lasso solutions remain more or less unchanged.
 
 %This leads us then to conclude that the "best" fit to this kind of "terrain" data, if the goal is to actually reproduce the qualitative features of the "terrain", is the highest degree of OLS that is not overpowered by the variance. If one insists on using a higher complexity, Ridge and Lasso will remain stable, but might be markedly worse at reproducing the underlying features than a lower degree OLS. As might be imagined after our earlier discussion regarding the effect of the sample size, a larger sample size allows for the use of higher degrees before OLS meets a variance barrier; conversely, with fewer data points the highest "safe" complexity decreases. In the unfortunate case that one has so few data-points that variance becomes an issue even for say polynomial degree 4, then one might actually prefer a higher order Ridge or Lasso fit, to at least capture the main "feel" of the terrain.
-
-
 
 \begin{figure*}
     \centering
