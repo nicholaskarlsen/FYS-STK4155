@@ -401,10 +401,15 @@ We then move on to the $5-$fold cross-validation (CV), which is summarized for a
 %We make an attempt at explaining this discrepancy by considering more closely the differences between the two re-sampling techniques.
 %Starting with the cross-validation; here we are testing our models performance with data points which all come from the original data set.
 %Conversely, when performing the bootstrapped re-sample, we generate a training data set which is in essence a small perturbation of our input training data set, where as the testing set is kept static across all iterations. Thus, when testing the performance of the bootstrapped model, for each iteration we test a model generated from a slightly perturbed sample space which introduces an inherent additional error to the computed MSE compared to the CV.
+Looking more closely at the CV plots in Fig.~\ref{fig:franke_contour_plots}, we observe the same phenomenon as we did with the bootstrap, where the MSE grows rapidly for OLS past a certain complexity. However, in this case we also get a much better insight of how Ridge and LASSO behaves wrt. $\lambda$. We observe that there is little change in the MSE for Ridge and Lasso over a wide range of $\lambda$ values and polynomial degrees. Though not shown here, we have investigated and found that, with the exception of for very high $\lambda$-values, the bias and variance versus complexity for both ridge and lambda does not vary appreciably with $\lambda$, nor do the actual predictions resulting from those methods trained on our 500-point data set.
+
+%Starting with Ridge for $N=200$ and $N=500$ shown in Figs.~\ref{franke Ridge CV 200}, \ref{franke Ridge CV 500} respectively. We see particularly well in Fig.~\ref{franke OLS CV 200} how the additional penalty parameter $\lambda$ acts on the increasing variance present in the OLS. It seems that as you increase the complexity, you similarly also have to increase $\lambda$ to avoid the MSE from growing. However, LASSO on the other hand seems to handle both the $N=200$ and $N=500$ cases in very similar fashions as observed in Fig.~\ref{franke LASSO CV 200} and Fig.~\ref{franke LASSO CV 500}, suggesting that LASSO is somewhat less reliant on the sample size compared to Ridge.
 
 %We want to have a high enough complexity to be able to accommodate the peaks and valleys of the Franke function, while still not over-fitting to the noise. In order to find a suitable polynomial degree, we apply k-fold cross-validation, with k=5, to our full data set in order to get a more reliable estimate of the test-MSE than that provided by the bootstrap. For the Ridge and Lasso regressions, the k-fold cross-validation is also performed for a grid (with size 30) of possible values for the regularization parameter $\lambda \in [10^{-6},10^{0}]$ in order to select the best value (giving the lowest test-MSE) for a given degree.
 
 %We see, from Fig.~\ref{fig:franke_contour_plots}, that while the OLS solution still blows up past a certain complexity, the Ridge and Lasso solutions keep a very stable MSE-score. Looking at the contour-plots of MSE versus $\lambda$ and complexity, we find that there is little change in the test-MSE for Ridge and Lasso over a wide range of $\lambda$ values and polynomial degrees. Though not shown here, we have investigated and found that, with the exception of for very high $\lambda$-values, the bias and variance versus complexity for both ridge and lambda does not vary appreciably with $\lambda$, nor do the actual predictions resulting from those methods trained on our 500-point data set.
+
+\subsubsection{Fitting the Franke Function}
 
 %Just looking at the MSE-scores one might be tempted to simply pick the method and complexity with the lowest MSE-score. This is not always a good idea. As we will see, a low MSE-score does not guarantee that predictions will be good. In fact, low complexity models, while having small MSE-scores, fail to reproduce more than the main peak of the Franke function. They simply do not have the necessary degrees of freedom to incorporate the finer qualitative details. In Fig.~\ref{fig:3d_plots_franke} we show the Franke function and the predictions learned on our n=500 points for OLS, Ridge and Lasso, for the highest complexity OLS manages before the variance becomes large enough to ruin it. This is notedly NOT the highest degree that still keeps a low MSE-score, but rather the highest degree before the variance becomes appreciable in our bootstrap plots.
 
@@ -431,23 +436,23 @@ We then move on to the $5-$fold cross-validation (CV), which is summarized for a
 \begin{figure*}
      \centering
       \subfloat[][OLS, N=200]{
-        \includegraphics[width=0.5\columnwidth]{OLS_CV_Franke_N_200.pdf}\label{<figure1>}
+        \includegraphics[width=0.5\columnwidth]{OLS_CV_Franke_N_200.pdf}\label{franke OLS CV 200}
      }
      \subfloat[][Ridge, N=200]{
-        \includegraphics[width=0.75\columnwidth]{RIDGE_CV_Franke_contour_N_200.pdf}\label{<figure1>}
+        \includegraphics[width=0.75\columnwidth]{RIDGE_CV_Franke_contour_N_200.pdf}\label{franke Ridge CV 200}
      }
      \subfloat[][LASSO, N=200]{
-        \includegraphics[width=0.75\columnwidth]{LASSO_CV_Franke_contour_N_200.pdf}\label{<figure2>}
+        \includegraphics[width=0.75\columnwidth]{LASSO_CV_Franke_contour_N_200.pdf}\label{franke LASSO CV 200}
      }
      \\
      \subfloat[][OLS, N=500]{
-        \includegraphics[width=0.5\columnwidth]{OLS_CV_Franke_N_500.pdf}\label{<figure1>}
+        \includegraphics[width=0.5\columnwidth]{OLS_CV_Franke_N_500.pdf}\label{franke OLS CV 500}
      }
      \subfloat[][Ridge, N=500]{
-        \includegraphics[width=0.75\columnwidth]{RIDGE_CV_Franke_contour_N_500.pdf}\label{<figure1>}
+        \includegraphics[width=0.75\columnwidth]{RIDGE_CV_Franke_contour_N_500.pdf}\label{franke Ridge CV 500}
      }
      \subfloat[][LASSO, N=500]{
-        \includegraphics[width=0.75\columnwidth]{LASSO_CV_Franke_contour_N_500.pdf}\label{<figure2>}
+        \includegraphics[width=0.75\columnwidth]{LASSO_CV_Franke_contour_N_500.pdf}\label{franke LASSO CV 500}
      }
      \caption{MSE for $k=5$ cross-validated Ridge \& LASSO regression performed on $N$ samples of the Franke Function with added random noise in the form $0.2\cdot\mathcal N(0, 1)$}
      \label{fig:franke_contour_plots}
@@ -511,14 +516,18 @@ We then move on to the $5-$fold cross-validation (CV), which is summarized for a
 
 \subsection{The terrain data}
 \noindent
-We then proceed to treat the terrain data in an almost identical fashion. We began by using a data set containing 2116 pixels/points created by picking only every 40th point in x and y from the original $1801\times1801$ map. That is, we down-sample into a map consisting of $46\times46$ pixels.
+Following our analysis of the Franke function, we performed a similar analysis of Terrain data provided by \cite{4155_repo}. In order to reduce the computational time required to process and analyze the data, we limited ourselves to a subsection of the full data set which was further down-sampled by only sampling every 40$^{\textup{th}}$ pixed of the subsection. The full data set, as well as the down-sampled subset are both shown in Fig.~\ref{fig:terrain image}.
+
+Once again using $k$-fold cross-validation with $k=5$ on our complete data set, we try to estimate what the optimal complexities and penalty parameters might be for the three methods. The results are shown in Fig.~\ref{fig:terrain_contour_plots}. We see once again that the MSE-scores remains quite consistent for Ridge and Lasso, and that there is little dependence on $\lambda$ outside the very largest values. Here, the MSE for OLS is actually decreasing with complexity, until it blows up past a certain point.
+
+A bootstrapped bias-variance analysis of a train-test split, with test/train ratio 0.2, is then performed, in order to see whether the exploding OLS MSE is due to variance and whether Ridge and Lasso manage to keep the variance down. Fig.~\ref{fig:terrain_bootstrap} shows this to be the case. Ridge and LASSO do keep the variance in check, so that most of their errors are due to bias. For OLS we see that it performs quite well according to MSE, until the variance kicks in and leads to a rapid growth similar to what we observed for the Franke function.
+
+%We then proceeded to treat the terrain data in an almost identical fashion as we did for the Franke Function. We began by using a data set containing 2116 pixels/points created by picking only every 40th point in x and y from the original $1801\times1801$ map. That is, we down-sample into a map consisting of $46\times46$ pixels.
 % Note the origin of the data set
 
-Once again using $k$-fold cross-validation, with $k=5$, on our complete data set, we try to estimate what the optimal complexities and penalty parameters might be for the three methods. The results are shown in Fig.~\ref{fig:terrain_contour_plots}. We see, once again, that the MSE-scores remains quite consistent for Ridge and Lasso, and that there is little dependence on $\lambda$ outside the very largest values. Here, the MSE for OLS is actually decreasing with complexity, until it blows up past a certain point.
 
-A bootstrapped bias-variance analysis of a train-test split, with test/train ratio 0.2, is then performed, in order to see whether the exploding OLS-MSE is due to variance and whether Ridge and Lasso manage to keep the variance down. Fig.~\ref{fig:terrain_bootstrap} shows this to be the case. Ridge and Lasso do keep the variance in check, so that most of their errors are due to bias. For OLS we see that it performs quite well, according to MSE, until the variance kicks in and poisons the solutions.
 
-Keeping in mind our previous lesson about MSE-scores not being the whole picture, we try to recreate our original terrain data with predictions learned on our 2116 points. We try the highest polynomial degree before the OLS solution blows up, and find that the variance is still significantly high to severely disfigure our predictions, even though the MSE-score is actually at its lowest. Going down in complexity until the variance becomes a sufficiently minor component of the error leads us to what we consider the best prediction for the given number of 2116 data points. This is shown in Fig.~\ref{fig:3d_terrain}. We see that only the OLS method really manages to capture the variability of the terrain, the other two mainly identify a peak and a bottom and smooth out the paths between.
+% Keeping in mind our previous lesson about MSE-scores not being the whole picture, we try to recreate our original terrain data with predictions learned on our 2116 points. We try the highest polynomial degree before the OLS solution blows up, and find that the variance is still significantly high to severely disfigure our predictions, even though the MSE-score is actually at its lowest. Going down in complexity until the variance becomes a sufficiently minor component of the error leads us to what we consider the best prediction for the given number of 2116 data points. This is shown in Fig.~\ref{fig:3d_terrain}. We see that only the OLS method really manages to capture the variability of the terrain, the other two mainly identify a peak and a bottom and smooth out the paths between.
 
 
 \begin{figure}
