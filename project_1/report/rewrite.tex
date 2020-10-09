@@ -327,13 +327,13 @@
         \end{figure}
 
 \section{Results \& Discussion}
-
-We aim to model both the Franke function and the terrain data as sums of polynomials in x and y. Our overarching goal is to determine which regression method performs the best (i.e. most faithfully reproduces the full data-set on which they are sampled) in both cases, and for which degree of the polynomial model and which value of the penalty parameter $\lambda$. The Franke function is given as in Eqn. \ref{eq:franke} over the domain $x,y \in [0,1]$.
+\noindent
+We aim to model both the Franke function and a set of terrain data as sums of polynomials in $x$ and $y$. Our overarching goal is to determine which regression method performs the best (i.e. most faithfully reproduces the full data-set on which they are sampled) in both cases, and for which degree of the polynomial model and which value of the penalty parameter $\lambda$.
+% The Franke function is given as in Eqn. \ref{eq:franke} over the domain $x,y \in [0,1]$.
 
 The terrain data, which has been downloaded from \cite{4155_repo}, is a collection of measured elevation heights at a discrete set of $3601\times1801$ pixel coordinates. For ease of interpretation and computation, we parameterize the pixel indices as uniformly spaced $x,y \in [0,1]$, and restrict ourselves to the first square of the terrain map, i.e. the first $[1801,1801]$ pixels.
 
-
-We will first consider random samples of the Franke function. We will analyze the performance of the different regression methods for various models (polynomial degrees) and penalty parameters. We will investigate the bias-variance behaviour of the methods, and the effect of the sampling size.  Finally we will compare various 'best predictions' for the different regression methods, in order to visualize the significance of their different approaches. These predictions will be learned on the same randomly sampled set of points in $x,y \in [0,1]$, and applied to a grid of 2000 points in each direction, with their resulting predictions being compared amongst the methods and with the ground truth of the Franke function evaluated on that grid.
+We first consider random samples of the Franke function where we analyze the performance of the different regression methods for various models (polynomial degrees) and penalty parameters. We then investigate the bias-variance behaviour of the methods, and the effect of the sampling size.  Finally we compare various 'best predictions' for the different regression methods, in order to visualize the significance of their different approaches. These predictions are all trained on the same randomly sampled set of points in $x,y \in [0,1]$, and applied to a grid of 2000 points in each direction, with their resulting predictions being compared amongst the methods and with the ground truth of the Franke function evaluated on that grid.
 
 Armed with insights from the investigation of the Franke function, we will subsequently do much of the same analysis for the terrain data. Ultimately we will compare the best predictions for each method (learned on the same down-sampled data set) with each other and with the ground truth of the full $[1801,1801]$ terrain map we down-sampled from.
 
@@ -348,12 +348,13 @@ Throughout our analysis of the Franke function our focus was primarily on a data
 %We start by looking at the behaviour of the OLS regression limited to a relatively modest complexity of polynomials up to the $5^\textup{th}$ order and a dataset consisting of $N=500$ random samples of the Franke function. Fig.~\ref{fig:confidence intervals} shows the estimated variance and confidence intervals for the different $\beta$ coefficients when a standard normal noise, with weight 0.2, has been added to the Franke function at each point. The variance and confidence intervals are estimated by:
 
 \noindent
-We start by looking at the behaviour of OLS limited to relatively modest complexities of polynomials up to the $5^{\textup{th}}$ order modeled from data sets consisting of $N=500$ random samples of the Franke function with added random noise in the form $0.2\mathcal N(0, 1)$. We also chose our confidence interval for the predictors as $\beta_i\pm 2\sigma_i$ in adherence with the literature as a standard choice \cite{hastie}, which corresponds to $95\%$ of similarly sampled models falling within our range of uncertainty.
+We start by looking at the behaviour of OLS limited to relatively modest complexities of polynomials up to the $5^{\textup{th}}$ order modeled from data sets consisting of $N=500$ random samples of the Franke function with added random noise in the form $0.2\mathcal N(0, 1)$. We also chose our confidence interval for the predictors as $\beta_i\pm 2\sigma_i$ in adherence with the literature as a standard choice \cite{hastie}, which corresponds to $95\%$ of similarly sampled models falling within our range of uncertainty. Here, $\sigma_i$ denotes the standard deviation of $\beta_i$ computed as the root of the variance given by Eqn.~\ref{eqn:OLS beta variance}.
+Furthermore, we also scale this and all subsequent datasets by first subtracting the mean of our response variable, then applying sci-kit learns \cite{scikit-learn} \lstinline{StandardScaler()} functionality.
 
 In Fig.~\ref{fig:confidence intervals} we see the size of each predictor $\beta_i$ for a $5^{\textup{th}}$ order polynomial. Further, we also see the full size of confidence interval for each term for all the polynomial degrees $p = 1,\dots, 5$.
 
 We observe that the confidence intervals markedly increases as a function of the models complexity, as shown more explicitly in Fig.~\ref{fig:mean confidence interval}, which seems to suggest a $\sim$ quadratic trend. This implies that as we try to model our data on higher order polynomials, we will at some point run into the issue of the confidence interval of our predictors becoming an increasingly significant problem for the regression.
-We observe the manifestation of this problem more concretely in the as the complexity grows in Fig.\ref{fig:Hastie2.11 MSE Bootstrap}, where we observe a rather significant rise in the MSE of the test set compared to the training set.
+We observe the manifestation of this problem more concretely as the complexity grows large in Fig.\ref{fig:Hastie2.11 MSE Bootstrap}, where we observe a rather significant rise in the MSE of the test set compared to the training set.
 
 \begin{figure}[h!tb]
     \center
@@ -362,7 +363,7 @@ We observe the manifestation of this problem more concretely in the as the compl
 \end{figure}
 %The interesting point to note is that we see the variance, and hence the confidence intervals, markedly increases as a function of the model's complexity/polynomial degree. This means that as we try to fit with higher order polynomials, we will at some point run into the issue of the variance becoming a worse problem for the fitting than the bias (under-fitting). We can see from Fig.~\ref{fig:r2_vs_noise} and \ref{fig:mse_vs_noise} how the variance, which depends on the noise, impacts the R2-score and the MSE, even at fairly modest complexities; and we can see how increasing the size of the noise decreases the ability of OLS to fit the data.
 
-We then investigated the effects that different magnitudes of noise had on OLS. In particular, we added random noise sampled from a weighted normal distributions $\delta \cdot \mathcal N(0, 1)$ for different weights $\delta$, where the $R^2$ score for each case over the different complexities are shown in Fig~\ref{fig:r2_vs_noise}.
+We then investigated the effects that different magnitudes of noise had on OLS. In particular, we added random noise sampled from a weighted normal distribution $\delta \cdot \mathcal N(0, 1)$ for different weights $\delta$, where the $R^2$ score for each case over the different complexities are shown in Fig~\ref{fig:r2_vs_noise}.
 We observe here that the regression becomes increasingly worse as $\delta$ approaches $0.5$, and the noise begins to dominate.
 
 \begin{figure}[h!tb]
@@ -375,17 +376,17 @@ We observe here that the regression becomes increasingly worse as $\delta$ appro
 
 \subsubsection{Resampling}
 \noindent
-We then moved on to our comparison of the various regression methods; OLS, Ridge and LASSO. In order to infer about their relative performance, we first computed their MSE using $5$-fold cross validation for complexities $1, \dots 15$ and in the case of Ridge \& LASSO, 30 evenly spaced $\lambda \in [10^{-5}, 10^{0}]$. Then, for the optimal $\lambda$ in each case we performed $M=100$ bootstrap re-samplings for each of the models over all the complexities which we used to compute the MSE, as well as the MSE decomposed into the squared bias and variance.
+We then move on to our comparison of the various regression methods; OLS, Ridge and LASSO. In order to infer about their relative performance, we first computed their MSE using standard $5$-fold cross-validation for complexities $p=1, \dots 15$ and in the case of Ridge \& LASSO, 30 evenly spaced $\lambda \in [10^{-5}, 10^{0}]$. Then, for the optimal $\lambda$ in each case we performed $M=100$ bootstrap re-samplings for each of the models over all the complexities which we used to compute the MSE, as well as the MSE decomposed into the squared bias and variance.
 
 Here, we present the above analysis performed for two datasets consisting of $N=200$ and $N=500$ random samples of the Franke function. Additionally, we again added Gaussian noise sampled from $0.2 \cdot \mathcal N(0,1)$ in both of the data sets.
 
-As we saw in Fig.~\ref{fig:Hastie2.11 MSE Bootstrap}, once the complexity of our model reaches approximately the $8^{\textup{th}}$ order, the MSE of our test set begins to grow rapidly. Looking then at Fig.~\ref{fig:franke ols bootstrap n 500}, we observe at the same complexity that the variance overtakes the square bias, and thus becomes the dominating term. Hence, this rapid growth of the MSE observed in \ref{fig:Hastie2.11 MSE Bootstrap} is an indication of the model being over-fitted to the data sample.
+As we saw in Fig.~\ref{fig:Hastie2.11 MSE Bootstrap}, once the complexity of our model reaches approximately the $8^{\textup{th}}$ order, the MSE of our test set begins to grow rapidly. Looking then at Fig.~\ref{fig:franke ols bootstrap n 500}, we observe at the same complexity that the variance overtakes the square bias, and thus becomes the dominating term. Hence, the rapid growth of the MSE that we observed in Fig.~\ref{fig:Hastie2.11 MSE Bootstrap} is an indication of the model being over-fitted to the data sample.
 This problem motivates the usage of Ridge and LASSO regression, which as we can see in Fig.~\ref{fig:franke ols bootstrap n 500} and Fig.~\ref{fig:franke lasso bootstrap n 500} successfully suppresses the variance from becoming dominant for higher complexities. Furthermore, in both cases this is accomplished without affecting the bias of the model to a significant extent thus keeping the MSE relatively stable.
 
-We turn then to Fig.~\ref{fig:franke ols bootstrap n 200}, \ref{fig:franke ridge bootstrap n 200}, \ref{fig:franke lasso bootstrap n 200} for the same analysis performed in a situation where the number of data samples has been limited to $N=200$. Here, we observe the same problem but shifted to an earlier complexity and to a much greater extent. Furthermore, the problem of overfitting is apparanlty much greater in this case. We may explain this by considering how the number of data points in our sample related to the total number of predictors in our model for each complexity. Using Eqn.~\ref{eqn:number of predictors wrt complexity}, we may compute easily the number of predictors, which for convenience we list here in the table \ref{tab: no predictors wrt complexity} for a range of complexities
+We turn then to Fig.~\ref{fig:franke ols bootstrap n 200}, \ref{fig:franke ridge bootstrap n 200}, \ref{fig:franke lasso bootstrap n 200} for the same analysis performed in a situation where the number of data samples has been limited to $N=200$. Here, we observe the same problem but shifted to an lower complexity and to a much greater extent. Furthermore, the problem of overfitting is apparanlty much greater in this case. We may explain this by considering how the number of data points in our sample related to the total number of predictors in our model for each complexity. Using Eqn.~\ref{eqn:number of predictors wrt complexity}, we may compute easily the number of predictors, which for convenience we list here in Table~\ref{tab: no predictors wrt complexity} for a range of complexities
 
 \begin{table}[h!]
-    \caption{\label{tab: no predictors wrt complexity}}
+    \caption{\label{tab: no predictors wrt complexity}Relationship between polynomial complexity and number of predictors for a 2D polynomial.}
     \begin{tabular}{|c | c | c | c | c | c | c | c | c | c | c | c | c | c |}
     \hline
      Complexity     & 3  & 4  & 5  & 6  & 7  & 8  & 9  & 10 & 11 & 12 & 13 & 14 & 15 \\
@@ -394,7 +395,7 @@ We turn then to Fig.~\ref{fig:franke ols bootstrap n 200}, \ref{fig:franke ridge
     \end{tabular}
 \end{table}
 
-Looking at Fig.~\ref{fig:franke ols bootstrap n 200}, we observe the variance to become problematic at around the $5^{\textup{th}}-7^{\textup{th}}$ order. Corresponding to 21-36 predictors. Similarly, in the case of $N=500$ the same problem begins to occur at the around the $8^{\textup{th}}$ order. Common to both of these cases are that the variance begins to increase rapidly once the number of predictors starts to approach $\sim 10\%$ the number of data points. This observation is supported by \textcite{Harell}, in which limiting the complexity to $20\%-10\%$ is proposed as a safe limit for the number of predictors, depending on the situation.
+Looking at Fig.~\ref{fig:franke ols bootstrap n 200}, we observe the variance becoming problematic at around the $5^{\textup{th}}-7^{\textup{th}}$ order. Corresponding to 21-36 predictors respectively. Similarly, in the case of $N=500$ the same problem begins to occur at the around the $8^{\textup{th}}$ order. Common to both of these cases are that the variance begins to increase rapidly once the number of predictors starts to approach $\sim 10\%$ the number of data points. This observation is supported by \textcite{Harell}, in which limiting the complexity to $20\%-10\%$ is proposed as a safe limit for the number of predictors, depending on the situation at hand.
 
 We then move on to the $5-$fold cross-validation (CV), which is summarized for all the regression methods and both of the datasets in Fig.~\ref{fig:franke_contour_plots}. Here, we note in particular for OLS that the CV yields a relatively low estimate of the MSE compared to the bootstrap.
 % COME BACK TO THIS
@@ -516,7 +517,7 @@ Looking more closely at the CV plots in Fig.~\ref{fig:franke_contour_plots}, we 
 
 \subsection{The terrain data}
 \noindent
-Following our analysis of the Franke function, we performed a similar analysis of Terrain data provided by \cite{4155_repo}. In order to reduce the computational time required to process and analyze the data, we limited ourselves to a subsection of the full data set which was further down-sampled by only sampling every 40$^{\textup{th}}$ pixed of the subsection. The full data set, as well as the down-sampled subset are both shown in Fig.~\ref{fig:terrain image}.
+Following our analysis of the Franke function, we performed a similar analysis of Terrain data found in \cite{4155_repo}. In order to reduce the computational time required to process and analyze the data, we limited ourselves to a subsection of the full data set which was further down-sampled by only sampling every 40$^{\textup{th}}$ pixel of the subsection. The full data set, as well as the down-sampled subset are both shown in Fig.~\ref{fig:terrain image}.
 
 Once again using $k$-fold cross-validation with $k=5$ on our complete data set, we try to estimate what the optimal complexities and penalty parameters might be for the three methods. The results are shown in Fig.~\ref{fig:terrain_contour_plots}. We see once again that the MSE-scores remains quite consistent for Ridge and Lasso, and that there is little dependence on $\lambda$ outside the very largest values. Here, the MSE for OLS is actually decreasing with complexity, until it blows up past a certain point.
 
