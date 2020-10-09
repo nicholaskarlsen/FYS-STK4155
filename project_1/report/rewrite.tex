@@ -363,7 +363,7 @@ We observe the manifestation of this problem more concretely as the complexity g
 \end{figure}
 %The interesting point to note is that we see the variance, and hence the confidence intervals, markedly increases as a function of the model's complexity/polynomial degree. This means that as we try to fit with higher order polynomials, we will at some point run into the issue of the variance becoming a worse problem for the fitting than the bias (under-fitting). We can see from Fig.~\ref{fig:r2_vs_noise} and \ref{fig:mse_vs_noise} how the variance, which depends on the noise, impacts the R2-score and the MSE, even at fairly modest complexities; and we can see how increasing the size of the noise decreases the ability of OLS to fit the data.
 
-We then investigated the effects that different magnitudes of noise had on OLS. In particular, we added random noise sampled from a weighted normal distribution $\delta \cdot \mathcal N(0, 1)$ for different weights $\delta$, where the $R^2$ score for each case over the different complexities are shown in Fig~\ref{fig:r2_vs_noise}.
+We then investigated the effects that different magnitudes of noise had on OLS. In particular, we added random noise sampled from a weighted normal distribution $\delta \cdot \mathcal N(0, 1)$ for different weights $\delta$. We also split our data set into a training and testing set with an 80/20 split using Sci-kit learn, where the $R^2$ score for each of the test sets over the different complexities are shown in Fig~\ref{fig:r2_vs_noise}.
 We observe here that the regression becomes increasingly worse as $\delta$ approaches $0.5$, and the noise begins to dominate.
 
 \begin{figure}[h!tb]
@@ -376,7 +376,7 @@ We observe here that the regression becomes increasingly worse as $\delta$ appro
 
 \subsubsection{Resampling}
 \noindent
-We then move on to our comparison of the various regression methods; OLS, Ridge and LASSO. In order to infer about their relative performance, we first computed their MSE using standard $5$-fold cross-validation for complexities $p=1, \dots 15$ and in the case of Ridge \& LASSO, 30 evenly spaced $\lambda \in [10^{-5}, 10^{0}]$. Then, for the optimal $\lambda$ in each case we performed $M=100$ bootstrap re-samplings for each of the models over all the complexities which we used to compute the MSE, as well as the MSE decomposed into the squared bias and variance.
+We then move on to our comparison of the various regression methods; OLS, Ridge and LASSO. In order to infer about their relative performance, we first computed their MSE using standard\footnote{As in; we did utilize a separate test/validation set in addition to the $k$-fold split} $5$-fold cross-validation for complexities $p=1, \dots 15$ and in the case of Ridge \& LASSO, 30 evenly spaced $\lambda \in [10^{-5}, 10^{0}]$. Then, for the optimal $\lambda$ in each case we performed $M=100$ bootstrap re-samplings for each of the models over all the complexities which we used to compute the MSE, as well as the MSE decomposed into the squared bias and variance. To specify, performed the bootstrap with a 80/20 train/test split, where the resamplings where performed on the training data and tested against the test data.
 
 Here, we present the above analysis performed for two datasets consisting of $N=200$ and $N=500$ random samples of the Franke function. Additionally, we again added Gaussian noise sampled from $0.2 \cdot \mathcal N(0,1)$ in both of the data sets.
 
