@@ -530,14 +530,6 @@ A bootstrapped bias-variance analysis of a train-test split, with test/train rat
 % Keeping in mind our previous lesson about MSE-scores not being the whole picture, we try to recreate our original terrain data with predictions learned on our 2116 points. We try the highest polynomial degree before the OLS solution blows up, and find that the variance is still significantly high to severely disfigure our predictions, even though the MSE-score is actually at its lowest. Going down in complexity until the variance becomes a sufficiently minor component of the error leads us to what we consider the best prediction for the given number of 2116 data points. This is shown in Fig.~\ref{fig:3d_terrain}. We see that only the OLS method really manages to capture the variability of the terrain, the other two mainly identify a peak and a bottom and smooth out the paths between.
 
 
-\begin{figure}
-   \center
-   \includegraphics[width=\columnwidth]{R2_terrain_data.pdf}
-   \caption{R$^2$ for the Terrain data using OLS regression.}
-\end{figure}
-
-
-
 \begin{figure*}
     \centering
      \subfloat[][OLS, N=500]{
