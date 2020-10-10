@@ -1,3 +1,3 @@
-### Project 1: Regression analysis and resampling methods
+# Project 1: Regression analysis and resampling methods
 
-Enlightening README goes
+## Overview of project structure
