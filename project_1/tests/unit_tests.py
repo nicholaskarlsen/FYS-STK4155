@@ -4,10 +4,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression, Ridge
 
 import sys
-sys.path.insert(0,"../src_fork/")
+sys.path.insert(0,"../src/")
 
 import linear_regression
-from main import FrankeFunction
+from FrankeFunction import FrankeFunction
 
 
 def OLS_unit_test(min_deg=2, max_deg=5, tol=1e-6):
