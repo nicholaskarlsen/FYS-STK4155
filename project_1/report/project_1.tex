@@ -26,16 +26,14 @@
 
 \begin{abstract}
     \noindent
-   In this paper we aim to explore the application of three distinct regression methods to both a sampling of the Franke function, as well as a set of terrain data. We utilize the ordinary-least-square (OLS) regression, Ridge regression and LASSO regression along with bootstrap and k-fold cross-validation re-sampling techniques in order to create and assess predictive polynomial models. We analyze the performance of the different regression models on the two data sets, with the ultimate goal of determining the best regression method and the best predictive polynomial model for each data set. We found that OLS was generally able to better capture the finer details in the data prior to overfitting; whilst Ridge and LASSO were more stable past this point at the cost of recreating less details. Ultimately, we conclude that the best choice of model depends on the problem at hand.
+    In this paper we aim to explore the application of three distinct regression methods to both a sampling of the Franke function, as well as a set of terrain data. We utilize the ordinary-least-square (OLS) regression, Ridge regression and LASSO regression along with bootstrap and k-fold cross-validation re-sampling techniques in order to create and assess predictive polynomial models. We analyze the performance of the different regression models on the two data sets, with the ultimate goal of determining the best regression method and the best predictive polynomial model for each data set. We found that OLS was generally able to better capture the finer details in the data prior to over-fitting; whilst Ridge and LASSO were more stable past this point at the cost of recreating less details. Ultimately, we conclude that the best choice of model depends on the problem at hand.
 \end{abstract}
 
 \maketitle
 
 \section{Introduction}
     \noindent
-%    In essence, Linear Regression is the process of taking points from a function, or a set of measurements, and mapping them to coordinates in a chosen basis in order to create an approximation, or model, of the original dataset.
-    % Maybe not original dataset, but underlying function/process/phenomena?
-        In essence, Linear Regression is the process of taking points from a function, or a set of measurements, and mapping them linearly to coordinates in a chosen basis in order to create an approximation, or model, explaining the original dataset and estimating unseen points in the domain spanned by the original data set. That is, from a limited set of data try to infer a linear functional relationship between some chosen prediction variables and the measured/sampled responses, and use this functional relationship to predict new data points in the domain. Typically, one is either interested in extracting the functional relationship between the measured responses and the prediction variables in order to say something about the relative importance of the conjectured predictors; or one wants to create a "best possible" predictive map of the (mostly unmeasured) response variables as a function of the (mostly unmeasured) prediction variables. In both cases what one really wants is some form of optimal mapping from prediction variables to response variables, and that mapping can be estimated by the use of linear regression methods.
+    In essence, Linear Regression is the process of taking points from a function, or a set of measurements, and mapping them linearly to coordinates in a chosen basis in order to create an approximation, or model, explaining the original dataset and estimating unseen points in the domain spanned by the original data set. That is, from a limited set of data try to infer a linear functional relationship between some chosen prediction variables and the measured/sampled responses, and use this functional relationship to predict new data points in the domain. Typically, one is either interested in extracting the functional relationship between the measured responses and the prediction variables in order to say something about the relative importance of the conjectured predictors; or one wants to create a "best possible" predictive map of the (mostly unmeasured) response variables as a function of the (mostly unmeasured) prediction variables. In both cases what one really wants is some form of optimal mapping from prediction variables to response variables, and that mapping can be estimated by the use of linear regression methods.
 
      Obviously, this way of doing predictions and inferences has an enormous range of possible applications; in basically every instance where one expects some linear relationship between selected prediction variables and a response variable one can, if one has a data set containing measurements of the variables, try to use regression methods to create an optimal model. Examples might be the construction of a model for housing prices as a function of distance from city center, living area, building year and whatever else one could imagine might affect the prices. Or one may wish to determine the best coefficients in a model for nuclear binding energy as a function of nucleon numbers.
 
@@ -234,12 +232,6 @@
             In the bootstrap re-sampling method, we sample our data set $S = \{s_1, \dots s_N\}$ $N$-number of times, in particular, we allow sampling the same $s_i$ multiple times. In this way, we generate new datasets in which some points are under-weighted and others overweighted with respect to the original dataset $S$. Loosely speaking, the concept corresponds to evenly sampling the ensemble of all possible input data sets to our regression method, in order to estimate the variance and expectation values of our model predictions over the ensemble. The idea is that if our training set representatively covers the domain of inputs, each re-sampled regression computation will give a certain prediction $\pmb{\tilde{y}_{B}}$ and these $\pmb{\tilde{y}_{B}}$ will appear with a frequency corresponding to their  underlying probability distribution. When we later try to compute statistics of the predictions, we will then be able to use point-estimators on the computed $\pmb{\tilde{y}_{B}}$ to obtain estimates of, for instance, the variance of the predictions or the mean value of the predictions over the ensemble of all possible inputs in the domain spanned by our data.
 
     \subsection{The Bias-Variance Trade-off}
-        %%%NICHOLAS' DRAFT START
-        % Consider a set of data $S$, sampled from some domain $D$ and two separate models. $\tilde{\pmb y}_s(x)$, a simple model with only a few degrees of freedom and $\tilde{\pmb y}_c(x)$, a more complicated model with many degrees of freedom.
-
-        % When fitting $\pmb{\tilde y}_s(x)$ to the sample $S$ we only have a few degrees of freedom to tune in order to fit the data, resulting in a higher bias, but low variance as the sensitivity to changes in $S$ will be relatively low. Conversely, when utilizing a complicated model with many degrees of freedom we may tune the parameters in such a way as to get a very good fit to some particular sample $S$, which is why we usually observer the MSE decreasing as the complexity of our model increases for some particular training sample $S$. However, since the model will then be so finely tuned to that particular sample it will then suffer poorly when making predictions that fall outside of this sample.
-        % As such, finding the optimal complexity implies weighing the benefits of having a high complexity model which yields good results on your test data vs having low complexity model which applies more generally across samples. Where the optimal model is one which balances the bias and variance contributions to the MSE.
-        %%% NICHOLAS' WEEKEND DRAFT END
         \noindent
         A key concept in much of machine learning is the so-called Bias-Variance Trade-off. Simply put the test error of a learned prediction method can be viewed as being partly the sum of two distinct quantities, the bias of the method and the variance of the method. The bias can be thought of as errors due to inflexible assumptions and constraints on the model, while the variance, quite opposingly, is the actual statistical variance of the procedure. Crucially, the variance is connected with the model having too much flexibility, over-fitting on the training data while giving very spread results on the test data. Naturally, the relative sizes of the errors due to bias and the errors due to variance change with the flexibility/complexity of the model. For an inflexible model, e.g. a polynomial regression model of low degree, the bias is expected to be the dominant contribution to the test error. On the other side of the spectrum, for a very flexible model, e.g. a polynomial regression model of high degree, the variance would be anticipated to be the dominating source of the test error. Importantly, the relative effects of the bias and the variance won't necessarily change at the same rate. Thus, one could hope to find an optimally flexible model which minimizes the combined error due to variance and bias. This is the essence of the Bias-Variance Trade-off; one could, for instance, try to slightly increase the bias of a method in the hopes of reducing the variance far more.
 
@@ -328,7 +320,6 @@
 \section{Results \& Discussion}
 \noindent
 We aim to model both the Franke function and a set of terrain data as sums of polynomials in $x$ and $y$. Our overarching goal is to determine which regression method performs the best (i.e. most faithfully reproduces the full data-set on which they are sampled) in both cases, and for which degree of the polynomial model and which value of the penalty parameter $\lambda$.
-% The Franke function is given as in Eqn. \ref{eq:franke} over the domain $x,y \in [0,1]$.
 
 The terrain data, which has been downloaded from \cite{4155_repo}, is a collection of measured elevation heights at a discrete set of $3601\times1801$ pixel coordinates. For ease of interpretation and computation, we parameterize the pixel indices as uniformly spaced $x,y \in [0,1]$, and restrict ourselves to the first square of the terrain map, i.e. the first $[1801,1801]$ pixels.
 
@@ -338,16 +329,11 @@ Armed with insights from the investigation of the Franke function, we will subse
 
 In order to ensure the reproducibility of our results, we used fixed seeds in the random number generators when producing the final results that were used in this report, and thus everything can be reproduced by running the notebooks in our Github repository \cite{our_repo}. The repository also contains various test cases \& some unit tests to ensure that our codes work as expected. For further information, see the README files in the repository.
 
-%%% Note on reproducability. Mention seed used, and refer to github to be able to reproduce the data
 \subsection{The Franke function}
-
 \noindent
-% THORE DRAFT: For the Franke function, we will mostly be considering a data set containing n=500 uniformly distributed random points, though we will also briefly comment on some limited results from a set with n=200 points in order to illustrate the effects of sample size. The full set of our calculations and results can be found at our repository \cite{our_repo}. As a technical note, our predictors are always scaled and centered using sci-kit's StandardScaler, while our response-variables are centered by subtracting the mean.
 Throughout our analysis of the Franke function our focus was primarily on a data set consisting of $N=500$ uniformly distributed random points, though we also made a brief analysis of the effects of varying the sample size. In particular, we present a limited analysis of a $N=200$ sample in order to infer about the effects on which $N$ has on the various regression methods.
 
 \subsubsection{Noise \& confidence intervals}
-%We start by looking at the behaviour of the OLS regression limited to a relatively modest complexity of polynomials up to the $5^\textup{th}$ order and a dataset consisting of $N=500$ random samples of the Franke function. Fig.~\ref{fig:confidence intervals} shows the estimated variance and confidence intervals for the different $\beta$ coefficients when a standard normal noise, with weight 0.2, has been added to the Franke function at each point. The variance and confidence intervals are estimated by:
-
 \noindent
 We start by looking at the behaviour of OLS limited to relatively modest complexities of polynomials up to the $5^{\textup{th}}$ order modeled from data sets consisting of $N=500$ random samples of the Franke function with added random noise in the form $0.2\mathcal N(0, 1)$. We also chose our confidence interval for the predictors as $\beta_i\pm 2\sigma_i$ in adherence with the literature as a standard choice \cite{hastie}, which corresponds to $95\%$ of similarly sampled models falling within our range of uncertainty. Here, $\sigma_i$ denotes the standard deviation of $\beta_i$ computed as the root of the variance given by Eqn.~\ref{eqn:OLS beta variance}.
 Furthermore, we also scale this and all subsequent datasets by utilizing the \lstinline{StandardScaler()} functionality provided by sci-kit learn on our design matrix.
@@ -369,7 +355,6 @@ We observe the manifestation of this problem more concretely as the complexity o
     \includegraphics[width=\columnwidth]{OLS_MSE_Hastie_211_N_500.pdf}
     \caption{\label{fig:Hastie2.11 MSE Bootstrap}The MSE for both the testing and the training data performed with OLS regression on $N=500$ random samples of the Franke Function}
 \end{figure}
-%The interesting point to note is that we see the variance, and hence the confidence intervals, markedly increases as a function of the model's complexity/polynomial degree. This means that as we try to fit with higher order polynomials, we will at some point run into the issue of the variance becoming a worse problem for the fitting than the bias (under-fitting). We can see from Fig.~\ref{fig:r2_vs_noise} and \ref{fig:mse_vs_noise} how the variance, which depends on the noise, impacts the R2-score and the MSE, even at fairly modest complexities; and we can see how increasing the size of the noise decreases the ability of OLS to fit the data.
 
 We then investigated the effects that different magnitudes of noise had on OLS. In particular, we added random noise sampled from a weighted normal distribution $\delta \cdot \mathcal N(0, 1)$ for different weights $\delta$. We also split our data set into a training and testing set with an 80/20 split using Sci-kit learn, where the $R^2$ score for each of the test sets over the different complexities are shown in Fig~\ref{fig:r2_vs_noise}.
 We observe here that the regression becomes increasingly worse as $\delta$ approaches $0.5$, and the noise begins to dominate.
@@ -380,7 +365,6 @@ We observe here that the regression becomes increasingly worse as $\delta$ appro
     \caption{R$^2$ measured for $N=500$ random samples of the Franke function with added noise in the form $\delta\cdot\mathcal N(0, 1)$ modeled with complexities 0 to 5.}
     \label{fig:r2_vs_noise}
 \end{figure}
-
 
 \subsubsection{Resampling}
 \noindent
@@ -408,17 +392,10 @@ Looking at Fig.~\ref{fig:franke ols bootstrap n 200}, we observe the variance be
 
 We then move on to the $5-$fold cross-validation (CV), which is summarized for all the regression methods and both of the datasets in Fig.~\ref{fig:franke_contour_plots}.
 Here, we note in particular for OLS that the CV yields a relatively low estimate of the MSE compared to the bootstrap. It is not completely clear why this is so, but a potential explanation is that the bootstrap estimates are more susceptible to variance. Since each individual bootstrap iteration is sampled with replacement they will contain on average only about 63.2\% of the unique points from the original sample when the original sample is large \cite{hastie}. For the highest degrees in our computations, 63.2\% of our 400 training points (from the train-test-split of the original 500 points)  will be cutting it dangerously close to the number of predictors, which might give rise to serious variance/over-fitting issues. For the lower degrees, the CV and bootstrap estimates seem to be more in line with each other, making this explanation at the very least plausible.
-% COME BACK TO THIS
 %We make an attempt at explaining this discrepancy by considering more closely the differences between the two re-sampling techniques.
 %Starting with the cross-validation; here we are testing our models performance with data points which all come from the original data set.
 %Conversely, when performing the bootstrapped re-sample, we generate a training data set which is in essence a small perturbation of our input training data set, where as the testing set is kept static across all iterations. Thus, when testing the performance of the bootstrapped model, for each iteration we test a model generated from a slightly perturbed sample space which introduces an inherent additional error to the computed MSE compared to the CV.
 Looking more closely at the CV plots in Fig.~\ref{fig:franke_contour_plots}, we observe the same phenomenon as we did with the bootstrap, where the MSE grows rapidly for OLS past a certain complexity. However, in this case we also get a much better insight of how Ridge and LASSO behaves wrt. $\lambda$. We observe that there is little change in the MSE for Ridge and Lasso over a wide range of $\lambda$ values and polynomial degrees. Though not shown here\footnote{To see this, we refer the reader to the test folder in our Github repository; Specifically \lstinline{test_franke_analysis.ipynb}}, we have investigated and found that, with the exception of for very high $\lambda$-values, the bias and variance versus complexity for both ridge and lambda does not vary appreciably with $\lambda$, nor do the actual predictions resulting from those methods trained on our 500-point data set.
-
-%Starting with Ridge for $N=200$ and $N=500$ shown in Figs.~\ref{franke Ridge CV 200}, \ref{franke Ridge CV 500} respectively. We see particularly well in Fig.~\ref{franke OLS CV 200} how the additional penalty parameter $\lambda$ acts on the increasing variance present in the OLS. It seems that as you increase the complexity, you similarly also have to increase $\lambda$ to avoid the MSE from growing. However, LASSO on the other hand seems to handle both the $N=200$ and $N=500$ cases in very similar fashions as observed in Fig.~\ref{franke LASSO CV 200} and Fig.~\ref{franke LASSO CV 500}, suggesting that LASSO is somewhat less reliant on the sample size compared to Ridge.
-
-%We want to have a high enough complexity to be able to accommodate the peaks and valleys of the Franke function, while still not over-fitting to the noise. In order to find a suitable polynomial degree, we apply k-fold cross-validation, with k=5, to our full data set in order to get a more reliable estimate of the test-MSE than that provided by the bootstrap. For the Ridge and Lasso regressions, the k-fold cross-validation is also performed for a grid (with size 30) of possible values for the regularization parameter $\lambda \in [10^{-6},10^{0}]$ in order to select the best value (giving the lowest test-MSE) for a given degree.
-
-%We see, from Fig.~\ref{fig:franke_contour_plots}, that while the OLS solution still blows up past a certain complexity, the Ridge and Lasso solutions keep a very stable MSE-score. Looking at the contour-plots of MSE versus $\lambda$ and complexity, we find that there is little change in the test-MSE for Ridge and Lasso over a wide range of $\lambda$ values and polynomial degrees. Though not shown here, we have investigated and found that, with the exception of for very high $\lambda$-values, the bias and variance versus complexity for both ridge and lambda does not vary appreciably with $\lambda$, nor do the actual predictions resulting from those methods trained on our 500-point data set.
 
 \subsubsection{Fitting the Franke Function}
 \noindent
@@ -440,28 +417,13 @@ Once again using $k$-fold cross-validation with $k=5$ on our complete data set, 
 
 A bootstrapped bias-variance analysis of a train-test split, with test/train ratio 0.2, is then performed, in order to see whether the exploding OLS MSE is due to variance and whether Ridge and Lasso manage to keep the variance down. Fig.~\ref{fig:terrain_bootstrap} shows this to be the case. Ridge and LASSO do keep the variance in check, so that most of their errors are due to bias. For OLS we see that it performs quite well according to MSE, until the variance kicks in and leads to a rapid growth similar to what we observed for the Franke function.
 
-%We then proceeded to treat the terrain data in an almost identical fashion as we did for the Franke Function. We began by using a data set containing 2116 pixels/points created by picking only every 40th point in x and y from the original $1801\times1801$ map. That is, we down-sample into a map consisting of $46\times46$ pixels.
-% Note the origin of the data set
-
-
-
-% Keeping in mind our previous lesson about MSE-scores not being the whole picture, we try to recreate our original terrain data with predictions learned on our 2116 points. We try the highest polynomial degree before the OLS solution blows up, and find that the variance is still significantly high to severely disfigure our predictions, even though the MSE-score is actually at its lowest. Going down in complexity until the variance becomes a sufficiently minor component of the error leads us to what we consider the best prediction for the given number of 2116 data points. This is shown in Fig.~\ref{fig:3d_terrain}. We see that only the OLS method really manages to capture the variability of the terrain, the other two mainly identify a peak and a bottom and smooth out the paths between.
-
 Keeping in mind our previous lesson about the CV-estimated MSE-scores not being the whole picture, we try to recreate our original terrain data with predictions trained on 2116 points. We try the highest polynomial degree possible before the OLS solution blows up. In this particular instance it seems that even though the CV-estimates for the MSE starts to increase, the highest degree in our calculation, polynomial degree 25, still remains stable. This is shown in Fig.~\ref{fig:3d_terrain}. We see that only the OLS method really manages to capture the variability of the terrain, the other two mainly identify a peak and bottom then smooths out the paths between; with Ridge seemingly more capable of retaining some terrain variations. Though not shown here\footnote{To see this, we refer the reader to the test folder in our Github repository; Specifically \lstinline{test_terrain_analysis.ipynb}}, we have tried the same procedure for a much smaller data sample (sampling every 100 pixel), and found the same trend, with the notable exception that at a certain complexity the OLS solution does blow up due to variance while the Ridge and Lasso solutions are able to keep stable.
 
-
-
-
-
-%\section{Discussion}
-
 \section{Conclusion}
-
-
+\noindent
 We have analyzed the performance of OLS, Ridge and LASSO regression on 'terrain-like' types of data, where the regression model was two-dimensional polynomials of varying degrees. We find that in order to qualitatively predict finer variations of the terrain,  OLS with high complexity is the best suited method; the other two methods tend to smooth out the actual terrain variations in an effort to be stable against variance, with Ridge still capturing the main features reasonably while LASSO is rather more aggressive in its reductions. However, OLS can be quite unstable depending on the complexity and number of data points used. At what point the balance tips in favor either OLS or Ridge seems to need a case-by-case evaluation. For our computations, the Ridge method applied to high polynomial degrees seems to be the best of the bunch for the Franke function, while high degree OLS is superior on the terrain data. For the terrain data we have tested, but not shown here\footnote{See again; \lstinline{test_terrain_analysis.ipynb} in the test folder of our Github repository}, that with fewer samples the higher degree OLS solutions hit a variance wall. In those cases, depending on at which complexity the variance wall hits, lower degree OLS solutions may still be better than higher degree Ridge solutions. But at some point, when one has so few sample points that even low degree OLS solutions are unstable, the higher degree Ridge solutions will perform best and quite successfully reproduce the larger scale variations in the terrain.
 
 As a concluding observation, the authors conjecture that the use of a different type of basis functions might be appropriate for these kind of 'terrain-like' data sets. For instance orthogonal polynomials, or a Fourier-type basis set, could be global basis sets that allow Ridge and Lasso to be more discerning in their regularizations, than with the highly correlated polynomials that have been used in the present study. Or basis functions with compact support, which are only non-zero on limited domains, such as B-splines could provide more freedom to adapt to the actual variations in the terrains, without having over-fitting ramifications outside their support.
-
 
 \onecolumngrid
 \bibliography{bibfile}
@@ -544,8 +506,6 @@ As a concluding observation, the authors conjecture that the use of a different 
      \label{contour plots}
 \end{figure*}
 
-
-
 \begin{figure*}
      \centering
     \subfloat[][OLS, Best Ridge \& LASSO]{
@@ -560,9 +520,6 @@ As a concluding observation, the authors conjecture that the use of a different 
      \caption{MSE for $k=5$ cross-validated OLS, Ridge and LASSO regression performed on the terrain data}
      \label{fig:terrain_contour_plots}
 \end{figure*}
-
-
-
 
 \begin{figure*}[h!tb]
     \center
