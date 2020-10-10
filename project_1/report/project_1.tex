@@ -26,7 +26,7 @@
 
 \begin{abstract}
     \noindent
-   In this paper we aim to explore the application of three distinct regression methods to both a sampling of the Franke function, as well as a set of terrain data. We utilize the ordinary-least-square (OLS) regression, Ridge regression and LASSO regression along with bootstrap and k-fold cross-validation re-sampling techniques in order to create and assess predictive polynomial models. We analyze the performance of the different regression models on the two data sets, with the ultimate goal of determining the best regression method and the best predictive polynomial model for each data set.
+   In this paper we aim to explore the application of three distinct regression methods to both a sampling of the Franke function, as well as a set of terrain data. We utilize the ordinary-least-square (OLS) regression, Ridge regression and LASSO regression along with bootstrap and k-fold cross-validation re-sampling techniques in order to create and assess predictive polynomial models. We analyze the performance of the different regression models on the two data sets, with the ultimate goal of determining the best regression method and the best predictive polynomial model for each data set. We found that OLS was generally able to better capture the finer details in the data prior to overfitting; whilst Ridge and LASSO were more stable past this point at the cost of recreating less details. Ultimately, we conclude that the best choice of model depends on the problem at hand.
 \end{abstract}
 
 \maketitle
@@ -227,8 +227,7 @@
                 \input{../figs/cross_validation_fig.tex}
                 \caption{\label{fig: Cross Validation}Visual representation of $k$-fold cross-sampling for $k=5$}
             \end{figure}
-            When doing cross-validation, typical choices of $k$ are $5$ and $10$ \cite{hastie}. Which one is better will depend on how the error scales with the size of the training set, as such, choosing a suitable $k$ requires some analysis.
-            The cross-validation re-sampling provides a good estimate for the mean error of our estimates.
+            When doing cross-validation, typical choices of $k$ are $5$ and $10$ \cite{hastie}. Which one is better will depend on how the error scales with the size of the training set, as such, choosing a suitable $k$ requires some analysis\cite{hastie}. However, for the present paper we will stick to $5$-fold cross validation on the basis that we are mainly concerned with small data sets and increasingly larger complexities.
 
         \subsubsection{Bootstrap}
             \noindent
@@ -427,13 +426,6 @@ Just looking at the MSE-scores one might be tempted to simply pick the method an
 
 In a preview of what we find for the terrain data, we might suspect that the "best" fit to this kind of "terrain" data, if the "terrain" is rapidly varying, is the highest degree of OLS that is not overpowered by variance. As might be imagined after our earlier discussion regarding the effect of the sample size, a larger sample size allows for the use of higher degrees before OLS meets a variance barrier; conversely, with fewer data points the highest "safe" complexity decreases. In the unfortunate case that one has so few data-points that variance becomes an issue for OLS even at uselessly low polynomial degrees, the Ridge and LASSO methods can still reliably reproduce the main features at higher degrees. Finally, the Ridge method seems to perform slightly better than the LASSO; possibly because the Lasso might struggle with our highly correlated basis functions.
 
-
-
-
-
-
-
-
 \begin{figure}[h!tb]
     \center
     \includegraphics[width=\columnwidth]{TerrainData.pdf}
@@ -481,7 +473,7 @@ As a concluding observation, the authors conjecture that the use of a different 
     \centering
     \includegraphics[width=2\columnwidth]{beta_confidence_interval_size_OLS.pdf}
     \includegraphics[width=2\columnwidth]{beta_confidence_interval_OLS.pdf}
-    \caption{\label{fig:confidence intervals}Predictors $\beta{i}$ for a $5^{\textup{th}}$ degree polynomial modeled with OLS on random samples of the Franke Function with noise $0.2\cdot\mathcal{N}(0, 1)$}
+    \caption{\label{fig:confidence intervals}(Bottom figure) Predictors $\beta{i}$ for a $5^{\textup{th}}$ degree polynomial modeled with OLS on random samples of the Franke Function with noise $0.2\cdot\mathcal{N}(0, 1)$ where the error bars indicate the confidence interval of $\pm 2\sigma$ (Top figure) as well as the size of the confidence intervals for the preceding complexities.}
 \end{figure*}
 
 
@@ -548,7 +540,7 @@ As a concluding observation, the authors conjecture that the use of a different 
      \subfloat[][LASSO]{
         \includegraphics[width=0.666\columnwidth]{Terrain_bootstrap_LASSO.pdf}\label{<figure2>}
      }
-     \caption{\label{fig:terrain_bootstrap}$M=100$ bootstrapped MSE for LASSO and Ridge regression on the Terrain data for the $\lambda$ parameters yielding the best results for $k=5$ fold cross-validation along with the $M = 100$ bootstrapped OLS.}
+     \caption{\label{fig:terrain_bootstrap}$M=100$ bootstrapped MSE for OLS, Ridge and LASSO regression on the Terrain data for the $\lambda$ parameters yielding the best results for $k=5$ fold cross-validation.}
      \label{contour plots}
 \end{figure*}
 
@@ -565,7 +557,7 @@ As a concluding observation, the authors conjecture that the use of a different 
      \subfloat[][LASSO regression]{
         \includegraphics[width=0.75\columnwidth]{LASSO_CV_Terrain_contour.pdf}\label{<figure2>}
      }
-     \caption{MSE for $k=5$ cross-validated Ridge \& LASSO regression performed on the terrain data}
+     \caption{MSE for $k=5$ cross-validated OLS, Ridge and LASSO regression performed on the terrain data}
      \label{fig:terrain_contour_plots}
 \end{figure*}
 
