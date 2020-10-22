@@ -1,0 +1,65 @@
+\documentclass[reprint, english, nofootinbib]{revtex4-2}
+
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage[colorlinks=true,urlcolor=blue,citecolor=blue]{hyperref}
+\usepackage{physics}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+%\usepackage{bbold}
+\usepackage{subfig}
+
+\usepackage{blindtext}
+\usepackage{tikzducks}
+\usepackage{listings}
+
+\graphicspath{{../figs/}}
+
+\begin{document}
+\title{Classification and Regression\\
+\normalsize{From Linear and Logistic Regression to Neural Networks}}
+
+\author{Nicholas Karlsen}
+\affiliation{University of Oslo}
+\author{Thore Espedal Moe}
+\affiliation{University of Oslo}
+\date{\today}
+
+\begin{abstract}
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+\subsection{Stochastic Gradient Descent}
+\noindent
+Consider a cost function in the form
+\begin{equation}
+    C(\pmb\beta) = \sum_{i=1}^{n}c_i(\pmb x_i, \pmb\beta)
+\end{equation}
+with predictors $\pmb \beta = (\beta_1, \dots, \beta_p)$ and data points $\pmb x = \{\pmb x_1\, \dots, \pmb x_n\}$. This forms a $p$-dimensional surface paramentresized by the predictors, where the optimal parameters are found at the  global minima. 
+We may localize these minima by the method of gradient descent, in which we follow the gradient of the cost function
+\begin{equation}
+    \pmb\nabla_{\beta} C(\pmb\beta) = \sum_{i=1}^n \pmb\nabla_\beta c_i(\pmb x_i, \pmb\beta)
+\end{equation}
+down the "slope" of our function in order to locate a minima. However, since we lack a priori knowledge of the shape of the "cost function space", we can not tell whether this is a local or global minima. There are several other issues related to the basic gradient descent methods in addition to this one, but for the sake of brevity we refer the reader to \textcite[pp.15-16]{Mehta_2019}, which provides an excellent summary.
+% Consider adding more motivation for the use of SGD
+
+In Stochastic gradient descent (SGD) we modify the basic gradient descent by splitting our dataset into $M$ random "mini batches" $B_k$.
+\begin{equation}
+    \pmb\beta_{j + 1} = \pmb\beta_j - \eta_j\pmb\nabla_\beta\sum_{i\in B_k} c_i (\pmb x_i, \pmb \beta)
+\end{equation}
+
+
+Practical tips regarding SDG; see \textcite[pp~19]{Mehta_2019}
+\section{Theory}
+\section{Results \& Discussion}
+\section{Conclusion}
+
+\onecolumngrid
+\bibliography{bibfile}
+\newpage
+\twocolumngrid
+\appendix
+\end{document}
