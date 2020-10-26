@@ -1,8 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import numba
-
 import sys
+
+import CostFunctions
+
 sys.path.insert(0, "../../project_1/src")
 from FrankeFunction import *
 import linear_regression
@@ -23,40 +25,195 @@ def minibatch(x, M):
     indices = np.array_split(indices, M)  # Split permutation into M sub-arrays
     return indices
 
-#@numba.jit(nopython=True)
-def SGD(x, y, M, w, n_epochs, t0, t1):
-    mb = minibatch(x, M)
-    for epoche in range(n_epochs):
+
+# Stochastic Gradient Descent
+def SGD(x, y, M, init_w, n_epochs, learning_rate, cost_gradient, *lambd):
+    """Performs Stochastic Gradient Descent (SGD) to optimize a cost
+    function given its gradient.
+
+    Args:
+        x (Array)               : Design matrix
+        y (Array)               : response variable
+        M (Int)                 : Number of mini-batches to split data set into
+        init_w (Array)          : Initial/starting weights
+        n_epochs (int)          : Number of epochs
+        learning_rate (Float)   :
+        cost_gradient (Func): Gradient of the cost function to optimize
+        lambd (Float)           : Optional penalty parameter that goes into cost_gradient
+    Returns:
+        w (Array)               : Optimal weights corresponding to the cost gradient
+    """
+    mb = minibatch(x, M)  # Split x into M minibatches
+    w = init_w
+    for epoch in range(n_epochs):
         for i in range(M):
+            # Pick out a random mini-batch index
             k = np.random.randint(M)
-            xi = x[mb[k]]
-            yi = y[mb[k]]
-            grad = - 2 * xi.T @ (yi - xi @ w)
-            t = n_epochs * M + i
-            w = w - (t0 / (t + t1)) * grad
+            # compute gradient with random minibatch
+            grad = cost_gradient(x[mb[k]], y[mb[k]], w, *lambd)
+            # increment weights
+            w = w - learning_rate * grad
+    return w
+
+
+# Stochastic Gradient Descent with Momentum (SGDM)
+def SGDM(x, y, M, init_w, n_epochs, learning_rate, momentum, cost_gradient, *lambd):
+    """Performs Stochastic Gradient Descent with Momentum (SGDM) to optimize a cost
+    function given its gradient.
+
+    Args:
+        x (Array)               : Design matrix
+        y (Array)               : response variable
+        M (Int)                 : Number of mini-batches to split data set into
+        init_w (Array)          : Initial/starting weights
+        n_epochs (int)          : Number of epochs
+        learning_rate (Float)   :
+        momentum (Float)        : Momentum pramameter in the SGDM method, must be in [0,1]
+        cost_gradient (Func)    : Gradient of the cost function to optimize
+        lambd (Float)           : Optional penalty parameter that goes into cost_gradient
+    Returns:
+        w (Array)               : Optimal weights corresponding to the cost gradient
+    """
+    mb = minibatch(x, M)  # Split x into M minibatches
+    w = init_w
+    dw = 0
+
+    for epoch in range(n_epochs):
+        for i in range(M):
+            # Pick out a random mini-batch index
+            k = np.random.randint(M)
+            # compute gradient with random minibatch
+            grad = cost_gradient(x[mb[k]], y[mb[k]], w, *lambd)
+            # increment weights
+            dw = momentum * dw - learning_rate * grad
+            w = w + dw
+    return w
+
+
+def ADAgrad(x, y, M, init_w, n_epochs, learning_rate, cost_gradient, *lambd):
+    """Performs the Adaptive gradient algorithm (ADAGrad) to optimize a cost
+    function given its gradient.
+
+    Args:
+        x (Array)               : Design matrix
+        y (Array)               : response variable
+        M (Int)                 : Number of mini-batches to split data set into
+        init_w (Array)          : Initial/starting weights
+        n_epochs (int)          : Number of epochs
+        learning_rate (Float)   :
+        cost_gradient (Func)    : Gradient of the cost function to optimize
+        lambd (Float)           : Optional penalty parameter that goes into cost_gradient
+    Returns:
+        w (Array)               : Optimal weights corresponding to the cost gradient
+    """
+    mb = minibatch(x, M)
+    w = init_w
+    g_ti = np.zeros(len(init_w))
+    for epoch in range(n_epochs):
+        for i in range(M):
+            # Pick out a random mini-batch index
+            k = np.random.randint(M)
+            # compute gradient with random minibatch
+            grad = cost_gradient(x[mb[k]], y[mb[k]], w, *lambd)
+            g_ti += np.dot(grad, grad)  # Gradient squared
+            w = w - learning_rate / np.sqrt(g_ti) * grad
 
     return w
 
-    
-def gamma(t0, t1, n_epochs, M):
-    learning_rate = np.zeros(n_epochs * M)
-    for e in range(n_epochs):
+
+def RMSprop(x, y, M, init_w, n_epochs, learning_rate, forgetting_factor, cost_gradient, *lambd):
+    """Performs the Adaptive gradient algorithm (ADAGrad) to optimize a cost
+    function given its gradient.
+
+    Args:
+        x (Array)               : Design matrix
+        y (Array)               : response variable
+        M (Int)                 : Number of mini-batches to split data set into
+        init_w (Array)          : Initial/starting weights
+        n_epochs (int)          : Number of epochs
+        learning_rate (Float)   :
+        forgetting_factor(Float):
+        cost_gradient (Func)    : Gradient of the cost function to optimize
+        lambd (Float)           : Optional penalty parameter that goes into cost_gradient
+    Returns:
+        w (Array)               : Optimal weights corresponding to the cost gradient
+    """
+    mb = minibatch(x, M)
+    w = init_w
+    v = 0
+    for epoch in range(n_epochs):
         for i in range(M):
-            t = e * M + i
-            learning_rate[t] = t0 / (t + t1)
-    return learning_rate
+            # Pick out a random mini-batch index
+            k = np.random.randint(M)
+            # compute gradient with random minibatch
+            grad = cost_gradient(x[mb[k]], y[mb[k]], w, *lambd)
+            v = forgetting_factor * v + (1 - forgetting_factor) * np.dot(grad, grad)
+            w = w - learning_rate / np.sqrt(v) * grad
+
+    return w
 
 
 if __name__ == "__main__":
     np.random.seed(123)
-    x = np.random.uniform(0,1,500)
-    y = np.random.uniform(0,1,500)
+    x = np.random.uniform(0, 1, 500)
+    y = np.random.uniform(0, 1, 500)
     z = FrankeFunction(x, y)
-    
-    deg = 5    
+
+    deg = 2
 
     X = linear_regression.design_matrix_2D(x, y, deg)
+    N_predictors = int((deg + 1) * (deg + 2) / 2)
+    w_init = np.random.randn(N_predictors)
+
+    w_SGD_OLS = SGD(
+        X,
+        z,
+        M=250,
+        init_w=w_init,
+        n_epochs=100,
+        learning_rate=0.01,
+        cost_gradient=CostFunctions.OLS_cost_gradient,
+    )
+    w_SGDM_OLS = SGDM(
+        X,
+        z,
+        M=250,
+        init_w=w_init,
+        n_epochs=100,
+        learning_rate=0.01,
+        momentum=0.5,
+        cost_gradient=CostFunctions.OLS_cost_gradient,
+    )
+    w_ADAgrad_OLS = ADAgrad(
+        X,
+        z,
+        M=250,
+        init_w=w_init,
+        n_epochs=100,
+        learning_rate=1,
+        cost_gradient=CostFunctions.OLS_cost_gradient,
+    )
+    w_RMSProp_OLS = RMSprop(
+        X,
+        z,
+        M=250,
+        init_w=w_init,
+        n_epochs=100,
+        learning_rate=1,
+        forgetting_factor=0.9,
+        cost_gradient=CostFunctions.OLS_cost_gradient,
+    )
+
+    # w_SGD_Ridge = SGD(X, z, 250, w_init, 100, 0.01, CostFunctions.Ridge_cost_gradient, 0)
+    # w_SGDM_Ridge = SGDM(X, z, 250, w_init, 100, 0.01, 0.5, CostFunctions.Ridge_cost_gradient, 0)
+
     w_analytic = linear_regression.OLS_2D(X, z)
+
+    print(w_SGD_OLS, "- SGD OLS")
+    print(w_SGDM_OLS, "- SGDM OLS")
+    print(w_ADAgrad_OLS, "- ADAgrad OLS")
+    print(w_RMSProp_OLS, "- RMSprop OLS")
+    print(w_analytic, "- OLS")
 
     """
     for m in [2, 5, 10, 50]:
@@ -67,5 +224,5 @@ if __name__ == "__main__":
         print(w_analytic)
         print("diff = ", abs(w_analytic - w))
     """
-    
-    #w = SGD(X, z, 50, np.random.randn(int((deg+1)*(deg+2)/2)), 1000, 0.1, 100)
+
+    # w = SGD(X, z, 50, np.random.randn(int((deg+1)*(deg+2)/2)), 1000, 0.1, 100)
