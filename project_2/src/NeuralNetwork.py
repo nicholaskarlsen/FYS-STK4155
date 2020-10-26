@@ -1,6 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+import ActivationFunctions
+import SGD
+import CostFunctions
+import sys
+
 
 # Maps x -> scalar a
 class Neuron:
@@ -21,15 +26,26 @@ class Neuron:
 
 
 class FeedForwardNeuralNetwork:
-    def __init__(self):
-        self.layers = []  # Layer of neurons
+    def __init__(self, activation_function):
+
+        if callable(activation_function):
+            self.activation_function = activation_function
+        else:
+            raise Exception("activation_function is not a callable")
+
+    def __initialize_weights(self):
         pass
 
     def add_layer(self, layer):
         self.layers.append(layer)
         return
 
-    def backpropogation(self):
+    def train(self):
+        pass
+
+    def __backpropogation(self):
+
+
         pass
 
     def __call__(self):
@@ -37,3 +53,7 @@ class FeedForwardNeuralNetwork:
 
     def __repr__(self):
         pass
+
+
+if __name__ == "__main__":
+    NN = FeedForwardNeuralNetwork(1)

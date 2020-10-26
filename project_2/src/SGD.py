@@ -199,7 +199,7 @@ if __name__ == "__main__":
         M=250,
         init_w=w_init,
         n_epochs=100,
-        learning_rate=1,
+        learning_rate=0.01,
         forgetting_factor=0.9,
         cost_gradient=CostFunctions.OLS_cost_gradient,
     )
