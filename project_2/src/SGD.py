@@ -50,7 +50,7 @@ def SGD(x, y, M, init_w, n_epochs, learning_rate, cost_gradient, *lambd):
             # Pick out a random mini-batch index
             k = np.random.randint(M)
             # compute gradient with random minibatch
-            grad = cost_gradient(x[mb[k]], y[mb[k]], w, *lambd)
+            grad = cost_gradient(x[mb[k]], y[mb[k]], w, *lambd) / x[mb[k]].shape[0]
             # increment weights
             w = w - learning_rate * grad
     return w
@@ -83,7 +83,7 @@ def SGDM(x, y, M, init_w, n_epochs, learning_rate, momentum, cost_gradient, *lam
             # Pick out a random mini-batch index
             k = np.random.randint(M)
             # compute gradient with random minibatch
-            grad = cost_gradient(x[mb[k]], y[mb[k]], w, *lambd)
+            grad = cost_gradient(x[mb[k]], y[mb[k]], w, *lambd) / x[mb[k]].shape[0]
             # increment weights
             dw = momentum * dw - learning_rate * grad
             w = w + dw
@@ -114,7 +114,7 @@ def ADAgrad(x, y, M, init_w, n_epochs, learning_rate, cost_gradient, *lambd):
             # Pick out a random mini-batch index
             k = np.random.randint(M)
             # compute gradient with random minibatch
-            grad = cost_gradient(x[mb[k]], y[mb[k]], w, *lambd)
+            grad = cost_gradient(x[mb[k]], y[mb[k]], w, *lambd) / x[mb[k]].shape[0]
             g_ti += np.dot(grad, grad)  # Gradient squared
             w = w - learning_rate / np.sqrt(g_ti) * grad
 
@@ -146,7 +146,7 @@ def RMSprop(x, y, M, init_w, n_epochs, learning_rate, forgetting_factor, cost_gr
             # Pick out a random mini-batch index
             k = np.random.randint(M)
             # compute gradient with random minibatch
-            grad = cost_gradient(x[mb[k]], y[mb[k]], w, *lambd)
+            grad = cost_gradient(x[mb[k]], y[mb[k]], w, *lambd) / x[mb[k]].shape[0]
             v = forgetting_factor * v + (1 - forgetting_factor) * np.dot(grad, grad)
             w = w - learning_rate / np.sqrt(v) * grad
 

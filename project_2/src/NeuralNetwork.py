@@ -45,7 +45,7 @@ class FeedForwardNeuralNetwork:
 
     def __backpropogation(self):
 
-
+        # Compute the activation of all the neurons in the activation layer
         pass
 
     def __call__(self):
