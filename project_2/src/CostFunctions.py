@@ -5,6 +5,40 @@ Various cost functions and their gradients. Follows a general interface of (X, y
 
 """
 
+# Define a clear interace for all the Cost functions (Primarily for the NN class)
+class CostFunction:
+    def evaluate(X, y, predictors):
+        pass
+
+    def evaluate_gradient(X, y, predictors):
+        pass
+
+    def __repr__(self):
+        pass
+
+class OLS(CostFunction):
+    def evaluate(X, y, predictors):
+        return (y - X @ predictors).T @ (y - X @ predictors)
+
+    def evaluate_gradient(X, y, predictors):
+        return -2 * X.T @ (y - X @ predictors)
+
+    def __repr__(self):
+        return "OLS"
+
+
+class Ridge(CostFunction):
+    def evaluate(X, y, predictors, lambd):
+        return OLS.evaluate(X, y, predictors) + lamb * predictors.T @ predictors
+
+    def evaluate_gradient(X, y, predictors, lambd):
+        return OLS.evaluate_gradient(X, y, predictors) + 2 * lambd * predictors
+
+    def __repr__(self):
+        return "Ridge"
+
+
+# Consider depricating the old functions later, but keep for now due to existing SGD code
 
 def OLS_cost(X, y, predictors):
     return (y - X @ predictors).T @ (y - X @ predictors)
@@ -20,6 +54,7 @@ def Ridge_cost(X, y, predictors, lambd):
 
 def Ridge_cost_gradient(X, y, predictors, lambd):
     return OLS_cost_gradient(X, y, predictors) + 2 * lambd * predictors
+
 
 
 """

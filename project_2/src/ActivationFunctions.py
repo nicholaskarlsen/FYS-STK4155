@@ -1,38 +1,69 @@
 import numpy as np
 
-
-def ReLU(x):
-    return np.maximum(0, x)
+# Wrap all the activation functions in classes with static methods
 
 
-def ReLU_derivative(x):
-    return np.where(x < 0, 0, 1)
+class ActivationFunction:
+    def evaluate(x):
+        pass
+
+    def evaluate_derivative(x):
+        pass
+
+    def __repr__(self):
+        pass
 
 
-def LeakyReLU(x):
-    return np.where(x < 0, 0.1 * x, x)
+class ReLU(ActivationFunction):
+    def evaluate(x):
+        return np.maximum(0, x)
+
+    def evaluate_derivative(x):
+        return np.where(x < 0, 0, 1)
+
+    def __repr__(self):
+        return "ReLU"
 
 
-def LeakyReLU_derivative(x):
-    return np.where(x < 0, 0.1, 1)
+class LeakyReLU(ActivationFunction):
+    def evaluate(x):
+        return np.where(x < 0, 0.1 * x, x)
+
+    def evaluate_derivative(x):
+        return np.where(x < 0, 0.1, 1)
+
+    def __repr__(self):
+        return "LeakyReLU"
 
 
-def ELU(x):
-    return np.where(x < 0, np.exp(x) - 1, x)
+class ELU(ActivationFunction):
+    def evaluate(x):
+        return np.where(x < 0, np.exp(x) - 1, x)
+
+    def evaluate_derivative(x):
+        return np.where(x < 0, np.exp(x), 1)
+
+    def __repr__(self):
+        return "ELU"
 
 
-def ELU_derivative(x):
-    return np.where(x < 0, np.exp(x), 1)
+class Sigmoid(ActivationFunction):
+    def evaluate(x):
+        return 1 / (1 + np.exp(-x))
 
+    def evaluate_derivative(x):
+        # sig(x) * (1 - sig(x))
+        return 1 / (1 + np.exp(-x)) * (1 - 1 / (1 + np.exp(-x)))
 
-def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
-
-
-def sigmoid_derivative(x):
-    return sigmoid(x) * (1 - sigmoid(x))
+    def __repr__(self):
+        return "Sigmoid"
 
 
 if __name__ == "__main__":
-    print("Hello")
-    print(ActivationFunction(123))
+    # quick check to ensure interfaces are implemented correctly
+    for a in [ReLU, LeakyReLU, ELU, Sigmoid]:
+        print(a())
+        print(a.evaluate(10))
+        print(a.evaluate_derivative(10), end="\n---\n")
+
+    print(issubclass(ReLU, ActivationFunction))
