@@ -1,10 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-import SGD
+#import SGD
 import ActivationFunctions
 import CostFunctions
+import SGD
 import sys
+sys.path.insert(0, "../../project_1/src")
 
 
 class FeedForwardNeuralNetwork:
@@ -45,7 +47,7 @@ class FeedForwardNeuralNetwork:
         else:
             raise Exception("activation is not a sub-class of ActivationFunction")
 
-        if issubclass(activation_out, ActivationFunction):
+        if issubclass(activation_out, ActivationFunctions.ActivationFunction):
             self.activation_out = activation
         else:
             raise Exception("activation_out is not a sub-class of ActivationFunction")
@@ -57,19 +59,30 @@ class FeedForwardNeuralNetwork:
 
         # Initialize weight & bias
         self.network_shape = network_shape
-        self.N_hidden_layers = len(self.network_shape)     # Number of hidden layers in the network
-        self.N_layers = self.N_hidden_layers
-        self.weights = np.empty(self.N_layers, dtype="object")
-        self.biases = np.empty(self.N_layers, dtype="object")
+        # Number of hidden layers in the network
+        self.N_layers = len(self.network_shape)
+
+        # Store weights and biases corresponding to L = 1, .., L, L+1
+        # Where L + 1 goes from the last hidden layer to the output
+        self.weights = np.empty(self.N_layers + 1, dtype="object")
+        self.biases = np.empty(self.N_layers + 1, dtype="object")
         self.__initialize_weights()
         self.__initialize_biases()
 
         # Storage arrays for Feed-Forward & Backward propogation algorithm
-        self.a = np.empty(self.N_layers, dtype="object")
-        self.z = np.empty(self.N_layers, dtype="object")
+        self.a = np.empty(self.N_layers + 1, dtype="object") # Activation(z[l])
+        self.z = np.empty(self.N_layers + 1, dtype="object") # a[l-1] @ w[l]
 
-        self.lambd = lambd
+        # Initialize array to store the gradients of the cost function wrt. weights & biases.
+        self.cost_weight_gradient = np.empty(self.N_layers + 1, dtype="object")
+        self.cost_bias_gradient = np.empty(self.N_layers + 1, dtype="object")
+        # Initialize the shape based on weights & storages
+        for i in range(self.N_layers):
+            self.cost_weight_gradient[i] = np.zeros(self.weights[i].shape)
+            self.cost_bias_gradient[i] = np.zeros(self.biases[i].shape)
 
+        # Note: These arrays will be re-used. But avoid re-initialization duiring
+        # each itteration to reduce time spent on garbage collection
         return
 
     def __initialize_weights(self):
@@ -77,25 +90,27 @@ class FeedForwardNeuralNetwork:
         # TODO: Look more closely at this
         # weight from k in l-1 to j in l -> w[l][j,k]
         # Input layer -> First Hidden layer
-        self.weights[0] = np.random.randn([self.N_inputs, self.network_shape[0]])
+        j = self.network_shape[0]
+        k = self.N_inputs
+        self.weights[0] = np.random.randn(j, k)
         # Hidden layers
-        for L in range(1, self.N_layers - 1):
-            self.weights[L] = np.random.randn([j, k])
+        for i in range(1, self.N_layers):
+            j = self.network_shape[i-1]
+            k = self.network_shape[i]
+            self.weights[i] = np.random.randn(j, k)
         # Last hidden layer -> Output layer
-        self.weights[-1] = np.randn([self.network_shape[-1], self.N_outputs])
+        self.weights[-1] = np.random.randn(self.network_shape[-1], self.N_outputs)
 
         return
 
     def __initialize_biases(self):
         # NOTE: Consult the literature to ensure that random initialization is OK
         # TODO: Look more closely at this, only a sketch for now.
-        self.biases[0] = np.random.randn(self.network_shape[0])
         # Hidden layers
-        for L in range(1, self.N_layers - 1):
-            self.biases[L] = np.random.randn(self.network_shape[L])
+        for i in range(self.N_layers):
+            self.biases[i] = np.random.randn(self.network_shape[i])
         # Last hidden layer -> Output layer
-        self.biases[-1] = np.randn(self.output_dim)
-
+        self.biases[-1] = np.random.randn(self.output_dim)
         return
 
     def __feed_forward(self, X_mb, Y_mb):
@@ -104,30 +119,32 @@ class FeedForwardNeuralNetwork:
         self.a[0] = self.activation.evaluate(self.z[0])
 
         # Feed Forward
-        # l = 2, 3, ..., L compute z[l] = w[l] @ a[l-1] + b[l]
-        for l in range(1, self.N_layers - 1):
+        # l = 1,2,3,...,L compute z[l] = w[l] @ a[l-1] + b[l]
+        for l in range(1, self.N_layers):
             self.z[l] = self.a[l-1] @ self.weights[l] + self.biases[l]
             self.a[l] = self.activation.evaluate(z[l])
 
+        # Note; weights = [1, ..., L, L+1] -> last index stores the output weight
         # Treat the output layer separately, due to different activation func
         self.z[-1] = self.a[-2] @ self.weights[-1] + self.biases[-1]
         self.a[-1] = self.activation_out.evaluate(self.z[-1])
         return
 
     def __backpropogation(self, X_mb, Y_mb):
+        # Consider making this a class variable
         error = np.empty(self.N_hidden_layers, dtype="Object")
-
         # Compute the error at the output
         error[-1] = self.cost.evaluate_gradient(Y_mb, self.a[-1]) \
                   * self.activation_out.evaluate_derivative(self.z[-1])
 
-        # Backpropogate the error from L-1, ..., 2
-        for l in range(self.N_hidden_layers-2, 1, -1):
-            error[l] = (self.w[l+1].T @ error[l+1]) * self.activation.evaluate_derivative(self.z[l])
+        # Backpropogate the error from L,...,2
+        for l in range(self.N_hidden_layers-1, 1, -1):
+            error[l] = (error[l+1] @ self.w[l+1].T) * self.activation.evaluate_derivative(self.z[l])
 
-        # Compute gradients as
-        dCdw[l][j][k] = a[l-1][k] @ error[l][j]
-        dCdb[l][j] = error[l][j]
+        # Compute the gradients
+        for l in range(self.N_hidden_layers):
+            self.cost_weight_gradient[l] = self.a[l-1] @ error[l]
+            self.cost_bias_gradient[l] = error[l]
 
         return
 
@@ -149,20 +166,27 @@ class FeedForwardNeuralNetwork:
 
     def train(self, M, learning_rate, n_epochs):
         # Ensure that the mini-batch size is NOT greater than
-        assert M <= len(X)
+        assert M <= len(self.X)
 
         for epoch in range(n_epochs):
             # Pick out a new mini-batch
-            mb = SGD.minibatch(X, m)
+            mb = SGD.minibatch(X, M)
             for i in range(M):
                 # with replacement, replace i with k
                 # k = np.random.randint(M)
+
+                # Feed-Forward to compute all the activations
                 self.__feed_forward(self.X[i], self.Y[i])
+                # Back-propogate to compute the gradients
                 self.__backpropogation(self.X[i], self.Y[i])
+                # Update the weights and biases using gradient descent
+                for l in range(self.N_layers):
+                    self.weights[i] -= self.learning_rate / M * self.dCdw[l]
+                    self.biases[i] -= self.learning_rate / M * self.dCdb[l]
         return
 
     def predict(self, X):
-        a = self.__feed_forward_output(X):
+        a = self.__feed_forward_output(X)
         return a
 
     def __repr__(self):
@@ -170,14 +194,25 @@ class FeedForwardNeuralNetwork:
 
 
 if __name__ == "__main__":
+    from FrankeFunction import *
+    import linear_regression
+
+    x = np.random.uniform(0, 1, 500)
+    y = np.random.uniform(0, 1, 500)
+    z = FrankeFunction(x, y)
+
+    deg = 2
+
+    X = linear_regression.design_matrix_2D(x, y, deg)
+
     # Define the network
     FFNN = FeedForwardNeuralNetwork(
-        X=1,
-        y=1,
+        X=X,
+        Y=z,
         cost=CostFunctions.OLS,
         activation=ActivationFunctions.ReLU,
-        activation_out=ActivationFunctions.Sigmoid,
-        network_shape=[4, 5],
+        activation_out=ActivationFunctions.ReLU,
+        network_shape=[4, 5, 6],
     )
 
-    # FFNN.train(X, y, M, learning_rate, n_epochs)
+    FFNN.train(M=500, learning_rate=0.02, n_epochs=10)
