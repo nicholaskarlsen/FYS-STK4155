@@ -87,11 +87,10 @@ class FeedForwardNeuralNetwork:
 
     def __initialize_weights(self):
         # NOTE: Consult the literature to ensure that random initialization is OK
-        # TODO: Look more closely at this
         # weight from k in l-1 to j in l -> w[l][j,k]
         # Input layer -> First Hidden layer
         j = self.network_shape[0]
-        k = self.N_inputs
+        k = self.input_dim
         self.weights[0] = np.random.randn(j, k)
         # Hidden layers
         for i in range(1, self.N_layers):
@@ -104,9 +103,6 @@ class FeedForwardNeuralNetwork:
         return
 
     def __initialize_biases(self):
-        # NOTE: Consult the literature to ensure that random initialization is OK
-        # TODO: Look more closely at this, only a sketch for now.
-        # Hidden layers
         for i in range(self.N_layers):
             self.biases[i] = np.random.randn(self.network_shape[i])
         # Last hidden layer -> Output layer
@@ -114,19 +110,24 @@ class FeedForwardNeuralNetwork:
         return
 
     def __feed_forward(self, X_mb, Y_mb):
+        print("w = ", self.weights[0].shape)    # (4, 6)
+        print("X_mb.T = ", X_mb.T.shape)            # (6,)
+        print("b = ", self.biases[0].shape)     # (4,)
         # Activation at the input layer
-        self.z[0] = X_mb @ self.weights[0] + self.biases[0]
+        self.z[0] = self.weights[0] @ X_mb.T  + self.biases[0]
         self.a[0] = self.activation.evaluate(self.z[0])
-
+        print("Starting FF loop")
         # Feed Forward
         # l = 1,2,3,...,L compute z[l] = w[l] @ a[l-1] + b[l]
         for l in range(1, self.N_layers):
-            self.z[l] = self.a[l-1] @ self.weights[l] + self.biases[l]
+            print(f"w[{l}] = ",self.weights[l].shape)
+            print(f"a[{l}-1] = ",self.a[l-1].shape)
+            self.z[l] = self.weights[l] @ self.a[l-1] + self.biases[l]
             self.a[l] = self.activation.evaluate(z[l])
 
         # Note; weights = [1, ..., L, L+1] -> last index stores the output weight
         # Treat the output layer separately, due to different activation func
-        self.z[-1] = self.a[-2] @ self.weights[-1] + self.biases[-1]
+        self.z[-1] = self.weights[-1] @ self.a[-2] + self.biases[-1]
         self.a[-1] = self.activation_out.evaluate(self.z[-1])
         return
 
@@ -134,7 +135,7 @@ class FeedForwardNeuralNetwork:
         # Consider making this a class variable
         error = np.empty(self.N_hidden_layers, dtype="Object")
         # Compute the error at the output
-        error[-1] = self.cost.evaluate_gradient(Y_mb, self.a[-1]) \
+        error[-1] = self.cost.evaluate_gradient(self.a[-1], Y_mb) \
                   * self.activation_out.evaluate_derivative(self.z[-1])
 
         # Backpropogate the error from L,...,2
@@ -150,15 +151,15 @@ class FeedForwardNeuralNetwork:
 
     def __feed_forward_output(self, X):
         # Activation of the input layer
-        z = X @ self.weights[0] + self.biases[0]
+        z = self.weights[0] @ X + self.biases[0]
         a = self.activation.evaluate(z)
 
         # Activation of the hidden layers
         for L in range(1, self.N_layers - 1):
-            z = a @ self.weights[L] + self.biases[L]
+            z = self.weights[L] @ a + self.biases[L]
             a = self.activation.evaluate(z)
 
-        z = a @ self.weights[-1] + self.biases[-1]
+        z = self.weights[-1] @ a + self.biases[-1]
         a = self.activation_out(z)
 
         return a
@@ -174,11 +175,11 @@ class FeedForwardNeuralNetwork:
             for i in range(M):
                 # with replacement, replace i with k
                 # k = np.random.randint(M)
-
+                print("Before sending in to __feed_forward X.shape = ", self.X[mb[i]].shape)
                 # Feed-Forward to compute all the activations
-                self.__feed_forward(self.X[i], self.Y[i])
+                self.__feed_forward(self.X[mb[i]], self.Y[mb[i]])
                 # Back-propogate to compute the gradients
-                self.__backpropogation(self.X[i], self.Y[i])
+                self.__backpropogation(self.X[mb[i]], self.Y[mb[i]])
                 # Update the weights and biases using gradient descent
                 for l in range(self.N_layers):
                     self.weights[i] -= self.learning_rate / M * self.dCdw[l]
