@@ -25,17 +25,8 @@ class FeedForwardNeuralNetwork:
         self.X = X
         self.Y = Y
 
-        try:
-            self.N_inputs, self.input_dim = self.X.shape
-        except ValueError as e:  # if 1D input data
-            self.N_inputs = len(self.X)
-            self.input_dim = 1
-
-        try:
-            self.N_outputs, self.output_dim = self.Y.shape
-        except ValueError as e:  # if 1D output data
-            self.N_outputs = len(self.Y)
-            self.output_dim = 1
+        self.N_inputs, self.input_dim = self.X.shape
+        self.N_outputs, self.output_dim = self.Y.shape
 
         # Make sure both data-sets are the same size
         assert self.N_inputs == self.N_outputs
@@ -94,11 +85,11 @@ class FeedForwardNeuralNetwork:
         self.weights[0] = np.random.randn(j, k)
         # Hidden layers
         for i in range(1, self.N_layers):
-            j = self.network_shape[i-1]
-            k = self.network_shape[i]
+            j = self.network_shape[i]
+            k = self.network_shape[i-1]
             self.weights[i] = np.random.randn(j, k)
         # Last hidden layer -> Output layer
-        self.weights[-1] = np.random.randn(self.network_shape[-1], self.N_outputs)
+        self.weights[-1] = np.random.randn(self.N_outputs, self.network_shape[-1])
 
         return
 
@@ -144,7 +135,7 @@ class FeedForwardNeuralNetwork:
 
         # Compute the gradients
         for l in range(self.N_hidden_layers):
-            self.cost_weight_gradient[l] = self.a[l-1] @ error[l]
+            self.cost_weight_gradient[l] = error[l] @ self.a[l-1].T
             self.cost_bias_gradient[l] = error[l]
 
         return
@@ -171,7 +162,7 @@ class FeedForwardNeuralNetwork:
 
         for epoch in range(n_epochs):
             # Pick out a new mini-batch
-            mb = SGD.minibatch(X, M)
+            mb = SGD.minibatch(self.X, M)
             for i in range(M):
                 # with replacement, replace i with k
                 # k = np.random.randint(M)
@@ -182,8 +173,8 @@ class FeedForwardNeuralNetwork:
                 self.__backpropogation(self.X[mb[i]], self.Y[mb[i]])
                 # Update the weights and biases using gradient descent
                 for l in range(self.N_layers):
-                    self.weights[i] -= self.learning_rate / M * self.dCdw[l]
-                    self.biases[i] -= self.learning_rate / M * self.dCdb[l]
+                    self.weights[i] -= self.learning_rate / M * self.cost_weight_gradient[l]
+                    self.biases[i] -= self.learning_rate / M * self.cost_bias_gradient[l]
         return
 
     def predict(self, X):
