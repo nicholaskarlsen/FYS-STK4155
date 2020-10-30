@@ -16,17 +16,21 @@ class CostFunction:
     def __repr__(self):
         pass
 
+# CONSIDER THIS CAREFULLY
 
 class OLS(CostFunction):
-    def evaluate(X, y, predictors):
-        return (y - X @ predictors).T @ (y - X @ predictors)
+    def evaluate(X, Y):
+        return (Y - X).T @ (Y - X)
+                     # [m, q]x[q, m] -> [m, m]
+                     # [q, m]x[m, q] -> [q, q] = q=1 => tall
 
-    def evaluate_gradient(X, y, predictors):
-        return -2 * X.T @ (y - X @ predictors)
+    def evaluate_gradient(X, Y):
+        return -2 * X.T @ (Y - X)
 
     def __repr__(self):
         return "OLS"
 
+# CONSIDER THIS CAREFULLY
 
 class Ridge(CostFunction):
     def evaluate(X, y, predictors, lambd):
@@ -39,7 +43,7 @@ class Ridge(CostFunction):
         return "Ridge"
 
 
-# Consider depricating the old functions later, but keep for now due to existing SGD code
+# KEEP THIS FOR SGD
 
 
 def OLS_cost(X, y, predictors):

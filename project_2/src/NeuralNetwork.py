@@ -104,9 +104,14 @@ class FeedForwardNeuralNetwork:
         print("w = ", self.weights[0].shape)    # (4, 6)
         print("X_mb.T = ", X_mb.T.shape)            # (6,)
         print("b = ", self.biases[0].shape)     # (4,)
+        z = np.empty(self.N_layers + 1, dtpye="object")
+        a = np.empty(self.N_layers + 1, dtype="object")
+
         # Activation at the input layer
-        self.z[0] = self.weights[0] @ X_mb.T  + self.biases[0]
-        self.a[0] = self.activation.evaluate(self.z[0])
+        #self.z[0] = self.weights[0] @ X_mb.T  + self.biases[0]
+        #self.a[0] = self.activation.evaluate(self.z[0])
+        z[0] = X_mb @ self.weights[0] + self.biases[0].T
+        a[0] = self.activation.evaluate(self.z[0, :])
         print("Starting FF loop")
         # Feed Forward
         # l = 1,2,3,...,L compute z[l] = w[l] @ a[l-1] + b[l]

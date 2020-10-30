@@ -38,7 +38,7 @@ Consider a cost function in the form
 \begin{equation}
     C(\pmb\beta) = \sum_{i=1}^{n}c_i(\pmb x_i, \pmb\beta)
 \end{equation}
-with predictors $\pmb \beta = (\beta_1, \dots, \beta_p)$ and data points $\pmb x = \{\pmb x_1\, \dots, \pmb x_n\}$. This forms a $p$-dimensional surface paramentresized by the predictors, where the optimal parameters are found at the  global minima. 
+with predictors $\pmb \beta = (\beta_1, \dots, \beta_p)$ and data points $\pmb x = \{\pmb x_1\, \dots, \pmb x_n\}$. This forms a $p$-dimensional surface paramentresized by the predictors, where the optimal parameters are found at the  global minima.
 We may localize these minima by the method of gradient descent, in which we follow the gradient of the cost function
 \begin{equation}
     \pmb\nabla_{\beta} C(\pmb\beta) = \sum_{i=1}^n \pmb\nabla_\beta c_i(\pmb x_i, \pmb\beta)
@@ -54,6 +54,34 @@ In Stochastic gradient descent (SGD) we modify the basic gradient descent by spl
 
 Practical tips regarding SDG; see \textcite[pp~19]{Mehta_2019}
 \section{Theory}
+    \[
+        w_{jk} X_{mk}^T = (w_{jk}X_{km})^T = X_{mk} w_{kj} = [m,j]
+    \]
+    \[
+        z^1_{mj} = X_{mk}w^1_{kj} + (b^1_j)^T
+    \]
+    \[
+        z^l_{mj} = a^{l-1}_{mk}w^{l}_{kj} + (b^l_j)^T
+    \]
+    \[
+        a^l_{mj} = \sigma(z^l_{mj})
+    \]
+
+    ----
+
+    \[
+        z^1_{jm} = w^1_{jk}X_{mk}^T
+    \]
+
+    \[
+        z^l_{jm} = w^l_{jk}a^{l-1}_{km} + b_j
+    \]
+
+    \[
+        \delta^{L+1}_{q} = \sum_m \pdv{C(Y_{mq}, a^{L+1}_{mq})}{a^{L+1}_{jm}} \odot \sigma'(z^{L+1}_{jm})
+    \]
+
+
 \section{Results \& Discussion}
 \section{Conclusion}
 
