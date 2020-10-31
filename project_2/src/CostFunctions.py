@@ -7,10 +7,10 @@ Various cost functions and their gradients. Follows a general interface of (X, y
 
 # Define a clear interace for all the Cost functions (Primarily for the NN class)
 class CostFunction:
-    def evaluate(X, y, predictors):
+    def evaluate(model, data):
         pass
 
-    def evaluate_gradient(X, y, predictors):
+    def evaluate_gradient(model, data):
         pass
 
     def __repr__(self):
@@ -18,14 +18,12 @@ class CostFunction:
 
 # CONSIDER THIS CAREFULLY
 
-class OLS(CostFunction):
-    def evaluate(X, Y):
-        return (Y - X).T @ (Y - X)
-                     # [m, q]x[q, m] -> [m, m]
-                     # [q, m]x[m, q] -> [q, q] = q=1 => tall
+class SquareError(CostFunction):
+    def evaluate(model, data):
+        return (data - model)**2 / 2
 
-    def evaluate_gradient(X, Y):
-        return -2 * X.T @ (Y - X)
+    def evaluate_gradient(model, data):
+        return model - data
 
     def __repr__(self):
         return "OLS"
@@ -33,12 +31,11 @@ class OLS(CostFunction):
 # CONSIDER THIS CAREFULLY
 
 class Ridge(CostFunction):
-    def evaluate(X, y, predictors, lambd):
-        return OLS.evaluate(X, y, predictors) + lamb * predictors.T @ predictors
+    def evaluate(model, data):
+        return
 
-    def evaluate_gradient(X, y, predictors, lambd):
-        return OLS.evaluate_gradient(X, y, predictors) + 2 * lambd * predictors
-
+    def evaluate_gradient(model, data):
+        return
     def __repr__(self):
         return "Ridge"
 

@@ -1,0 +1,107 @@
+\documentclass{article}
+
+\usepackage[colorlinks=true,urlcolor=blue,citecolor=blue]{hyperref}
+\usepackage{physics}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+
+
+\begin{document}
+    \noindent
+    We initialize the Feed-Forward algorithm by computing
+    \begin{align}\label{eqn: FeedForward Initial}
+        \begin{split}
+            z^1_j &= w^1_{jk}X_k + b^1_j \\
+            a^1_j &= \sigma(z^1_j)
+        \end{split}
+    \end{align}
+    where we adopt the Einstein summation convention by summing over repeated indices.
+    We then compute
+    \begin{align}
+        \begin{split}
+            z^l_{j} &= w^l_{jk}a^{l-1}_k + b^l_j \\
+            a^l_{j} &= \sigma(z^l_{j})
+        \end{split}
+    \end{align}
+    for hidden layers $l = 2, \dots, L$. Then, for the ouput layer we compute
+    \begin{align}
+        \begin{split}
+            z^{L}_j &= w^{L}_{jk}a^{L-1}_k + b^{L}_j \\
+            a^{L}_j &= \tilde\sigma(z^{L}_j)
+        \end{split}
+    \end{align}
+    where $a^{L}_j$ is the predicted response, and $\tilde\sigma$ is the activation function for the output layer, which may differ from the activation function of the hidden layers.
+
+    We then compute the error of the output as
+    \begin{equation}
+        \delta^{L}_j = \pdv{C}{a^{L}_{j}} \odot \tilde\sigma'(z^{L}_j)
+    \end{equation}
+    and backpropogate the error like
+    \begin{equation}
+        \delta^{l}_j = (\delta^{l+1}_{k}w^{l+1}_{kj}) \odot \sigma'(z^l_j)
+    \end{equation}
+    for all $l = L-1, \dots, 2$ where we make particular note that $w_{kj} = (w_{jk})^T$.
+
+    We may then easily compute the gradients of the cost function wrt. the weights \& biases as
+
+    \begin{align}
+        \begin{split}
+            \pdv{C}{w_{jk}^l} &= \delta_j^l a^{l-1}_k \\
+            \pdv{C}{b^l_j} &= \delta_j^l
+        \end{split}
+    \end{align}
+    which are then used to update the weights and biases via gradient descent.
+
+    \section*{Backpropogation with minibatches}
+    We have input and output matrices $X\in[M\times P], Y\in[M\times Q]$, with elements $X_{mp}, Y_{mq}$. Since we wish to perform the Backpropogation effectively using the highly optimized linear algebra libraries available in Numpy, we must therefore slightly alter the way in which we perform the backpropogation. Since our input vectors $X$ now comes in the form
+
+    \begin{equation}
+        X = \qty[
+        \begin{matrix}
+            X_1 \\ \vdots \\ X_P
+        \end{matrix}
+        ] \rightarrow
+        X = \qty[
+        \begin{matrix}
+            X_{11} & \dots & X_{1P} \\
+                     & \vdots&          \\
+            X_{M1} & \dots & X_{MP}
+        \end{matrix}
+        ]
+    \end{equation}
+    we let $z^l_j \rightarrow z^l_{mj}$ and $a^l_{j}\rightarrow a^l_{mj}$ such that they are in accordance with $X_{mp}, Y_{mq}$.
+
+    In order to adhere to this new form, we must transpose Eqn.~\ref{eqn: FeedForward Initial} which yields
+    \begin{equation}
+        w_{jk}X_K \rightarrow \qty(w_{jk}X_k)^T = X_k^Tw_{kj}
+    \end{equation}
+    Thus, we may write the initial step as
+    \begin{align}
+        \begin{split}
+            z^1_{mj} &= X_{mk}w_{kj} + \qty(b^1_j)^T \\
+            a^1_{mj} &= \sigma\qty(z^1_{mj})
+        \end{split}
+    \end{align}
+    where the transposed bias is implicitly added element-wise to each row in the resultant matrix. In a similar fashion, we feed forward for $l = 2, \dots L$
+    \begin{align}
+        \begin{split}
+            z^l_{mj} &= a^{l-1}_{mk}w_{kj} + \qty(b^L_j)^T \\
+            a^l_{mj} &= \sigma(z^L_{mj})
+        \end{split}
+    \end{align}
+    and for the output layer
+    \begin{align}
+        \begin{split}
+            z^L_{mj} &= a^{L-1}_{mk}w_{kj} + \qty(b^L_j)^T \\
+            a^L_{mj} &= \tilde\sigma\qty(z^L_{mj})
+        \end{split}
+    \end{align}
+
+    \begin{equation}
+        \delta^{l}_j = (w_{jk})^T \delta^{l+1}_j
+    \end{equation}
+    \begin{equation}
+        \delta^{l}_{mj} = \delta^{l+1}_{mk}w^{l+1}_{kj}
+    \end{equation}
+\end{document}
