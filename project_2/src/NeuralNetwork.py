@@ -97,10 +97,10 @@ class FeedForwardNeuralNetwork:
     def __initialize_biases(self):
         for i in range(self.N_layers):
             #self.biases[i] = np.random.randn(self.network_shape[i])
-            self.biases[i] = np.zeros(self.network_shape[i])
+            self.biases[i] = np.zeros(self.network_shape[i]) + 0.01
         # Last hidden layer -> Output layer
         #self.biases[-1] = np.random.randn(self.output_dim)
-        self.biases[-1] = np.zeros(self.output_dim)
+        self.biases[-1] = np.zeros(self.output_dim) + 0.01
 
         return
 
@@ -185,11 +185,8 @@ class FeedForwardNeuralNetwork:
                 X_mb = self.X[mb[i]]
                 Y_mb = self.Y[mb[i]]
                 M = X_mb.shape[0] # Size of each minibach (NOT constant, see SGD.minibatch)
-
-
                 # Feed-Forward to compute all the activations
                 self.__feed_forward(X_mb, M)
-
                 # Back-propogate to compute the gradients
                 self.__backpropogation(X_mb, Y_mb, M)
 
@@ -212,10 +209,9 @@ if __name__ == "__main__":
     from FrankeFunction import *
     import linear_regression
 
-    """
 
-    x = np.random.uniform(0, 1, 10)
-    y = np.random.uniform(0, 1, 10)
+    x = np.random.uniform(0, 1, 500)
+    y = np.random.uniform(0, 1, 500)
     z = FrankeFunction(x, y)
     z = z.reshape(-1,1)
 
@@ -227,15 +223,15 @@ if __name__ == "__main__":
         X=X,
         Y=z,
         cost=CostFunctions.SquareError,
-        activation=ActivationFunctions.ReLU,
-        activation_out=ActivationFunctions.ID,
-        network_shape=[2, 2],
+        activation=ActivationFunctions.Sigmoid,
+        activation_out=ActivationFunctions.LeakyReLU,
+        network_shape=[50, 50],
     )
 
-    FFNN.train(N_minibatches=1, learning_rate=0.1, n_epochs=4)
+    FFNN.train(N_minibatches=32, learning_rate=0.0001, n_epochs=40000)
 
-    xv = np.random.uniform(0, 1, 5)
-    yv = np.random.uniform(0, 1, 5)
+    xv = np.random.uniform(0, 1, 50)
+    yv = np.random.uniform(0, 1, 50)
     zv = FrankeFunction(x, y)
     zv = z.reshape(-1,1)
     X = linear_regression.design_matrix_2D(x, y, deg)
@@ -243,6 +239,7 @@ if __name__ == "__main__":
     pred = FFNN.predict(X)
 
     print(sum((zv - pred)**2) / 50)
+
     """
     X = np.random.randn(1000)
     X = X.reshape(-1, 1)
@@ -255,4 +252,5 @@ if __name__ == "__main__":
         )
 
     FFNN.train(N_minibatches=32, learning_rate=0.001, n_epochs=10000)
+    """
 

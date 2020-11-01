@@ -52,26 +52,22 @@ print("predictions:", FFNN.predict(inp))
 """
 #np.random.seed(2020)
 
-for i in range(10):
-    X = np.random.uniform(1, 5, 1000)
-    X = X.reshape(-1, 1)
-    Y = X**2
+X = np.random.uniform(2, 9, 1000)
+X = X.reshape(-1, 1)
+Y = X**2
 
-    FFNN = NN.FeedForwardNeuralNetwork(
-        X=X,
-        Y=Y,
-        cost=CostFunctions.SquareError,
-        activation=ActivationFunctions.ReLU,
-        activation_out=ActivationFunctions.ReLU,
-        network_shape = [20, 20]
-        )
+FFNN = NN.FeedForwardNeuralNetwork(
+    X=X,
+    Y=Y,
+    cost=CostFunctions.SquareError,
+    activation=ActivationFunctions.LeakyReLU,
+    activation_out=ActivationFunctions.LeakyReLU,
+    network_shape = [10, 10]
+    )
 
-    #print("Product of initial weights = ", np.product(FFNN.weights))
-    #FFNN.train(N_minibatches=32, learning_rate=0.001, n_epochs=1000)
-    FFNN.train(N_minibatches=32, learning_rate=0.001, n_epochs=1000)
-    #print("Product of weights after {n_epochs} epochs = ", np.product(FFNN.weights))
+FFNN.train(N_minibatches=32, learning_rate=0.0001, n_epochs=1000)
 
-    inp = [[2],[3],[4],[5]]
-    print("input: ", inp)
-    print("predictions:", FFNN.predict(inp))
-
+inp = np.array([[2],[3],[4],[5],[6],[7],[8],[9]])
+print("input: ", inp)
+print("input: ", inp**2)
+print("predictions:", FFNN.predict(inp))
