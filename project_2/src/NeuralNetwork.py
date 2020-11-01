@@ -102,7 +102,7 @@ class FeedForwardNeuralNetwork:
 
         return
 
-    def __feed_forward(self, X_mb, Y_mb, M):
+    def __feed_forward(self, X_mb, M):
 
         for l in range(self.N_layers):
             self.a[l] = np.zeros([M, self.network_shape[l]])
@@ -138,33 +138,35 @@ class FeedForwardNeuralNetwork:
             self.error[l] = (self.error[l+1] @ self.weights[l+1]) * self.activation.evaluate_derivative(self.z[l])
 
 
-        self.cost_weight_gradient[0] = X_mb.T @ self.error[0]
-        self.cost_bias_gradient[0] = np.sum(self.error[0], axis=1)
+        self.cost_weight_gradient[0] =  self.error[0].T @ X_mb
+        self.cost_bias_gradient[0] = np.sum(self.error[0], axis=0)
 
-        print("-->", self.cost_weight_gradient[0].shape)
-        print("-->", self.cost_weight_gradient[0].shape)
+        assert self.cost_bias_gradient[0].shape == self.biases[0].shape
+        assert self.cost_weight_gradient[0].shape == self.weights[0].shape
 
         # Compute the gradients
         for l in range(1, self.N_layers + 1):
-            self.cost_weight_gradient[l] = self.a[l-1].T @ self.error[l]
-            self.cost_bias_gradient[l] = np.sum(self.error[l], axis=1)
+            self.cost_weight_gradient[l] = self.error[l].T @ self.a[l-1]
+            self.cost_bias_gradient[l] = np.sum(self.error[l], axis=0)
+            assert self.cost_weight_gradient[l].shape == self.weights[l].shape
+            assert self.cost_bias_gradient[l].shape == self.biases[l].shape
 
         return
 
-    def __feed_forward_output(self, X):
-        # Activation of the input layer
-        z = self.weights[0] @ X + self.biases[0]
-        a = self.activation.evaluate(z)
+    def __feed_forward_output(self, X_out):
+        z_out = X_out @ self.weights[0].T + self.biases[0]
+        a_out = self.activation.evaluate(z_out)
+        # Feed Forward
+        # l = 2,3,4,...,L-1 compute z[l] = w[l] @ a[l-1] + b[l]
+        for l in range(1, self.N_layers):
+            z_out = a_out @ self.weights[l].T + self.biases[l]
+            a_out = self.activation.evaluate(z_out)
+        # Note; weights = [1, ..., L, L+1] -> last index stores the output weight
+        # Treat the output layer separately, due to different activation func
+        z_out = a_out @ self.weights[-1].T + self.biases[-1]
+        a_out = self.activation_out.evaluate(z_out)
 
-        # Activation of the hidden layers
-        for L in range(1, self.N_layers - 1):
-            z = self.weights[L] @ a + self.biases[L]
-            a = self.activation.evaluate(z)
-
-        z = self.weights[-1] @ a + self.biases[-1]
-        a = self.activation_out(z)
-
-        return a
+        return a_out
 
 
     def train(self, N_minibatches, learning_rate, n_epochs):
@@ -183,26 +185,21 @@ class FeedForwardNeuralNetwork:
 
 
                 # Feed-Forward to compute all the activations
-                self.__feed_forward(X_mb, Y_mb, M)
+                self.__feed_forward(X_mb, M)
 
                 # Back-propogate to compute the gradients
                 self.__backpropogation(X_mb, Y_mb, M)
 
                 # TODO: ADD if for lambd != None to add penalty to gradients
-
                 # Update the weights and biases using gradient descent
                 for l in range(self.N_layers + 1):
-                    print(self.weights[l].shape)
-                    print(self.cost_weight_gradient[l].shape)
-
-
                     self.weights[l] -= learning_rate / M * self.cost_weight_gradient[l]
                     self.biases[l] -= learning_rate / M * self.cost_bias_gradient[l]
         return
 
-    def predict(self, X):
-        a = self.__feed_forward_output(X)
-        return a
+    def predict(self, X_out):
+        a_out = self.__feed_forward_output(X_out)
+        return a_out
 
     def __repr__(self):
         return f"FFNN: {self.N_layers} layers"
@@ -215,11 +212,9 @@ if __name__ == "__main__":
     x = np.random.uniform(0, 1, 500)
     y = np.random.uniform(0, 1, 500)
     z = FrankeFunction(x, y)
-
     z = z.reshape(-1,1)
 
-    deg = 2
-
+    deg = 6
     X = linear_regression.design_matrix_2D(x, y, deg)
 
     # Define the network
@@ -232,4 +227,16 @@ if __name__ == "__main__":
         network_shape=[4, 5, 6],
     )
 
-    FFNN.train(N_minibatches=250, learning_rate=0.02, n_epochs=10)
+    FFNN.train(N_minibatches=32, learning_rate=10, n_epochs=10)
+
+    xv = np.random.uniform(0, 1, 500)
+    yv = np.random.uniform(0, 1, 500)
+    zv = FrankeFunction(x, y)
+    zv = z.reshape(-1,1)
+    X = linear_regression.design_matrix_2D(x, y, deg)
+
+    pred = FFNN.predict(X)
+
+    print(sum((zv - pred)**2) / 500)
+
+
