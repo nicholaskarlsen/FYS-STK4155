@@ -35,6 +35,16 @@ class LeakyReLU(ActivationFunction):
     def __repr__(self):
         return "LeakyReLU"
 
+class ID(ActivationFunction):
+    def evaluate(x):
+        return x
+
+    def evaluate_derivative(x):
+        return 1
+
+    def __repr__(self):
+        return "ID"
+
 
 class ELU(ActivationFunction):
     def evaluate(x):

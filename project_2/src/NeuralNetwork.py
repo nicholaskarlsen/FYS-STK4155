@@ -96,9 +96,11 @@ class FeedForwardNeuralNetwork:
 
     def __initialize_biases(self):
         for i in range(self.N_layers):
-            self.biases[i] = np.random.randn(self.network_shape[i])
+            #self.biases[i] = np.random.randn(self.network_shape[i])
+            self.biases[i] = np.zeros(self.network_shape[i])
         # Last hidden layer -> Output layer
-        self.biases[-1] = np.random.randn(self.output_dim)
+        #self.biases[-1] = np.random.randn(self.output_dim)
+        self.biases[-1] = np.zeros(self.output_dim)
 
         return
 
@@ -133,13 +135,14 @@ class FeedForwardNeuralNetwork:
         self.error[-1] = self.cost.evaluate_gradient(self.a[-1], Y_mb) \
                   * self.activation_out.evaluate_derivative(self.z[-1])
 
-        # Backpropogate the error from l = L-1,...,2
-        for l in range(self.N_layers-1, 0, -1):
+        # Backpropogate the error from l = L-1,...,1
+        for l in range(self.N_layers-1, -1, -1):
             self.error[l] = (self.error[l+1] @ self.weights[l+1]) * self.activation.evaluate_derivative(self.z[l])
 
 
-        self.cost_weight_gradient[0] =  self.error[0].T @ X_mb
+        self.cost_weight_gradient[0] = self.error[0].T @ X_mb
         self.cost_bias_gradient[0] = np.sum(self.error[0], axis=0)
+
 
         assert self.cost_bias_gradient[0].shape == self.biases[0].shape
         assert self.cost_weight_gradient[0].shape == self.weights[0].shape
@@ -171,7 +174,7 @@ class FeedForwardNeuralNetwork:
 
     def train(self, N_minibatches, learning_rate, n_epochs):
         # Ensure that the mini-batch size is NOT greater than
-        assert N_minibatches <= X.shape[0]
+        assert N_minibatches <= self.X.shape[0]
 
         for epoch in range(n_epochs):
             # Pick out a new mini-batch
@@ -209,8 +212,10 @@ if __name__ == "__main__":
     from FrankeFunction import *
     import linear_regression
 
-    x = np.random.uniform(0, 1, 500)
-    y = np.random.uniform(0, 1, 500)
+    """
+
+    x = np.random.uniform(0, 1, 10)
+    y = np.random.uniform(0, 1, 10)
     z = FrankeFunction(x, y)
     z = z.reshape(-1,1)
 
@@ -223,20 +228,31 @@ if __name__ == "__main__":
         Y=z,
         cost=CostFunctions.SquareError,
         activation=ActivationFunctions.ReLU,
-        activation_out=ActivationFunctions.ReLU,
-        network_shape=[4, 5, 6],
+        activation_out=ActivationFunctions.ID,
+        network_shape=[2, 2],
     )
 
-    FFNN.train(N_minibatches=32, learning_rate=10, n_epochs=10)
+    FFNN.train(N_minibatches=1, learning_rate=0.1, n_epochs=4)
 
-    xv = np.random.uniform(0, 1, 500)
-    yv = np.random.uniform(0, 1, 500)
+    xv = np.random.uniform(0, 1, 5)
+    yv = np.random.uniform(0, 1, 5)
     zv = FrankeFunction(x, y)
     zv = z.reshape(-1,1)
     X = linear_regression.design_matrix_2D(x, y, deg)
 
     pred = FFNN.predict(X)
 
-    print(sum((zv - pred)**2) / 500)
+    print(sum((zv - pred)**2) / 50)
+    """
+    X = np.random.randn(1000)
+    X = X.reshape(-1, 1)
+    Y = X * 2
 
+
+    FFNN = FeedForwardNeuralNetwork(X=X, Y=Y, cost=CostFunctions.SquareError,
+        activation=ActivationFunctions.ID, activation_out=ActivationFunctions.ID,
+        network_shape = [1]
+        )
+
+    FFNN.train(N_minibatches=32, learning_rate=0.001, n_epochs=10000)
 
