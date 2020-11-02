@@ -209,18 +209,20 @@ if __name__ == "__main__":
     from FrankeFunction import *
     import linear_regression
 
-
-    x = np.random.uniform(0, 1, 500)
-    y = np.random.uniform(0, 1, 500)
-    z = FrankeFunction(x, y)
+    # NN is meant to be magical black bocks that takes
+    # (x, y) -> z. Why bother with an arbitrary design matrix itermediary step?
+    #x = np.random.uniform(0, 1, 500)
+    #y = np.random.uniform(0, 1, 500)
+    xy = np.random.uniform(0, 1, [200, 2])
+    z = FrankeFunction(xy[:, 0], xy[:, 0])
     z = z.reshape(-1,1)
 
-    deg = 6
-    X = linear_regression.design_matrix_2D(x, y, deg)
+    #deg = 6
+    #X = linear_regression.design_matrix_2D(x, y, deg)
 
     # Define the network
     FFNN = FeedForwardNeuralNetwork(
-        X=X,
+        X=xy,
         Y=z,
         cost=CostFunctions.SquareError,
         activation=ActivationFunctions.Sigmoid,
@@ -228,17 +230,21 @@ if __name__ == "__main__":
         network_shape=[50, 50],
     )
 
-    FFNN.train(N_minibatches=32, learning_rate=0.0001, n_epochs=40000)
+    FFNN.train(N_minibatches=32, learning_rate=0.0001, n_epochs=400)
 
-    xv = np.random.uniform(0, 1, 50)
-    yv = np.random.uniform(0, 1, 50)
-    zv = FrankeFunction(x, y)
-    zv = z.reshape(-1,1)
-    X = linear_regression.design_matrix_2D(x, y, deg)
 
-    pred = FFNN.predict(X)
+    xy_test = np.random.uniform(0, 1, [100, 2])
+    z_test = FrankeFunction(xy[:, 0], xy[:, 0])
+    z_test = z.reshape(-1,1)
+    #xv = np.random.uniform(0, 1, 50)
+    #yv = np.random.uniform(0, 1, 50)
+    #zv = FrankeFunction(x, y)
+    #zv = z.reshape(-1,1)
+    #X = linear_regression.design_matrix_2D(x, y, deg)
 
-    print(sum((zv - pred)**2) / 50)
+    pred = FFNN.predict(xy_test)
+
+    print(sum((z_test - pred)**2) / 50)
 
     """
     X = np.random.randn(1000)
