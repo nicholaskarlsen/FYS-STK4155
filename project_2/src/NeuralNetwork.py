@@ -206,45 +206,47 @@ class FeedForwardNeuralNetwork:
 
 
 if __name__ == "__main__":
+    from sklearn.model_selection import train_test_split
     from FrankeFunction import *
     import linear_regression
 
-    # NN is meant to be magical black bocks that takes
+    # NOTE: NN is meant to be magical black box that takes
     # (x, y) -> z. Why bother with an arbitrary design matrix itermediary step?
+
     #x = np.random.uniform(0, 1, 500)
     #y = np.random.uniform(0, 1, 500)
-    xy = np.random.uniform(0, 1, [200, 2])
+    N = 500
+    xy = np.random.uniform(0, 1, [N, 2])
     z = FrankeFunction(xy[:, 0], xy[:, 0])
     z = z.reshape(-1,1)
+
+    xy_train, xy_test, z_train, z_test = train_test_split(xy, z, test_size=0.2)
 
     #deg = 6
     #X = linear_regression.design_matrix_2D(x, y, deg)
 
     # Define the network
     FFNN = FeedForwardNeuralNetwork(
-        X=xy,
-        Y=z,
+        X=xy_train,
+        Y=z_train,
         cost=CostFunctions.SquareError,
         activation=ActivationFunctions.Sigmoid,
         activation_out=ActivationFunctions.LeakyReLU,
         network_shape=[50, 50],
     )
 
-    FFNN.train(N_minibatches=32, learning_rate=0.0001, n_epochs=400)
+    FFNN.train(N_minibatches=32, learning_rate=0.02, n_epochs=1000)
+    z_test_prediction = FFNN.predict(xy_test)
 
+    print(sum((z_test - z_test_prediction)**2) / N)
 
-    xy_test = np.random.uniform(0, 1, [100, 2])
-    z_test = FrankeFunction(xy[:, 0], xy[:, 0])
-    z_test = z.reshape(-1,1)
     #xv = np.random.uniform(0, 1, 50)
     #yv = np.random.uniform(0, 1, 50)
     #zv = FrankeFunction(x, y)
     #zv = z.reshape(-1,1)
     #X = linear_regression.design_matrix_2D(x, y, deg)
 
-    pred = FFNN.predict(xy_test)
 
-    print(sum((z_test - pred)**2) / 50)
 
     """
     X = np.random.randn(1000)
