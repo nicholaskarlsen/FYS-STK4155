@@ -32,54 +32,126 @@
 \maketitle
 
 \section{Introduction}
+
+\section{Theory}
 \subsection{Stochastic Gradient Descent}
 \noindent
 Consider a cost function in the form
 \begin{equation}
-    C(\pmb\beta) = \sum_{i=1}^{n}c_i(\pmb x_i, \pmb\beta)
+    C(\pmb Y, \tilde{\pmb Y}(\pmb w)) = \frac{1}{N}\sum_{i=1}^{N}C_i(\pmb y_i, \tilde{\pmb y}(\pmb w)_i)
 \end{equation}
-with predictors $\pmb \beta = (\beta_1, \dots, \beta_p)$ and data points $\pmb x = \{\pmb x_1\, \dots, \pmb x_n\}$. This forms a $p$-dimensional surface paramentresized by the predictors, where the optimal parameters are found at the  global minima.
-We may localize these minima by the method of gradient descent, in which we follow the gradient of the cost function
+for a data set $\pmb Y = \left\{\pmb y_1, \dots, \pmb y_N\right\}$ and a corresponding set of modeled data points $\tilde{\pmb Y}(\pmb w) = \left\{\tilde{\pmb y_1}(\pmb w), \dots, \tilde{\pmb y}_N(\pmb w)\right\}$, where the $C$ is some measure of the error of the model.
+
+Given that our model is optimized by some set of weights $\pmb w$, we may optimize it by gradient descent, where the set of weights $\pmb w$ are updated by
 \begin{equation}
-    \pmb\nabla_{\beta} C(\pmb\beta) = \sum_{i=1}^n \pmb\nabla_\beta c_i(\pmb x_i, \pmb\beta)
+    \pmb w^{(k+1)} = \pmb w^{(k)} - \eta \nabla_{w}C(\pmb Y, \tilde{\pmb Y})
 \end{equation}
-down the "slope" of our function in order to locate a minima. However, since we lack a priori knowledge of the shape of the "cost function space", we can not tell whether this is a local or global minima. There are several other issues related to the basic gradient descent methods in addition to this one, but for the sake of brevity we refer the reader to \textcite[pp.15-16]{Mehta_2019}, which provides an excellent summary.
-% Consider adding more motivation for the use of SGD
+untill the cost function has reached a minima. However, we may not guarantee that this minima is infact the global minima of the cost function.
 
-In Stochastic gradient descent (SGD) we modify the basic gradient descent by splitting our dataset into $M$ random "mini batches" $B_k$.
+\begin{figure}[h!tb]
+    \center
+    \vspace{5mm} % To avoid touching the preceding text
+    \input{../figs/NN_fig.tex}
+    \caption{\label{fig: NN Fig} Visual representation of a simple neural network with $2$ inputs, $2$ hidden layers with $3$, $2$ neurons respectively and an output layer with a single neuron.}
+\end{figure}
+
+\subsection{Feed-Forward Neural Network}
+\noindent
+We initialize the Feed-Forward algorithm by computing
+\begin{align}\label{eqn: FeedForward Initial}
+    \begin{split}
+        z^1_j &= w^1_{jk}X_k + b^1_j \\
+        a^1_j &= \sigma(z^1_j)
+    \end{split}
+\end{align}
+where we adopt the Einstein summation convention by summing over repeated indices.
+We then compute
+\begin{align}
+    \begin{split}
+        z^l_{j} &= w^l_{jk}a^{l-1}_k + b^l_j \\
+        a^l_{j} &= \sigma(z^l_{j})
+    \end{split}
+\end{align}
+for hidden layers $l = 2, \dots, L$. Then, for the ouput layer we compute
+\begin{align}
+    \begin{split}
+        z^{L}_j &= w^{L}_{jk}a^{L-1}_k + b^{L}_j \\
+        a^{L}_j &= \tilde\sigma(z^{L}_j)
+    \end{split}
+\end{align}
+where $a^{L}_j$ is the predicted response, and $\tilde\sigma$ is the activation function for the output layer, which may differ from the activation function of the hidden layers.
+
+We then compute the error of the output as
 \begin{equation}
-    \pmb\beta_{j + 1} = \pmb\beta_j - \eta_j\pmb\nabla_\beta\sum_{i\in B_k} c_i (\pmb x_i, \pmb \beta)
+    \delta^{L}_j = \pdv{C}{a^{L}_{j}} \odot \tilde\sigma'(z^{L}_j)
 \end{equation}
+and backpropogate the error like
+\begin{equation}
+    \delta^{l}_j = \qty(\delta^{l+1}_{k}\qty(w^{l+1}_{kj})^T) \odot \sigma'(z^l_j)
+\end{equation}
+for all $l = L-1, \dots, 2$.
 
+We may then easily compute the gradients of the cost function wrt. the weights \& biases as
 
-Practical tips regarding SDG; see \textcite[pp~19]{Mehta_2019}
-\section{Theory}
-    \[
-        w_{jk} X_{mk}^T = (w_{jk}X_{km})^T = X_{mk} w_{kj} = [m,j]
-    \]
-    \[
-        z^1_{mj} = X_{mk}w^1_{kj} + (b^1_j)^T
-    \]
-    \[
-        z^l_{mj} = a^{l-1}_{mk}w^{l}_{kj} + (b^l_j)^T
-    \]
-    \[
-        a^l_{mj} = \sigma(z^l_{mj})
-    \]
+\begin{align}
+    \begin{split}
+        \pdv{C}{w_{jk}^l} &= \delta_j^l a^{l-1}_k \\
+        \pdv{C}{b^l_j} &= \delta_j^l
+    \end{split}
+\end{align}
+which are then used to update the weights and biases via gradient descent.
 
-    ----
+\section*{Backpropogation with minibatches}
+We have input and output matrices $X\in[M\times P], Y\in[M\times Q]$, with elements $X_{mp}, Y_{mq}$. Since we wish to perform the Backpropogation effectively using the highly optimized linear algebra libraries available in Numpy, we must therefore slightly alter the way in which we perform the backpropogation. Since our input vectors $X$ now comes in the form
 
-    \[
-        z^1_{jm} = w^1_{jk}X_{mk}^T
-    \]
+\begin{equation}
+    X = \qty[
+    \begin{matrix}
+        X_1 \\ \vdots \\ X_P
+    \end{matrix}
+    ] \rightarrow
+    X = \qty[
+    \begin{matrix}
+        X_{11} & \dots & X_{1P} \\
+                 & \vdots&          \\
+        X_{M1} & \dots & X_{MP}
+    \end{matrix}
+    ]
+\end{equation}
+we let $z^l_j \rightarrow z^l_{mj}$ and $a^l_{j}\rightarrow a^l_{mj}$ such that they are in accordance with $X_{mp}, Y_{mq}$.
 
-    \[
-        z^l_{jm} = w^l_{jk}a^{l-1}_{km} + b_j
-    \]
+In order to adhere to this new form, we must transpose Eqn.~\ref{eqn: FeedForward Initial} which yields
+\begin{equation}
+    w_{jk}X_K \rightarrow \qty(w_{jk}X_k)^T = X_k^T \qty(w^1_{kj})^T
+\end{equation}
+Thus, we may write the initial step as
+\begin{align}
+    \begin{split}
+        z^1_{mj} &= X_{mk}w_{kj} + \qty(b^1_j)^T \\
+        a^1_{mj} &= \sigma\qty(z^1_{mj})
+    \end{split}
+\end{align}
+where the transposed bias is implicitly added element-wise to each row in the resultant matrix. In a similar fashion, we feed forward for $l = 2, \dots L$
+\begin{align}
+    \begin{split}
+        z^l_{mj} &= a^{l-1}_{mk}w_{kj} + \qty(b^L_j)^T \\
+        a^l_{mj} &= \sigma(z^L_{mj})
+    \end{split}
+\end{align}
+and for the output layer
+\begin{align}
+    \begin{split}
+        z^L_{mj} &= a^{L-1}_{mk}w_{kj} + \qty(b^L_j)^T \\
+        a^L_{mj} &= \tilde\sigma\qty(z^L_{mj})
+    \end{split}
+\end{align}
 
-    \[
-        \delta^{L+1}_{q} = \sum_m \pdv{C(Y_{mq}, a^{L+1}_{mq})}{a^{L+1}_{jm}} \odot \sigma'(z^{L+1}_{jm})
-    \]
+\begin{equation}
+    \delta^{l}_j = (w_{jk})^T \delta^{l+1}_j
+\end{equation}
+\begin{equation}
+    \delta^{l}_{mj} = \delta^{l+1}_{mk}w^{l+1}_{kj}
+\end{equation}
 
 
 \section{Results \& Discussion}
