@@ -31,6 +31,11 @@ class FeedForwardNeuralNetwork:
         # Make sure both data-sets are the same size
         assert self.N_inputs == self.N_outputs
 
+        self.lambd = lambd
+
+        # Keep track of total number of epochs the network has been trained for
+        self.total_epochs = 0
+
         # Ensure that activation & cost are implementations of their respective interfaces
         # Which in turn guaranties the existence of the appropriate (static) methods
         if issubclass(activation, ActivationFunctions.ActivationFunction):
@@ -143,16 +148,13 @@ class FeedForwardNeuralNetwork:
         self.cost_weight_gradient[0] = self.error[0].T @ X_mb
         self.cost_bias_gradient[0] = np.sum(self.error[0], axis=0)
 
-
-        assert self.cost_bias_gradient[0].shape == self.biases[0].shape
-        assert self.cost_weight_gradient[0].shape == self.weights[0].shape
-
         # Compute the gradients
         for l in range(1, self.N_layers + 1):
             self.cost_weight_gradient[l] = self.error[l].T @ self.a[l-1]
             self.cost_bias_gradient[l] = np.sum(self.error[l], axis=0)
-            assert self.cost_weight_gradient[l].shape == self.weights[l].shape
-            assert self.cost_bias_gradient[l].shape == self.biases[l].shape
+
+        if self.lambd != None:
+            self.cost_weight_gradient += self.lambd * self.weights
 
         return
 
@@ -175,6 +177,8 @@ class FeedForwardNeuralNetwork:
     def train(self, N_minibatches, learning_rate, n_epochs):
         # Ensure that the mini-batch size is NOT greater than
         assert N_minibatches <= self.X.shape[0]
+        # Increment the epoch counter
+        self.total_epochs += n_epochs
 
         for epoch in range(n_epochs):
             # Pick out a new mini-batch
