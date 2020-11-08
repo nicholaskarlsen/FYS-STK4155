@@ -137,11 +137,9 @@ class FeedForwardNeuralNetwork:
             self.error[l] = np.zeros([M, self.network_shape[l]])
         self.error[-1] = np.zeros([M, self.output_dim])
 
-        # NOTE!!! FIX THIS!!!!
         # Compute the error at the output
-        #self.error[-1] = self.cost.evaluate_gradient(self.a[-1], Y_mb) \
-        #          * self.activation_out.evaluate_derivative(self.z[-1])
-        self.error[-1] = self.a[-1] - Y_mb
+        self.error[-1] = self.cost.evaluate_gradient(self.a[-1], Y_mb) \
+                  * self.activation_out.evaluate_derivative(self.z[-1])
 
         # Backpropogate the error from l = L-1,...,1
         for l in range(self.N_layers-1, -1, -1):
@@ -218,6 +216,37 @@ class FeedForwardNeuralNetwork:
 
     def __repr__(self):
         return f"FFNN: {self.N_layers} layers"
+
+
+class FFNNClassifier(FeedForwardNeuralNetwork):
+    def __backpropogation(self, X_mb, Y_mb, M):
+        for l in range(self.N_layers):
+            self.error[l] = np.zeros([M, self.network_shape[l]])
+        self.error[-1] = np.zeros([M, self.output_dim])
+
+        # Consider generalizing this!
+        # Compute the error at the output
+        self.error[-1] = self.a[-1] - Y_mb
+
+        # Backpropogate the error from l = L-1,...,1
+        for l in range(self.N_layers-1, -1, -1):
+            self.error[l] = (self.error[l+1] @ self.weights[l+1]) * self.activation.evaluate_derivative(self.z[l])
+
+
+        self.cost_weight_gradient[0] = self.error[0].T @ X_mb
+        self.cost_bias_gradient[0] = np.sum(self.error[0], axis=0)
+
+        # Compute the gradients
+        for l in range(1, self.N_layers + 1):
+            self.cost_weight_gradient[l] = self.error[l].T @ self.a[l-1]
+            self.cost_bias_gradient[l] = np.sum(self.error[l], axis=0)
+
+        if self.lambd != None:
+            for l in range(self.N_layers + 1):
+                self.cost_weight_gradient[l] += self.lambd * self.weights[l]
+
+        return
+
 
 
 if __name__ == "__main__":

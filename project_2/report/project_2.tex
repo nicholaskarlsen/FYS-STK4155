@@ -40,15 +40,19 @@
 \noindent
 Consider a cost function in the form
 \begin{equation}
-    C(\pmb Y, \tilde{\pmb Y}(\pmb w)) = \frac{1}{N}\sum_{i=1}^{N}C_i(\pmb y_i, \tilde{\pmb y}(\pmb w)_i)
+    C(\pmb Y, \tilde{\pmb Y}(\pmb w)) = \frac{1}{N}\sum_{i=1}^{N}c_i(\pmb y_i, \tilde{\pmb y}(\pmb w)_i)
 \end{equation}
-for a data set $\pmb Y = \left\{\pmb y_1, \dots, \pmb y_N\right\}$ and a corresponding set of modeled data points $\tilde{\pmb Y}(\pmb w) = \left\{\tilde{\pmb y_1}(\pmb w), \dots, \tilde{\pmb y}_N(\pmb w)\right\}$, where the $C$ is some measure of the error of the model.
+which quantifies the error for some data set $\pmb Y = \left\{\pmb y_1, \dots, \pmb y_N\right\}$ with respect to a corresponding set of modeled data $\tilde{\pmb Y}(\pmb w) = \left\{\tilde{\pmb y_1}(\pmb w), \dots, \tilde{\pmb y}_N(\pmb w)\right\}$, where $\pmb w$ are denotes the free parameters of the model.
 
-Given that our model is optimized by some set of weights $\pmb w$, we may optimize it by gradient descent, where the set of weights $\pmb w$ are updated by
+Since we can not in general expect to have a way of minimizing the cost analytically, we may in stead optimize it by gradient descent (GD), where the set of free parameters are incremented by
 \begin{equation}
     \pmb w^{(k+1)} = \pmb w^{(k)} - \eta \nabla_{w}C\qty(\pmb Y, \tilde{\pmb Y}(\pmb w))
 \end{equation}
-untill the cost function has reached a minima, where the parameter $\eta \in \mathbb R$ denotes the learning rate. However, we may not guarantee that this minima is infact the global minima of the cost function.
+until the cost function has reached a is found, where the parameter $\eta \in \mathbb R_{>0}$ denotes the learning rate. However, since we do not know a priori the shape of the space spanned by the cost function wrt. the parameters $\pmb w$, we can not tell whether the minima is indeed a global one, or simply a local minima.
+
+One attempt at remedying this problem is the so-called \textit{Stochastic Gradient Descent} (SGD), in which stochasticity is introduced to the gradient descent by splitting the data set $\pmb Y$ into randomly sampled subsets $\pmb Y_{MB}$ called \textit{mini-batches} and then performing (GD) on each subset. Limiting the data-set in this way has the effect of "flattening" the space for each iteration, thus lessening the chance of getting stuck in local minima. This process is then repeated for multiple "epochs", where for each epoch we re-draw another random set of mini-batches from $\pmb Y$.
+
+
 
 \begin{figure}[h!tb]
     \center
@@ -57,9 +61,21 @@ untill the cost function has reached a minima, where the parameter $\eta \in \ma
     \caption{\label{fig: NN Fig} Visual representation of a simple neural network with $2$ inputs, $2$ hidden layers with $3$, $2$ neurons respectively and an output layer with a single neuron.}
 \end{figure}
 
-\subsection{Feed-Forward Neural Network}
+\subsection{Neural Networks}
 \noindent
-We initialize the Feed-Forward algorithm by computing
+Neural Networks are a class of algorithms in which a set of nodes, often referred to as Neurons, are connected as a weighted graph. Which as the name may suggests, aims to emulate behaviour similar to that of the human brain. Each of the nodes in this graph is then activated by an activation function, which takes the weighted input of all of its connected graphs like
+\begin{equation}
+    a = \sigma\qty(w_1 a_1' + w_2 a_2' + \dots + w_n a_n' + b)
+\end{equation}
+where $w_i$, $a_i'$ denotes the weights and activations of the connected nodes, and $sigma$ the activation function of the node, for which is chosen differently depending on the problem at hand. Lastly, we have also introduced a bias, $b$, which simply shifts the activation of the Node. In the very simple case where the activation function is chosen to be the identity function, the bias term simply reduces to being the intercept.
+
+The simplest type of neural network is the \textit{Feed-Forward Neural Network}, which is a directed graph, consisting of layers where each neuron in the preceding layer is connected to each neuron in the following layer as depicted in Fig.~\ref{fig: NN Fig}, which is directed from left to right.
+
+As the name may suggest, the input layer is where the input data starts out, before being fed forward through the hidden layers of the network, weighted in-between each node before it finally reaches the output layer, the final model. In a similar fashion to other methods of supervised learning, the neural network must first undergo a process of training to obtain
+
+\subsubsection{Backpropagation}
+\noindent
+Start by computing the response of each of the neurons in the network by the Feed-Forward algorithm, starting with the first hidden layer
 \begin{align}\label{eqn: FeedForward Initial}
     \begin{split}
         z^1_j &= w^1_{jk}X_k + b^1_j \\
@@ -74,7 +90,7 @@ We then compute
         a^l_{j} &= \sigma(z^l_{j})
     \end{split}
 \end{align}
-for hidden layers $l = 2, \dots, L$. Then, for the ouput layer we compute
+for hidden layers $l = 2, \dots, L$. Then, for the output layer we compute
 \begin{align}
     \begin{split}
         z^{L}_j &= w^{L}_{jk}a^{L-1}_k + b^{L}_j \\
@@ -87,7 +103,7 @@ We then compute the error of the output as
 \begin{equation}
     \delta^{L}_j = \pdv{C}{a^{L}_{j}} \odot \tilde\sigma'(z^{L}_j)
 \end{equation}
-and backpropogate the error like
+and backpropagate the error like
 \begin{equation}
     \delta^{l}_j = \qty(\delta^{l+1}_{k}\qty(w^{l+1})^T_{kj}) \odot \sigma'(z^l_j)
 \end{equation}
@@ -101,11 +117,11 @@ We may then easily compute the gradients of the cost function wrt. the weights \
         \pdv{C}{b^l_j} &= \delta_j^l
     \end{split}
 \end{align}
-which are then used to update the weights and biases via gradient descent.
+which are then used to update the weights and biases via gradient descent. Notably, we have not justified in any detail as to why this algorithm works, for which we refer the reader to \textcite{Mehta_2019}, \textcite{hastie}, or any other text on machine learning. However, in summary, it is all made possible by utilizing the chain rule.
 
-\subsubsection{Backpropogation with minibatches}
+\subsubsection{Backpropagation with mini-batches}
 \noindent
-In order to efficiently perform Backpropogation simultaneously across several inputs at once, we need to slightly adjust our algorithm such that we may take advantage of the fast and efficient linear algebra libraries that are available, like i.e Numpy.
+In order to efficiently perform backpropagation simultaneously across several inputs at once, we need to slightly adjust our algorithm such that we may take advantage of the fast and efficient linear algebra libraries that are available, like i.e Numpy.
 
 We then structure our input and output matrices adhering to the row-major storage of Numpy arrays by letting $X\in[M\times P], \enspace Y\in[M\times Q]$ where $M$ denotes the number of data points in the mini-batch and $P, Q$ the dimensionality of the input and output respectively. Explicitly, our data then undergoes the structure change
 
@@ -123,7 +139,7 @@ We then structure our input and output matrices adhering to the row-major storag
     \end{matrix}
     ]
 \end{equation}
-similarly, we let $z^l_j \rightarrow z^l_{mj}$ and $a^l_{j}\rightarrow a^l_{mj}$ such that they are in accordance with $X_{mp}, Y_{mq}$.
+similarly, we let $z^l_j \rightarrow z^l_{mj}$ and $a^l_{j}\rightarrow a^l_{mj}$ such that they are in accordance with $X$ and $Y$.
 
 In order to adhere to this new form, we transpose Eqn.~\ref{eqn: FeedForward Initial} which yields
 \begin{equation}
@@ -154,7 +170,7 @@ Then, we compute the error of the output error as
 \begin{equation}
     \delta^L_{mj} = \pdv{C}{a^L_{mj}} \odot \tilde\sigma'(z^L_{mj})
 \end{equation}
-which we then backpropogate throught the layers for $l = L-1, \dots 1$
+which we then backpropagate throughout the layers for $l = L-1, \dots 1$
 \begin{equation}
     \delta^{l}_{mj} = \delta^{l+1}_{mk}w^{l+1}_{kj} \odot \sigma'(z^l_{mj})
 \end{equation}
@@ -173,6 +189,44 @@ and similarly for layers $l = 2, \dots, L$ as
     \end{split}
 \end{align}
 The derivatives are then used to update the weights and biases by gradient descent in the usual way.
+
+\subsubsection{Considerations when fitting Neural Networks}
+
+
+\begin{table*}[]
+\caption{\label{tab: activation functions}Various Activation functions used in Neural Networks}
+\setlength{\tabcolsep}{20pt}
+\renewcommand{\arraystretch}{2.5}
+\begin{tabular}{llll}
+    Name & Activation Function & Derivative & Range \\
+    \hline\hline
+    Identity &
+    $\sigma(x) = x$  &
+    $\sigma'(x) = 1$ &
+    $(-\infty, \infty)$
+    \\ \hline
+    Sigmoid &
+    $\sigma(x) = \frac{1}{1 + e^{-x}}$  &
+    $\sigma'(x) =\sigma(x)\qty(1-\sigma(x))$ &
+    $(0, 1)$
+    \\ \hline
+    Tanh &
+    $\sigma(x) = \tanh(x)$  &
+    $\sigma'(x) =  1 - \tanh^2(x)$ &
+    $(0, 1)$
+    \\ \hline
+    ReLU    &
+    $\sigma(x) = \left\{\begin{matrix}0 & \text{for } x \leq 0 \\ x & \text{for } 0 < x\end{matrix}\right.$ &
+    $\sigma'(x) = \left\{\begin{matrix}0 & \text{for } x \leq 0 \\ 1 & \text{for } 0 < x\end{matrix}\right.$ &
+    $[0, \infty)$
+    \\ \hline
+    LeakyReLU &
+    $\sigma(x) = \left\{\begin{matrix}0.01x & \text{for } x \leq 0 \\ x & \text{for } 0 < x\end{matrix}\right.$ &
+    $\sigma'(x) = \left\{\begin{matrix}0.01 & \text{for } x \leq 0 \\ 1 & \text{for } 0 < x\end{matrix}\right.$ &
+    $(-\infty, \infty)$
+    \\ \hline
+\end{tabular}
+\end{table*}
 
 
 

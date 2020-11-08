@@ -43,9 +43,9 @@ def SGD(x, y, M, init_w, n_epochs, learning_rate, cost_gradient, *lambd):
     Returns:
         w (Array)               : Optimal weights corresponding to the cost gradient
     """
-    mb = minibatch(x, M)  # Split x into M minibatches
     w = init_w
     for epoch in range(n_epochs):
+        mb = minibatch(x, M)  # Split x into M minibatches
         for i in range(M):
             # Pick out a random mini-batch index
             k = np.random.randint(M)
@@ -74,11 +74,11 @@ def SGDM(x, y, M, init_w, n_epochs, learning_rate, momentum, cost_gradient, *lam
     Returns:
         w (Array)               : Optimal weights corresponding to the cost gradient
     """
-    mb = minibatch(x, M)  # Split x into M minibatches
     w = init_w
     dw = 0
 
     for epoch in range(n_epochs):
+        mb = minibatch(x, M)  # Split x into M minibatches
         for i in range(M):
             # Pick out a random mini-batch index
             k = np.random.randint(M)
@@ -106,10 +106,10 @@ def ADAgrad(x, y, M, init_w, n_epochs, learning_rate, cost_gradient, *lambd):
     Returns:
         w (Array)               : Optimal weights corresponding to the cost gradient
     """
-    mb = minibatch(x, M)
     w = init_w
     g_ti = np.zeros(len(init_w))
     for epoch in range(n_epochs):
+        mb = minibatch(x, M)
         for i in range(M):
             # Pick out a random mini-batch index
             k = np.random.randint(M)
@@ -138,10 +138,10 @@ def RMSprop(x, y, M, init_w, n_epochs, learning_rate, forgetting_factor, cost_gr
     Returns:
         w (Array)               : Optimal weights corresponding to the cost gradient
     """
-    mb = minibatch(x, M)
     w = init_w
     v = 0
     for epoch in range(n_epochs):
+        mb = minibatch(x, M)
         for i in range(M):
             # Pick out a random mini-batch index
             k = np.random.randint(M)

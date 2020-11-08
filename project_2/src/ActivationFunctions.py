@@ -4,9 +4,10 @@ import numpy as np
 
 
 class ActivationFunction:
+    @staticmethod
     def evaluate(x):
         pass
-
+    @staticmethod
     def evaluate_derivative(x):
         pass
 
@@ -14,9 +15,11 @@ class ActivationFunction:
         pass
 
 class Softmax(ActivationFunction):
+    @staticmethod
     def evaluate(x):
         return np.exp(x)/np.sum(np.exp(x),axis=1,keepdims=True)
 
+    @staticmethod
     def evaluate_derivative(x):
         softmax_eval = np.exp(x)/np.sum(np.exp(x),axis=1,keepdims=True)
         return softmax_eval - softmax_eval**2
@@ -25,9 +28,11 @@ class Softmax(ActivationFunction):
         return "Softmax"
 
 class ReLU(ActivationFunction):
+    @staticmethod
     def evaluate(x):
         return np.maximum(0, x)
 
+    @staticmethod
     def evaluate_derivative(x):
         return np.where(x < 0, 0, 1)
 
@@ -36,9 +41,11 @@ class ReLU(ActivationFunction):
 
 
 class LeakyReLU(ActivationFunction):
+    @staticmethod
     def evaluate(x):
         return np.where(x < 0, 0.1 * x, x)
 
+    @staticmethod
     def evaluate_derivative(x):
         return np.where(x < 0, 0.1, 1)
 
@@ -46,9 +53,11 @@ class LeakyReLU(ActivationFunction):
         return "LeakyReLU"
 
 class ID(ActivationFunction):
+    @staticmethod
     def evaluate(x):
         return x
 
+    @staticmethod
     def evaluate_derivative(x):
         return 1
 
@@ -57,9 +66,11 @@ class ID(ActivationFunction):
 
 
 class ELU(ActivationFunction):
+    @staticmethod
     def evaluate(x):
         return np.where(x < 0, np.exp(x) - 1, x)
 
+    @staticmethod
     def evaluate_derivative(x):
         return np.where(x < 0, np.exp(x), 1)
 
@@ -68,9 +79,11 @@ class ELU(ActivationFunction):
 
 
 class Sigmoid(ActivationFunction):
+    @staticmethod
     def evaluate(x):
         return 1 / (1 + np.exp(-x))
 
+    @staticmethod
     def evaluate_derivative(x):
         # sig(x) * (1 - sig(x))
         return 1 / (1 + np.exp(-x)) * (1 - 1 / (1 + np.exp(-x)))
@@ -80,9 +93,11 @@ class Sigmoid(ActivationFunction):
 
 
 class Tanh(ActivationFunction):
+    @staticmethod
     def evaluate(x):
         return np.tanh(x)
 
+    @staticmethod
     def evaluate_derivative(x):
         return 1 - Tanh(x) ** 2
 
