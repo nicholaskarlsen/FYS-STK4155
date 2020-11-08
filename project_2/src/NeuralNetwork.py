@@ -141,7 +141,7 @@ class FeedForwardNeuralNetwork:
         # Compute the error at the output
         #self.error[-1] = self.cost.evaluate_gradient(self.a[-1], Y_mb) \
         #          * self.activation_out.evaluate_derivative(self.z[-1])
-        self.error[-1] = Y_mb - self.a[-1]
+        self.error[-1] = self.a[-1] - Y_mb
 
         # Backpropogate the error from l = L-1,...,1
         for l in range(self.N_layers-1, -1, -1):
@@ -276,4 +276,3 @@ if __name__ == "__main__":
 
     FFNN.train(N_minibatches=32, learning_rate=0.001, n_epochs=10000)
     """
-
