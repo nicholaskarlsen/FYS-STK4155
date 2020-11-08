@@ -12,6 +12,8 @@
 
 \usepackage{blindtext}
 \usepackage{tikzducks}
+\usepackage{tikz}
+\usepackage{pgfplots}
 \usepackage{listings}
 
 \graphicspath{{../figs/}}
@@ -44,9 +46,9 @@ for a data set $\pmb Y = \left\{\pmb y_1, \dots, \pmb y_N\right\}$ and a corresp
 
 Given that our model is optimized by some set of weights $\pmb w$, we may optimize it by gradient descent, where the set of weights $\pmb w$ are updated by
 \begin{equation}
-    \pmb w^{(k+1)} = \pmb w^{(k)} - \eta \nabla_{w}C(\pmb Y, \tilde{\pmb Y})
+    \pmb w^{(k+1)} = \pmb w^{(k)} - \eta \nabla_{w}C\qty(\pmb Y, \tilde{\pmb Y}(\pmb w))
 \end{equation}
-untill the cost function has reached a minima. However, we may not guarantee that this minima is infact the global minima of the cost function.
+untill the cost function has reached a minima, where the parameter $\eta \in \mathbb R$ denotes the learning rate. However, we may not guarantee that this minima is infact the global minima of the cost function.
 
 \begin{figure}[h!tb]
     \center
@@ -87,9 +89,9 @@ We then compute the error of the output as
 \end{equation}
 and backpropogate the error like
 \begin{equation}
-    \delta^{l}_j = \qty(\delta^{l+1}_{k}\qty(w^{l+1}_{kj})^T) \odot \sigma'(z^l_j)
+    \delta^{l}_j = \qty(\delta^{l+1}_{k}\qty(w^{l+1})^T_{kj}) \odot \sigma'(z^l_j)
 \end{equation}
-for all $l = L-1, \dots, 2$.
+for all $l = L-1, \dots, 1$.
 
 We may then easily compute the gradients of the cost function wrt. the weights \& biases as
 
@@ -101,8 +103,11 @@ We may then easily compute the gradients of the cost function wrt. the weights \
 \end{align}
 which are then used to update the weights and biases via gradient descent.
 
-\section*{Backpropogation with minibatches}
-We have input and output matrices $X\in[M\times P], Y\in[M\times Q]$, with elements $X_{mp}, Y_{mq}$. Since we wish to perform the Backpropogation effectively using the highly optimized linear algebra libraries available in Numpy, we must therefore slightly alter the way in which we perform the backpropogation. Since our input vectors $X$ now comes in the form
+\subsubsection{Backpropogation with minibatches}
+\noindent
+In order to efficiently perform Backpropogation simultaneously across several inputs at once, we need to slightly adjust our algorithm such that we may take advantage of the fast and efficient linear algebra libraries that are available, like i.e Numpy.
+
+We then structure our input and output matrices adhering to the row-major storage of Numpy arrays by letting $X\in[M\times P], \enspace Y\in[M\times Q]$ where $M$ denotes the number of data points in the mini-batch and $P, Q$ the dimensionality of the input and output respectively. Explicitly, our data then undergoes the structure change
 
 \begin{equation}
     X = \qty[
@@ -118,41 +123,67 @@ We have input and output matrices $X\in[M\times P], Y\in[M\times Q]$, with eleme
     \end{matrix}
     ]
 \end{equation}
-we let $z^l_j \rightarrow z^l_{mj}$ and $a^l_{j}\rightarrow a^l_{mj}$ such that they are in accordance with $X_{mp}, Y_{mq}$.
+similarly, we let $z^l_j \rightarrow z^l_{mj}$ and $a^l_{j}\rightarrow a^l_{mj}$ such that they are in accordance with $X_{mp}, Y_{mq}$.
 
-In order to adhere to this new form, we must transpose Eqn.~\ref{eqn: FeedForward Initial} which yields
+In order to adhere to this new form, we transpose Eqn.~\ref{eqn: FeedForward Initial} which yields
 \begin{equation}
-    w_{jk}X_K \rightarrow \qty(w_{jk}X_k)^T = X_k^T \qty(w^1_{kj})^T
+    w_{jk}X_K \rightarrow \qty(w_{jk}X_k)^T = X_k^T \qty(w^1)^T_{kj}
 \end{equation}
 Thus, we may write the initial step as
 \begin{align}
     \begin{split}
-        z^1_{mj} &= X_{mk}w_{kj} + \qty(b^1_j)^T \\
+        z^1_{mj} &= X_{mk}\qty(w^{1})^T_{kj} + b^1_j \\
         a^1_{mj} &= \sigma\qty(z^1_{mj})
     \end{split}
 \end{align}
-where the transposed bias is implicitly added element-wise to each row in the resultant matrix. In a similar fashion, we feed forward for $l = 2, \dots L$
+where the transposed bias is implicitly\footnote{Matching the behaviour of Numpys addition operator} added element-wise to each row in the resultant matrix. In a similar fashion, we feed forward for $l = 2, \dots L-1$, the last hidden layer as
 \begin{align}
     \begin{split}
-        z^l_{mj} &= a^{l-1}_{mk}w_{kj} + \qty(b^L_j)^T \\
-        a^l_{mj} &= \sigma(z^L_{mj})
+        z^l_{mj} &= a^{l-1}_{mk}\qty(w^l)^T_{kj} + b^L_j \\
+        a^l_{mj} &= \sigma(z^l_{mj})
     \end{split}
 \end{align}
 and for the output layer
 \begin{align}
     \begin{split}
-        z^L_{mj} &= a^{L-1}_{mk}w_{kj} + \qty(b^L_j)^T \\
+        z^L_{mj} &= a^{L-1}_{mk}\qty(w^L)^T_{kj} + b^L_j \\
         a^L_{mj} &= \tilde\sigma\qty(z^L_{mj})
     \end{split}
 \end{align}
-
+Then, we compute the error of the output error as
 \begin{equation}
-    \delta^{l}_j = (w_{jk})^T \delta^{l+1}_j
+    \delta^L_{mj} = \pdv{C}{a^L_{mj}} \odot \tilde\sigma'(z^L_{mj})
 \end{equation}
+which we then backpropogate throught the layers for $l = L-1, \dots 1$
 \begin{equation}
-    \delta^{l}_{mj} = \delta^{l+1}_{mk}w^{l+1}_{kj}
+    \delta^{l}_{mj} = \delta^{l+1}_{mk}w^{l+1}_{kj} \odot \sigma'(z^l_{mj})
 \end{equation}
+and finally for the output layer. We the compute the derivatives of the cost functions wrt. the weights and biases for the input layer
+\begin{align}
+    \begin{split}
+        \pdv{C}{w^{1}_{jk}} &= \qty(\delta^1)^T_{jm} X_{mk} \\
+        \pdv{C}{b^1_{j}} &= \sum_m \delta^1_{mj}
+    \end{split}
+\end{align}
+and similarly for layers $l = 2, \dots, L$ as
+\begin{align}
+    \begin{split}
+        \pdv{C}{w^{l}_{jk}} &= \qty(\delta^1)^T_{jm} a^l_{mk} \\
+        \pdv{C}{b^l_{j}} &= \sum_m \delta_{mj}
+    \end{split}
+\end{align}
+The derivatives are then used to update the weights and biases by gradient descent in the usual way.
 
+
+
+\subsection{Logistic Regression}
+\noindent
+As opposed to linear regression where the aim is to project data-points into some linear basis as to model some continuous function, logistic regression instead aims to project data unto some binary response. This may in turn be used classify whether or not some particular data point fits into some category. Thus, we wish to fit our data unto some function $f : \mathbb R \rightarrow [0, 1]$.
+\begin{figure}[h!tb]
+    \center
+    \input{../figs/logistic.tex}
+    \caption{The logistic function}
+\end{figure}
 
 \section{Results \& Discussion}
 \section{Conclusion}

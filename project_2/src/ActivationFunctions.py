@@ -19,7 +19,7 @@ class Softmax(ActivationFunction):
 
     def evaluate_derivative(x):
         softmax_eval = np.exp(x)/np.sum(np.exp(x),axis=1,keepdims=True)
-        return softmax_eval-softmax_eval**2
+        return softmax_eval - softmax_eval**2
 
     def __repr__(self):
         return "Softmax"
@@ -77,6 +77,17 @@ class Sigmoid(ActivationFunction):
 
     def __repr__(self):
         return "Sigmoid"
+
+
+class Tanh(ActivationFunction):
+    def evaluate(x):
+        return np.tanh(x)
+
+    def evaluate_derivative(x):
+        return 1 - Tanh(x) ** 2
+
+    def __repr__(self):
+        return "Tanh"
 
 
 if __name__ == "__main__":

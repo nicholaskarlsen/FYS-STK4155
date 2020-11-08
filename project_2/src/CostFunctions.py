@@ -20,7 +20,7 @@ class CostFunction:
 
 class SquareError(CostFunction):
     def evaluate(model, data):
-        return (data - model)**2 / 2
+        return np.sum((model - data)**2) / 2
 
     def evaluate_gradient(model, data):
         return model - data
@@ -28,16 +28,21 @@ class SquareError(CostFunction):
     def __repr__(self):
         return "OLS"
 
-# CONSIDER THIS CAREFULLY
 
-class Ridge(CostFunction):
+class CrossEntropy(CostFunction):
     def evaluate(model, data):
-        return
+        # model => a
+        # data => Y
+        return - np.sum(data * np.log(model) + (1 - data) * np.log(1 - model))
+
+        # model = [M, n]
 
     def evaluate_gradient(model, data):
-        return
+        # return - (data * (1 - model) - (1 - data) * model) / (model * (1 - model))
+        return - (data - model) / (model - model**2)
+
     def __repr__(self):
-        return "Ridge"
+        return "Cross Entropy"
 
 
 # KEEP THIS FOR SGD

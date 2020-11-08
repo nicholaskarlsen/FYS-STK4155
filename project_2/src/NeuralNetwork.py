@@ -10,7 +10,7 @@ sys.path.insert(0, "../../project_1/src")
 
 
 class FeedForwardNeuralNetwork:
-    def __init__(self, X, Y, network_shape, activation, activation_out, cost, *lambd):
+    def __init__(self, X, Y, network_shape, activation, activation_out, cost, momentum=0, lambd=None):
         """Models implements a Feed Forward Neural Network
         Args:
             network_shape (Array) : Defines the number of hidden layers (L-1) and number of neurons
@@ -32,6 +32,7 @@ class FeedForwardNeuralNetwork:
         assert self.N_inputs == self.N_outputs
 
         self.lambd = lambd
+        self.momentum = momentum
 
         # Keep track of total number of epochs the network has been trained for
         self.total_epochs = 0
@@ -154,7 +155,8 @@ class FeedForwardNeuralNetwork:
             self.cost_bias_gradient[l] = np.sum(self.error[l], axis=0)
 
         if self.lambd != None:
-            self.cost_weight_gradient += self.lambd * self.weights
+            for l in range(self.N_layers + 1):
+                self.cost_weight_gradient[l] += self.lambd * self.weights[l]
 
         return
 
@@ -197,8 +199,15 @@ class FeedForwardNeuralNetwork:
                 # TODO: ADD if for lambd != None to add penalty to gradients
                 # Update the weights and biases using gradient descent
                 for l in range(self.N_layers + 1):
-                    self.weights[l] -= learning_rate / M * self.cost_weight_gradient[l]
-                    self.biases[l] -= learning_rate / M * self.cost_bias_gradient[l]
+                    # Change of weights
+                    dw = self.weights[l] * self.momentum \
+                         - learning_rate / M * self.cost_weight_gradient[l]
+                    # Change of bias
+                    db = self.biases[l] * self.momentum \
+                         - learning_rate / M * self.cost_bias_gradient[l]
+                    # Update weights and biases
+                    self.weights[l] += dw
+                    self.biases[l] += db
         return
 
     def predict(self, X_out):
@@ -207,6 +216,12 @@ class FeedForwardNeuralNetwork:
 
     def __repr__(self):
         return f"FFNN: {self.N_layers} layers"
+
+
+class ClassificationFeedForwardNeuralNetwork(FeedForwardNeuralNetwork):
+    def __init__(self, X, Y, network_shape, activation, activation_out, cost, momentum=0, lambd=None):
+        super().__init__(self)
+        return
 
 
 if __name__ == "__main__":
