@@ -15,10 +15,10 @@ class ActivationFunction:
 
 class Softmax(ActivationFunction):
     def evaluate(x):
-        return exp(x)/np.sum(exp(x),axis=1,keepdims=True)
+        return np.exp(x)/np.sum(np.exp(x),axis=1,keepdims=True)
 
     def evaluate_derivative(x):
-        softmax_eval = exp(x)/np.sum(exp(x),axis=1,keepdims=True)
+        softmax_eval = np.exp(x)/np.sum(np.exp(x),axis=1,keepdims=True)
         return softmax_eval-softmax_eval**2
 
     def __repr__(self):
