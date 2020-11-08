@@ -137,9 +137,11 @@ class FeedForwardNeuralNetwork:
             self.error[l] = np.zeros([M, self.network_shape[l]])
         self.error[-1] = np.zeros([M, self.output_dim])
 
+        # NOTE!!! FIX THIS!!!!
         # Compute the error at the output
-        self.error[-1] = self.cost.evaluate_gradient(self.a[-1], Y_mb) \
-                  * self.activation_out.evaluate_derivative(self.z[-1])
+        #self.error[-1] = self.cost.evaluate_gradient(self.a[-1], Y_mb) \
+        #          * self.activation_out.evaluate_derivative(self.z[-1])
+        self.error[-1] = Y_mb - self.a[-1]
 
         # Backpropogate the error from l = L-1,...,1
         for l in range(self.N_layers-1, -1, -1):
@@ -216,12 +218,6 @@ class FeedForwardNeuralNetwork:
 
     def __repr__(self):
         return f"FFNN: {self.N_layers} layers"
-
-
-class ClassificationFeedForwardNeuralNetwork(FeedForwardNeuralNetwork):
-    def __init__(self, X, Y, network_shape, activation, activation_out, cost, momentum=0, lambd=None):
-        super().__init__(self)
-        return
 
 
 if __name__ == "__main__":
