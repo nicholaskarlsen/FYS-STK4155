@@ -13,6 +13,16 @@ class ActivationFunction:
     def __repr__(self):
         pass
 
+class Softmax(ActivationFunction):
+    def evaluate(x):
+        return exp(x)/np.sum(exp(x),axis=1,keepdims=True)
+
+    def evaluate_derivative(x):
+        softmax_eval = exp(x)/np.sum(exp(x),axis=1,keepdims=True)
+        return softmax_eval-softmax_eval**2
+
+    def __repr__(self):
+        return "Softmax"
 
 class ReLU(ActivationFunction):
     def evaluate(x):
