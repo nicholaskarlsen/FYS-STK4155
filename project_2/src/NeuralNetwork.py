@@ -104,10 +104,10 @@ class FeedForwardNeuralNetwork:
     def __initialize_biases(self):
         for i in range(self.N_layers):
             # self.biases[i] = np.random.randn(self.network_shape[i])
-            self.biases[i] = np.zeros(self.network_shape[i]) #+ 0.01
+            self.biases[i] = np.zeros(self.network_shape[i])  # + 0.01
         # Last hidden layer -> Output layer
         # self.biases[-1] = np.random.randn(self.output_dim)
-        self.biases[-1] = np.zeros(self.output_dim) #+ 0.01
+        self.biases[-1] = np.zeros(self.output_dim)  # + 0.01
 
         return
 
@@ -140,12 +140,12 @@ class FeedForwardNeuralNetwork:
 
         # Compute the error at the output
         # Normal way to deal with everything else. TODO!
-        # self.error[-1] = self.cost.evaluate_gradient(
-        #     self.a[-1], Y_mb
-        # ) * self.activation_out.evaluate_derivative(self.z[-1])
+        self.error[-1] = self.cost.evaluate_gradient(
+            self.a[-1], Y_mb
+        ) * self.activation_out.evaluate_derivative(self.z[-1])
 
         # Ad hoc way to deal with softmax: TODO!
-        self.error[-1] = self.a[-1] - Y_mb
+        # self.error[-1] = self.a[-1] - Y_mb
 
         # Backpropogate the error from l = L-1,...,1
         for l in range(self.N_layers - 1, -1, -1):
@@ -223,7 +223,16 @@ class FeedForwardNeuralNetwork:
 
 
 class FFNNClassifier(FeedForwardNeuralNetwork):
-    def __init__(self, X, Y, network_shape, activation, activation_out, cost, momentum=0, lambd=None):
+    def __init__(
+        self,
+        X,
+        Y,
+        network_shape,
+        activation,
+        activation_out=ActivationFunctions.Softmax,
+        momentum=0,
+        lambd=None,
+    ):
         # NOTE: remove activation & activation out
 
         # Pre-proccess output data to onehot form
@@ -231,7 +240,14 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
         self.labels = labels
         # Let the constructor of the superclass handle everything else
         super().__init__(
-            X, Y_processed, network_shape, activation, activation_out, cost, momentum=momentum, lambd=lambd
+            X,
+            Y_processed,
+            network_shape,
+            activation,
+            activation_out,
+            cost=CostFunctions.CostFunction, # Send an empty iterface; since this should NOT be called.
+            momentum=momentum,
+            lambd=lambd,
         )
         return
 
@@ -261,7 +277,6 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
             self.error[l] = np.zeros([M, self.network_shape[l]])
         self.error[-1] = np.zeros([M, self.output_dim])
 
-        # Consider generalizing this!
         # Compute the error at the output
         self.error[-1] = self.a[-1] - Y_mb
 
@@ -317,7 +332,7 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
                     self.biases[l] += db
         return
 
-    def predict(self, X_out, return_probabilities = False):
+    def predict(self, X_out, return_probabilities=False):
         a_out = super().predict(X_out)
         a_labels = self.postprocess_classification_data(a_out, self.labels)
 
