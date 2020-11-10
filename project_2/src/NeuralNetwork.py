@@ -11,7 +11,9 @@ sys.path.insert(0, "../../project_1/src")
 
 
 class FeedForwardNeuralNetwork:
-    def __init__(self, X, Y, network_shape, activation, activation_out, cost, momentum=0, lambd=None):
+    def __init__(self, X, Y, network_shape, activation, activation_out, cost, momentum=0, lambd=None,
+        init_method = None
+        ):
         """Models implements a Feed Forward Neural Network
         Args:
             network_shape (Array) : Defines the number of hidden layers (L-1) and number of neurons
@@ -64,8 +66,14 @@ class FeedForwardNeuralNetwork:
         # Where L + 1 goes from the last hidden layer to the output
         self.weights = np.empty(self.N_layers + 1, dtype="object")
         self.biases = np.empty(self.N_layers + 1, dtype="object")
-        self.__initialize_weights()
-        self.__initialize_biases()
+
+        if init_method == "he":
+            self.__he_initialize_weight()
+            self.__initialize_biases()
+
+        else:
+            self.__initialize_weights()
+            self.__initialize_biases()
 
         # Initialize array to store the gradients of the cost function wrt. weights & biases.
         self.cost_weight_gradient = np.empty(self.N_layers + 1, dtype="object")
@@ -88,6 +96,7 @@ class FeedForwardNeuralNetwork:
         # NOTE: Consult the literature to ensure that random initialization is OK
         # weight from k in l-1 to j in l -> w[l][j,k]
         # Input layer -> First Hidden layer
+        print("Initialized using Normal dist")
         k = self.input_dim
         j = self.network_shape[0]
         self.weights[0] = np.random.randn(j, k)
@@ -98,6 +107,26 @@ class FeedForwardNeuralNetwork:
             self.weights[i] = np.random.randn(j, k)
         # Last hidden layer -> Output layer
         self.weights[-1] = np.random.randn(self.output_dim, self.network_shape[-1])
+
+        return
+
+    def __he_initialize_weight(self):
+        # NOTE: Consult the literature to ensure that random initialization is OK
+        # weight from k in l-1 to j in l -> w[l][j,k]
+        # Input layer -> First Hidden layer
+        print("Initialized using He")
+        k = self.input_dim
+        j = self.network_shape[0]
+        self.weights[0] = np.random.randn(j, k) * np.sqrt(2) / np.sqrt(k)
+        # Hidden layers
+        for i in range(1, self.N_layers):  # l = 1,..., L-1
+            k = self.network_shape[i - 1]
+            j = self.network_shape[i]
+            self.weights[i] = np.random.randn(j, k) * np.sqrt(2) / np.sqrt(k)
+        # Last hidden layer -> Output layer
+        k = self.network_shape[-1]
+        j = self.output_dim
+        self.weights[-1] = np.random.randn(j, k) * np.sqrt(2) / np.sqrt(k)
 
         return
 
@@ -232,6 +261,7 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
         activation_out=ActivationFunctions.Softmax,
         momentum=0,
         lambd=None,
+        init_method = None
     ):
         # NOTE: remove activation & activation out
 
@@ -248,6 +278,7 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
             cost=CostFunctions.CostFunction, # Send an empty iterface; since this should NOT be called.
             momentum=momentum,
             lambd=lambd,
+            init_method = init_method
         )
         return
 

@@ -19,4 +19,4 @@ def logreg(X,Y,theta):
     cost_gradients = X.T @ (prob * np.sum(weigths,axis=1)) - X.T @ weights
     # Derivatives of cost wrt thetas, shape = [predictors,classes]
 
-return 
+return
