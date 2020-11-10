@@ -46,7 +46,7 @@ class FeedForwardNeuralNetwork:
             raise Exception("activation is not a sub-class of ActivationFunction")
 
         if issubclass(activation_out, ActivationFunctions.ActivationFunction):
-            self.activation_out = activation
+            self.activation_out = activation_out
         else:
             raise Exception("activation_out is not a sub-class of ActivationFunction")
 
@@ -139,9 +139,13 @@ class FeedForwardNeuralNetwork:
         self.error[-1] = np.zeros([M, self.output_dim])
 
         # Compute the error at the output
-        self.error[-1] = self.cost.evaluate_gradient(
-            self.a[-1], Y_mb
-        ) * self.activation_out.evaluate_derivative(self.z[-1])
+        # Normal way to deal with everything else. TODO!
+        # self.error[-1] = self.cost.evaluate_gradient(
+        #     self.a[-1], Y_mb
+        # ) * self.activation_out.evaluate_derivative(self.z[-1])
+
+        # Ad hoc way to deal with softmax: TODO!
+        self.error[-1] = self.a[-1] - Y_mb
 
         # Backpropogate the error from l = L-1,...,1
         for l in range(self.N_layers - 1, -1, -1):
