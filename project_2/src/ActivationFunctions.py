@@ -99,7 +99,7 @@ class Tanh(ActivationFunction):
 
     @staticmethod
     def evaluate_derivative(x):
-        return 1 - Tanh(x) ** 2
+        return 1 - np.tanh(x)**2
 
     def __repr__(self):
         return "Tanh"

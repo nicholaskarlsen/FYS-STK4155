@@ -104,10 +104,10 @@ class FeedForwardNeuralNetwork:
     def __initialize_biases(self):
         for i in range(self.N_layers):
             # self.biases[i] = np.random.randn(self.network_shape[i])
-            self.biases[i] = np.zeros(self.network_shape[i]) + 0.01
+            self.biases[i] = np.zeros(self.network_shape[i]) #+ 0.01
         # Last hidden layer -> Output layer
         # self.biases[-1] = np.random.randn(self.output_dim)
-        self.biases[-1] = np.zeros(self.output_dim) + 0.01
+        self.biases[-1] = np.zeros(self.output_dim) #+ 0.01
 
         return
 
@@ -220,6 +220,7 @@ class FeedForwardNeuralNetwork:
 
 class FFNNClassifier(FeedForwardNeuralNetwork):
     def __init__(self, X, Y, network_shape, activation, activation_out, cost, momentum=0, lambd=None):
+        # NOTE: remove activation & activation out
 
         # Pre-proccess output data to onehot form
         Y_processed, labels = self.preprocess_classification_data(Y, return_labels=True)
@@ -228,6 +229,27 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
         super().__init__(
             X, Y_processed, network_shape, activation, activation_out, cost, momentum=momentum, lambd=lambd
         )
+        return
+
+    def __feed_forward(self, X_mb, M):
+        for l in range(self.N_layers):
+            self.a[l] = np.zeros([M, self.network_shape[l]])
+            self.z[l] = np.zeros([M, self.network_shape[l]])
+        self.a[-1] = np.zeros([M, self.output_dim])
+        self.z[-1] = np.zeros([M, self.output_dim])
+
+        self.z[0] = X_mb @ self.weights[0].T + self.biases[0]
+        self.a[0] = self.activation.evaluate(self.z[0])
+        # Feed Forward
+        # l = 2,3,4,...,L-1 compute z[l] = w[l] @ a[l-1] + b[l]
+        for l in range(1, self.N_layers):
+            self.z[l] = self.a[l - 1] @ self.weights[l].T + self.biases[l]
+            self.a[l] = self.activation.evaluate(self.z[l])
+        # Note; weights = [1, ..., L, L+1] -> last index stores the output weight
+        # Treat the output layer separately, due to different activation func
+
+        self.z[-1] = self.a[-2] @ self.weights[-1].T + self.biases[-1]
+        self.a[-1] = self.activation_out.evaluate(self.z[-1])
         return
 
     def __backpropogation(self, X_mb, Y_mb, M):
@@ -259,10 +281,46 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
 
         return
 
-    def predict(self, X_out):
+    def train(self, N_minibatches, learning_rate, n_epochs):
+        # Ensure that the mini-batch size is NOT greater than
+        assert N_minibatches <= self.X.shape[0]
+        # Increment the epoch counter
+        self.total_epochs += n_epochs
+
+        for epoch in range(n_epochs):
+            # Pick out a new mini-batch
+            mb = SGD.minibatch(self.X, N_minibatches)
+            for i in range(N_minibatches):
+                # with replacement, replace i with k
+                # k = np.random.randint(M)
+                X_mb = self.X[mb[i]]
+                Y_mb = self.Y[mb[i]]
+                M = X_mb.shape[0]  # Size of each minibach (NOT constant, see SGD.minibatch)
+                # Feed-Forward to compute all the activations
+                self.__feed_forward(X_mb, M)
+                # Back-propogate to compute the gradients
+                self.__backpropogation(X_mb, Y_mb, M)
+
+                # TODO: ADD if for lambd != None to add penalty to gradients
+                # Update the weights and biases using gradient descent
+                for l in range(self.N_layers + 1):
+                    # Change of weights
+                    dw = self.weights[l] * self.momentum - learning_rate / M * self.cost_weight_gradient[l]
+                    # Change of bias
+                    db = self.biases[l] * self.momentum - learning_rate / M * self.cost_bias_gradient[l]
+                    # Update weights and biases
+                    self.weights[l] += dw
+                    self.biases[l] += db
+        return
+
+    def predict(self, X_out, return_probabilities = False):
         a_out = super().predict(X_out)
-        a_out = self.postprocess_classification_data(a_out, self.labels)
-        return a_out
+        a_labels = self.postprocess_classification_data(a_out, self.labels)
+
+        if return_probabilities:
+            return a_labels, a_out
+
+        return a_labels
 
     def score(self, y_test, X_test):
         y_test_model = self.predict(X_test)
