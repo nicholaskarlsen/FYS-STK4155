@@ -21,6 +21,8 @@ class Softmax(ActivationFunction):
 
     @staticmethod
     def evaluate_derivative(x):
+        # Not complete, this only gives da(zj)/dzj. Also needs cross-terms
+        # da(zk)/dzj. Not used in current implementations.
         softmax_eval = np.exp(x)/np.sum(np.exp(x),axis=1,keepdims=True)
         return softmax_eval - softmax_eval**2
 
@@ -86,6 +88,8 @@ class Sigmoid(ActivationFunction):
     @staticmethod
     def evaluate_derivative(x):
         # sig(x) * (1 - sig(x))
+        # compare with CostFunctions.CrossEntropy.evaluate_gradient
+        # and note the cancelation with the substitution sig(x) <=> model
         return 1 / (1 + np.exp(-x)) * (1 - 1 / (1 + np.exp(-x)))
 
     def __repr__(self):

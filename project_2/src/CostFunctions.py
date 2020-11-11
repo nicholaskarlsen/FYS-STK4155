@@ -38,11 +38,30 @@ class CrossEntropy(CostFunction):
         # model = [M, n]
 
     def evaluate_gradient(model, data):
-        # return - (data * (1 - model) - (1 - data) * model) / (model * (1 - model))
+        # Note the cancelation when multiplied with derivative of
+        # activation if model is sigmoid.
         return - (data - model) / (model - model**2)
 
     def __repr__(self):
         return "Cross Entropy"
+
+class Softmax_loss(CostFunction):
+    def evaluate(model, data):
+        # model => a
+        # data => Y
+        return - np.sum(data * np.log(model))
+
+        # model = [M, n]
+
+    def evaluate_gradient(model, data):
+        # Not complete. Unused in current implementation. When using softmax
+        # as activation, dcost/dzj = sum_k dcost/da_k *da_k/dz_j is no longer
+        # zero for k != j, and thus not amenable to this simple treatment.
+        return None #- (data - model) / (model - model**2)
+
+    def __repr__(self):
+        return "Cross Entropy"
+
 
 
 # KEEP THIS FOR SGD

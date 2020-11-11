@@ -1,22 +1,57 @@
 import numpy as np
 
-def logreg(X,Y,theta):
-# This is the skeleton for the computations
-# X.shape = [examples,predictors]
-# Y.shape = [examples, classes]
-# theta.shape = [predictors,classes]
+def logreg(x, y, M, init_w, n_epochs, learning_rate, momentum, lambd=None):
+"""Logistic (softmax) regression for multiclass categorization. Uses momentum SGD."""
 
-    prob = np.exp(X @ theta)/np.sum(np.exp(X @ theta)),axis=1)
-    # prob.shape = [examples,classes], probabilites
-    cost_function = -np.sum(Y * np.ln(prob) + (1-Y)*np.ln(prob))
-    # scalar, from the double-sum over examples and classes, to only punish
-    # missing correct labels, remove everything after the last plus sign.
-    weight = prob * (Y - (1-Y)/(1-prob))
+    # prob = np.exp(X @ theta)/np.sum(np.exp(X @ theta),axis=1)
+    # prob.shape = [examples,classes]. Category probabilites as given
+    # by the Softmax-function.
+
+    # cost_function = -np.sum(Y * np.ln(prob) + (1-Y)*np.ln(prob))
+    # scalar, full cross-entropy cost function. Note that the last term
+    # is not really necessary, when using softmax there is an implicit
+    # penalty for giving nonzero probabilites to false categories.
+    # This version is a little more aggressive in punishing confidence in wrong
+    # labels, but is far clunkier and possibly numerically unstable.
+
+    # cost_function = -np.sum(Y * np.ln(prob))
+    # is the preferred cost function when using softmax. Also given as
+    # Softmax_loss in CostFunctions.py
+
+    # shorthand = prob * (Y / prob - (1-Y)/(1-prob))
     # helper matrix for vectorizing the computation of the cost_gradients
-    # shape = [examples,classes]. Punishes probailities for mislabeling,
-    # scary wrt numerics. In case numerical errors arise, remove the stuff
-    # after the first minus sign, then only missing correct labels is punished.
-    cost_gradients = X.T @ (prob * np.sum(weigths,axis=1)) - X.T @ weights
+    # shape = [examples,classes]. Remove the last term if using Softmax_loss
+    # as cost_function.
+
+    # cost_gradients = X.T @ (prob * np.sum(shorthand,axis=1)) - X.T @ shorthand
     # Derivatives of cost wrt thetas, shape = [predictors,classes]
 
-return
+    # NOTE! The above expressions for the cost_gradients have not been
+    # double-checked! Given the potential for error in their derivations
+    # they should be treated as highly suspect. The simpler version for
+    # Softmax_loss implemented below, is however, pretty safe.
+
+    w = init_w
+    dw = np.zeros(w.shape)
+
+    for epoch in range(n_epochs):
+        mb = minibatch(X, M)  # Split x into M minibatches
+        for i in range(M):
+            # Pick out a random mini-batch index
+            k = np.random.randint(M)
+            # compute gradient with random minibatch
+            X, Y = x[mb[k]] , y[mb[k]]
+            # Probabilities from Softmax:
+            prob = np.exp(X @ w)/np.sum(np.exp(X @ w),axis=1)
+
+            #cost_function = -np.sum(Y * np.ln(prob)) gives:
+            grad = X.T @ (prob - Y)
+
+            # Add l2 penalty:
+            if lambd != None:
+                grad += lamb * w
+
+            # increment weights
+            dw = momentum * dw - learning_rate * grad/X.shape[0]
+            w = w + dw
+    return w
