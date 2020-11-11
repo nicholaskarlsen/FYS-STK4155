@@ -61,7 +61,7 @@ def logreg(x, y, M, init_w, n_epochs, learning_rate, momentum, lambd=None):
 
             # Add l2 penalty:
             if lambd != None:
-                grad += lamb * w
+                grad += lambd * w
 
             # increment weights
             dw = momentum * dw - learning_rate * grad/X.shape[0]
