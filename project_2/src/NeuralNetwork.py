@@ -26,6 +26,11 @@ class FeedForwardNeuralNetwork:
         init_weights_method=None,
     ):
         """Models implements a Feed Forward Neural Network
+
+        NOTE: Elaborate as to how this class can also handle
+        the binary classification problem. Use sigmoid as
+        activation & cross entropy as cost.
+
         Args:
             X (Array) : Input data to train the network on. Data is expected to be structured in a
                 Row-Major fashion; that is, the expected shape is [N data points, Dimensionality of data]
