@@ -1,7 +1,19 @@
 import numpy as np
+import matplotlib.pyplot as plt
+
+# import SGD
+import ActivationFunctions
+import CostFunctions
+import SGD
+import sys
+
+sys.path.insert(0, "../../project_1/src")
+
+from stat_tools import MSE, R2
+
 
 def logreg(x, y, M, init_w, n_epochs, learning_rate, momentum, lambd=None):
-"""Logistic (softmax) regression for multiclass categorization. Uses momentum SGD."""
+    """Logistic (softmax) regression for multiclass categorization. Uses momentum SGD."""
 
     # prob = np.exp(X @ theta)/np.sum(np.exp(X @ theta),axis=1)
     # prob.shape = [examples,classes]. Category probabilites as given
@@ -35,14 +47,14 @@ def logreg(x, y, M, init_w, n_epochs, learning_rate, momentum, lambd=None):
     dw = np.zeros(w.shape)
 
     for epoch in range(n_epochs):
-        mb = minibatch(X, M)  # Split x into M minibatches
+        mb = SGD.minibatch(x, M)  # Split x into M minibatches
         for i in range(M):
             # Pick out a random mini-batch index
             k = np.random.randint(M)
             # compute gradient with random minibatch
             X, Y = x[mb[k]] , y[mb[k]]
             # Probabilities from Softmax:
-            prob = np.exp(X @ w)/np.sum(np.exp(X @ w),axis=1)
+            prob = np.exp(X @ w)/np.sum(np.exp(X @ w),axis=1,keepdims=True)
 
             #cost_function = -np.sum(Y * np.ln(prob)) gives:
             grad = X.T @ (prob - Y)
