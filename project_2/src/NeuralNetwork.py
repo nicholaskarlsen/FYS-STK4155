@@ -9,21 +9,48 @@ import sys
 
 sys.path.insert(0, "../../project_1/src")
 
+from stat_tools import MSE, R2
+
 
 class FeedForwardNeuralNetwork:
-    def __init__(self, X, Y, network_shape, activation, activation_out, cost, momentum=0, lambd=None,
-        init_method = None
-        ):
+    def __init__(
+        self,
+        X,
+        Y,
+        network_shape,
+        activation,
+        activation_out,
+        cost,
+        momentum=0,
+        lambd=None,
+        init_weights_method=None,
+    ):
         """Models implements a Feed Forward Neural Network
         Args:
-            network_shape (Array) : Defines the number of hidden layers (L-1) and number of neurons
-                    (n) for each hidden layer in the network in the form [n_1, n_2, ..., n_L-1].
+            X (Array) : Input data to train the network on. Data is expected to be structured in a
+                Row-Major fashion; that is, the expected shape is [N data points, Dimensionality of data]
 
-            activation (Object)   : The activation function; MUST be an implementation of the
-                    ActivationFunction interface. See ActivationFunctions.py
+            Y (Array) : Output data corrsponding to the X data set and structured in a similar fashion
 
-            cost (Object)         : The cost function. Same as above; must be implementation of
-                    CostFunction interface.
+            network_shape (Array) : Defines the number of hidden layers (L-1) and number of neurons (n)
+                for each hidden layer in the network in the form [n_1, n_2, ..., n_L-1].
+
+            activation (Object) : The activation function; MUST be an implementation of the
+                ActivationFunction interface. See ActivationFunctions.py
+
+            cost (Object) : The cost function. Same as above; must be implementation of
+                CostFunction interface.
+
+            momentum (Float): Hyperparameter determining the momentum to be used in the Stochastic
+                gradient descent.
+
+            lambd (Float): Hyper parameter corresponding to a L2 penalty in the cost function akin
+                to that of Ridge regression.
+
+            init_method (String): Parameter determining the type of initialization to be used for
+                the weights. If none, or an invalid value is choosen it will default to sampling
+                weights from the standard normal distribution N(0,1).
+                Available options are: [xavier, he]
         """
         self.X = X
         self.Y = Y
@@ -67,13 +94,16 @@ class FeedForwardNeuralNetwork:
         self.weights = np.empty(self.N_layers + 1, dtype="object")
         self.biases = np.empty(self.N_layers + 1, dtype="object")
 
-        if init_method == "he":
-            self.__he_initialize_weight()
-            self.__initialize_biases()
-
+        # Initialize the weights based on the users input. If no preference; sample from N(0,1)
+        if init_weights_method == "he":
+            self.__he_initialize_weights()
+        elif init_weights_method == "xavier":
+            self._xavier_initialize_weights()
         else:
             self.__initialize_weights()
-            self.__initialize_biases()
+
+        # Initialize the bias as zero
+        self.__initialize_biases()
 
         # Initialize array to store the gradients of the cost function wrt. weights & biases.
         self.cost_weight_gradient = np.empty(self.N_layers + 1, dtype="object")
@@ -93,10 +123,10 @@ class FeedForwardNeuralNetwork:
         return
 
     def __initialize_weights(self):
-        # NOTE: Consult the literature to ensure that random initialization is OK
+        # Standard, initialization; sample from a normal distribution.
         # weight from k in l-1 to j in l -> w[l][j,k]
         # Input layer -> First Hidden layer
-        print("Initialized using Normal dist")
+        print("Initializing weights using: Normal distribution")
         k = self.input_dim
         j = self.network_shape[0]
         self.weights[0] = np.random.randn(j, k)
@@ -110,11 +140,11 @@ class FeedForwardNeuralNetwork:
 
         return
 
-    def __he_initialize_weight(self):
-        # NOTE: Consult the literature to ensure that random initialization is OK
+    def __he_initialize_weights(self):
+        # He initialization; suitable to pair with ReLU
         # weight from k in l-1 to j in l -> w[l][j,k]
         # Input layer -> First Hidden layer
-        print("Initialized using He")
+        print("Initializing weights using: He")
         k = self.input_dim
         j = self.network_shape[0]
         self.weights[0] = np.random.randn(j, k) * np.sqrt(2) / np.sqrt(k)
@@ -127,6 +157,26 @@ class FeedForwardNeuralNetwork:
         k = self.network_shape[-1]
         j = self.output_dim
         self.weights[-1] = np.random.randn(j, k) * np.sqrt(2) / np.sqrt(k)
+
+        return
+
+    def _xavier_initialize_weights(self):
+        # Xavier initialization; Sample from a uniform distribution
+        print("Initializing weights using: Xavier")
+        # Define a lambda to easily compute the lower/upper bounds of the distribution
+        sample_bound = lambda j, k : np.sqrt(6) / np.sqrt(j + k)
+        k = self.input_dim
+        j = self.network_shape[0]
+        self.weights[0] = np.random.uniform(-sample_bound(j, k), sample_bound(j, k), size=(j,k))
+        # Hidden layers
+        for i in range(1, self.N_layers):  # l = 1,..., L-1
+            k = self.network_shape[i - 1]
+            j = self.network_shape[i]
+            self.weights[i] = np.random.uniform(-sample_bound(j, k), sample_bound(j, k), size=(j,k))
+        # Last hidden layer -> Output layer
+        k = self.network_shape[-1]
+        j = self.output_dim
+        self.weights[-1] = np.random.uniform(-sample_bound(j, k), sample_bound(j, k), size=(j,k))
 
         return
 
@@ -178,9 +228,9 @@ class FeedForwardNeuralNetwork:
 
         # Backpropogate the error from l = L-1,...,1
         for l in range(self.N_layers - 1, -1, -1):
-            self.error[l] = (self.error[l + 1] @ self.weights[l + 1]) * self.activation.evaluate_derivative(
-                self.z[l]
-            )
+            self.error[l] = (
+                self.error[l + 1] @ self.weights[l + 1]
+            ) * self.activation.evaluate_derivative(self.z[l])
 
         self.cost_weight_gradient[0] = self.error[0].T @ X_mb
         self.cost_bias_gradient[0] = np.sum(self.error[0], axis=0)
@@ -235,9 +285,15 @@ class FeedForwardNeuralNetwork:
                 # Update the weights and biases using gradient descent
                 for l in range(self.N_layers + 1):
                     # Change of weights
-                    dw = self.weights[l] * self.momentum - learning_rate / M * self.cost_weight_gradient[l]
+                    dw = (
+                        self.weights[l] * self.momentum
+                        - learning_rate / M * self.cost_weight_gradient[l]
+                    )
                     # Change of bias
-                    db = self.biases[l] * self.momentum - learning_rate / M * self.cost_bias_gradient[l]
+                    db = (
+                        self.biases[l] * self.momentum
+                        - learning_rate / M * self.cost_bias_gradient[l]
+                    )
                     # Update weights and biases
                     self.weights[l] += dw
                     self.biases[l] += db
@@ -246,6 +302,14 @@ class FeedForwardNeuralNetwork:
     def predict(self, X_out):
         a_out = self.__feed_forward_output(X_out)
         return a_out
+
+    def score(self, y_test, X_test, metric="default"):
+        y_test_model = self.predict(X_test)
+
+        if metric == "r2":
+            return R2(y_test, y_test_model)
+        else:
+            return MSE(y_test, y_test_model)
 
     def __repr__(self):
         return f"FFNN: {self.N_layers} layers"
@@ -261,7 +325,7 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
         activation_out=ActivationFunctions.Softmax,
         momentum=0,
         lambd=None,
-        init_method = None
+        init_method=None,
     ):
         # NOTE: remove activation & activation out
 
@@ -275,10 +339,10 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
             network_shape,
             activation,
             activation_out,
-            cost=CostFunctions.CostFunction, # Send an empty iterface; since this should NOT be called.
+            cost=CostFunctions.CostFunction,  # Send an empty iterface; since this should NOT be called.
             momentum=momentum,
             lambd=lambd,
-            init_method = init_method
+            init_method=init_method,
         )
         return
 
@@ -313,9 +377,9 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
 
         # Backpropogate the error from l = L-1,...,1
         for l in range(self.N_layers - 1, -1, -1):
-            self.error[l] = (self.error[l + 1] @ self.weights[l + 1]) * self.activation.evaluate_derivative(
-                self.z[l]
-            )
+            self.error[l] = (
+                self.error[l + 1] @ self.weights[l + 1]
+            ) * self.activation.evaluate_derivative(self.z[l])
 
         self.cost_weight_gradient[0] = self.error[0].T @ X_mb
         self.cost_bias_gradient[0] = np.sum(self.error[0], axis=0)
@@ -355,9 +419,15 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
                 # Update the weights and biases using gradient descent
                 for l in range(self.N_layers + 1):
                     # Change of weights
-                    dw = self.weights[l] * self.momentum - learning_rate / M * self.cost_weight_gradient[l]
+                    dw = (
+                        self.weights[l] * self.momentum
+                        - learning_rate / M * self.cost_weight_gradient[l]
+                    )
                     # Change of bias
-                    db = self.biases[l] * self.momentum - learning_rate / M * self.cost_bias_gradient[l]
+                    db = (
+                        self.biases[l] * self.momentum
+                        - learning_rate / M * self.cost_bias_gradient[l]
+                    )
                     # Update weights and biases
                     self.weights[l] += dw
                     self.biases[l] += db
