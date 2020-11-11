@@ -20,10 +20,11 @@ class FeedForwardNeuralNetwork:
         network_shape,
         activation,
         activation_out,
-        cost,
+        cost=CostFunctions.SquareError,
         momentum=0,
         lambd=None,
         init_weights_method=None,
+        learning_rate_decay=None,
     ):
         """Models implements a Feed Forward Neural Network
 
@@ -56,6 +57,9 @@ class FeedForwardNeuralNetwork:
                 the weights. If none, or an invalid value is choosen it will default to sampling
                 weights from the standard normal distribution N(0,1).
                 Available options are: [xavier, he]
+
+            learning_rate_decay (String): Choose which method to decay the learning rate.
+                'inverse' or 'exponential'. If none are choosen; keep it constant.
         """
         self.X = X
         self.Y = Y
@@ -125,6 +129,14 @@ class FeedForwardNeuralNetwork:
 
         # Note: These arrays will be re-used. But avoid re-initialization duiring
         # each itteration to reduce time spent on garbage collection
+
+        # Assign method
+        if learning_rate_decay == "exponential":
+            self.learning_rate_func = self.__exponential_decay
+        elif learning_rate_decay == "inverse":
+            self.learning_rate_func = self.__inverse_decay
+        else:
+            self.learning_rate_func = self.__constant_rate
         return
 
     def __initialize_weights(self):
@@ -169,19 +181,25 @@ class FeedForwardNeuralNetwork:
         # Xavier initialization; Sample from a uniform distribution
         print("Initializing weights using: Xavier")
         # Define a lambda to easily compute the lower/upper bounds of the distribution
-        sample_bound = lambda j, k : np.sqrt(6) / np.sqrt(j + k)
+        sample_bound = lambda j, k: np.sqrt(6) / np.sqrt(j + k)
         k = self.input_dim
         j = self.network_shape[0]
-        self.weights[0] = np.random.uniform(-sample_bound(j, k), sample_bound(j, k), size=(j,k))
+        self.weights[0] = np.random.uniform(
+            -sample_bound(j, k), sample_bound(j, k), size=(j, k)
+        )
         # Hidden layers
         for i in range(1, self.N_layers):  # l = 1,..., L-1
             k = self.network_shape[i - 1]
             j = self.network_shape[i]
-            self.weights[i] = np.random.uniform(-sample_bound(j, k), sample_bound(j, k), size=(j,k))
+            self.weights[i] = np.random.uniform(
+                -sample_bound(j, k), sample_bound(j, k), size=(j, k)
+            )
         # Last hidden layer -> Output layer
         k = self.network_shape[-1]
         j = self.output_dim
-        self.weights[-1] = np.random.uniform(-sample_bound(j, k), sample_bound(j, k), size=(j,k))
+        self.weights[-1] = np.random.uniform(
+            -sample_bound(j, k), sample_bound(j, k), size=(j, k)
+        )
 
         return
 
@@ -266,7 +284,16 @@ class FeedForwardNeuralNetwork:
 
         return a_out
 
-    def train(self, N_minibatches, learning_rate, n_epochs):
+    def __constant_rate(self, init_learning_rate, decay_rate):
+        return init_learning_rate
+
+    def __exponential_decay(self, init_learning_rate, decay_rate):
+        return init_learning_rate * np.exp(-decay_rate * self.total_epochs)
+
+    def __inverse_decay(self, init_learning_rate, decay_rate):
+        return init_learning_rate / (1 + decay_rate * self.total_epochs)
+
+    def train(self, N_minibatches, learning_rate, n_epochs, decay_rate=0):
         # Ensure that the mini-batch size is NOT greater than
         assert N_minibatches <= self.X.shape[0]
         # Increment the epoch counter
@@ -280,24 +307,27 @@ class FeedForwardNeuralNetwork:
                 # k = np.random.randint(M)
                 X_mb = self.X[mb[i]]
                 Y_mb = self.Y[mb[i]]
-                M = X_mb.shape[0]  # Size of each minibach (NOT constant, see SGD.minibatch)
+                M = X_mb.shape[
+                    0
+                ]  # Size of each minibach (NOT constant, see SGD.minibatch)
                 # Feed-Forward to compute all the activations
                 self.__feed_forward(X_mb, M)
                 # Back-propogate to compute the gradients
                 self.__backpropogation(X_mb, Y_mb, M)
 
-                # TODO: ADD if for lambd != None to add penalty to gradients
+                # update the learning rate using the choosen rate using the chosen method
+                lr = self.learning_rate_func(learning_rate, decay_rate)
                 # Update the weights and biases using gradient descent
                 for l in range(self.N_layers + 1):
                     # Change of weights
                     dw = (
                         self.weights[l] * self.momentum
-                        - learning_rate / M * self.cost_weight_gradient[l]
+                        - lr / M * self.cost_weight_gradient[l]
                     )
                     # Change of bias
                     db = (
                         self.biases[l] * self.momentum
-                        - learning_rate / M * self.cost_bias_gradient[l]
+                        - lr / M * self.cost_bias_gradient[l]
                     )
                     # Update weights and biases
                     self.weights[l] += dw
@@ -331,6 +361,8 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
         momentum=0,
         lambd=None,
         init_method=None,
+        init_weights_method=None,
+        learning_rate_decay=None,
     ):
         # NOTE: remove activation & activation out
 
@@ -347,11 +379,13 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
             cost=CostFunctions.CostFunction,  # Send an empty iterface; since this should NOT be called.
             momentum=momentum,
             lambd=lambd,
-            init_method=init_method,
+            init_weights_method=init_weights_method,
+            learning_rate_decay=learning_rate_decay
         )
         return
 
     def __feed_forward(self, X_mb, M):
+
         for l in range(self.N_layers):
             self.a[l] = np.zeros([M, self.network_shape[l]])
             self.z[l] = np.zeros([M, self.network_shape[l]])
@@ -400,7 +434,7 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
 
         return
 
-    def train(self, N_minibatches, learning_rate, n_epochs):
+    def train(self, N_minibatches, learning_rate, n_epochs, decay_rate=0):
         # Ensure that the mini-batch size is NOT greater than
         assert N_minibatches <= self.X.shape[0]
         # Increment the epoch counter
@@ -414,24 +448,27 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
                 # k = np.random.randint(M)
                 X_mb = self.X[mb[i]]
                 Y_mb = self.Y[mb[i]]
-                M = X_mb.shape[0]  # Size of each minibach (NOT constant, see SGD.minibatch)
+                M = X_mb.shape[
+                    0
+                ]  # Size of each minibach (NOT constant, see SGD.minibatch)
                 # Feed-Forward to compute all the activations
                 self.__feed_forward(X_mb, M)
                 # Back-propogate to compute the gradients
                 self.__backpropogation(X_mb, Y_mb, M)
 
-                # TODO: ADD if for lambd != None to add penalty to gradients
+                # update the learning rate using the choosen rate using the chosen method
+                lr = self.learning_rate_func(learning_rate, decay_rate)
                 # Update the weights and biases using gradient descent
                 for l in range(self.N_layers + 1):
                     # Change of weights
                     dw = (
                         self.weights[l] * self.momentum
-                        - learning_rate / M * self.cost_weight_gradient[l]
+                        - lr / M * self.cost_weight_gradient[l]
                     )
                     # Change of bias
                     db = (
                         self.biases[l] * self.momentum
-                        - learning_rate / M * self.cost_bias_gradient[l]
+                        - lr / M * self.cost_bias_gradient[l]
                     )
                     # Update weights and biases
                     self.weights[l] += dw
