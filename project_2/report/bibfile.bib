@@ -23,6 +23,14 @@ title = {Bias-Variance in Machine Learning},
 url = {https://www.cs.cmu.edu/~wcohen/10-601/bias-variance.pdf},
 }
 
+@online{4155_project_1,
+   title={Regression analysis and resampling methods},
+   url={https://github.com/nicholaskarlsen/FYS-STK4155/blob/master/project_1/report/project_1.pdf},
+   author={Karlsen, Nicholas and Espedal Moe, Thore},
+   year={2020},
+}
+
+
 @online{4155_repo,
 title = {Source of terrain data},
 url = {https://github.com/CompPhysics/MachineLearning/tree/master/doc/Projects/2020/Project1/DataFiles},
@@ -34,6 +42,14 @@ url = {https://github.com/CompPhysics/MachineLearning/tree/master/doc/Projects/2
    author =    {Harrell, F},
    year =      {2015},
    edition =   {2},
+}
+
+@book{Aggarwall,
+   title =     {Neural Networks and Deep Learning},
+   author =    {Charu C. Aggarwal},
+   year =      {2018},
+   publisher={Springer}
+   edition =   {1},
 }
 
 @misc{our_repo,
@@ -59,3 +75,59 @@ url = {https://github.com/CompPhysics/MachineLearning/tree/master/doc/Projects/2
    month={May},
    pages={1–124}
 }
+
+ @InProceedings{xavier,
+  title = {Understanding the difficulty of training deep feedforward neural networks},
+  author = {Xavier Glorot and Yoshua Bengio},
+  pages = {249--256},
+  year = {2010},
+  editor = {Yee Whye Teh and Mike Titterington},
+  volume = {9},
+  series = {Proceedings of Machine Learning Research},
+  address = {Chia Laguna Resort, Sardinia, Italy},
+  month = {13--15 May},
+  publisher = {JMLR Workshop and Conference Proceedings},
+  pdf = {http://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf},
+  url = {http://proceedings.mlr.press/v9/glorot10a.html}}
+
+
+@online{Nielsen,
+   title={Neural Networks and Deep Learning},
+   url={http://neuralnetworksanddeeplearning.com/},
+   author={Nielsen, Michael A.},
+   publisher = {Determination Press},
+   year={2015},
+}
+
+
+@online{ManyBodyML,
+   title={Machine Learning Techniques for Quantum Many-Body Physics - Lecture 1},
+   url={https://youtu.be/VKgVpZSAsn4?t=1657},
+   author={Giuseppe Carleo},
+   publisher = {ICTP Condensed Matter and Statistical Physics},
+   year={2017},
+}
+
+@misc{shamir2016withoutreplacement,
+      title={Without-Replacement Sampling for Stochastic Gradient Methods: Convergence Results and Application to Distributed Optimization},
+      author={Ohad Shamir},
+      year={2016},
+      eprint={1603.00570},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+
+ @InProceedings{pmlr-v97-nagaraj19a,
+    title = {{SGD} without Replacement: Sharper Rates for General Smooth Convex Functions},
+    author = {Nagaraj, Dheeraj and Jain, Prateek and Netrapalli, Praneeth},
+    pages = {4703--4711},
+    year = {2019},
+    editor = {Kamalika Chaudhuri and Ruslan Salakhutdinov}, v
+    olume = {97},
+    series = {Proceedings of Machine Learning Research},
+    address = {Long Beach, California, USA}, month = {09--15 Jun},
+    publisher = {PMLR},
+    pdf = {http://proceedings.mlr.press/v97/nagaraj19a/nagaraj19a.pdf},
+    url = {http://proceedings.mlr.press/v97/nagaraj19a.html},
+    abstract = {We study stochastic gradient descent without replacement (SGDo) for smooth convex functions. SGDo is widely observed to converge faster than true SGD where each sample is drawn independently with replacement (Bottou,2009) and hence, is more popular in practice. But it’s convergence properties are not well understood as sampling without replacement leads to coupling between iterates and gradients. By using method of exchangeable pairs to bound Wasserstein distance, we provide the first non-asymptotic results for SGDo when applied to general smooth, strongly-convex functions. In particular, we show that SGDo converges at a rate of $O(1/K^2)$ while SGD is known to converge at $O(1/K)$ rate, where $K$ denotes the number of passes over data and is required to be large enough. Existing results for SGDo in this setting require additional Hessian Lipschitz assumption (Gurbuzbalaban et al, 2015; HaoChen and Sra 2018). For small $K$, we show SGDo can achieve same convergence rate as SGD for general smooth strongly-convex functions. Existing results in this setting require $K=1$ and hold only for generalized linear models (Shamir,2016). In addition, by careful analysis of the coupling, for both large and small $K$, we obtain better dependence on problem dependent parameters like condition number.}
+  }
