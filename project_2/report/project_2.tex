@@ -308,7 +308,112 @@ in a particularly nice form. This cost function is then used in the backpropagat
 \end{tabular}
 \end{table*}
 
+%%%%%%%%%%%%%%% TEM: My draft begins here:
 
+
+\subsubsection{Application of Neural Networks}
+
+Having presented the general description of how neural networks work, it is now time to briefly look at the specifics of how they are applied to different types of problems. In this article we deal with two distinct tasks:, the approximation of continuous functions, and classification. These tasks are both highly amenable to treatment by neural networks, but require somewhat different setups for the input and output layers.
+
+For function approximations the task is simply to map, for sample $m$,  a set of input dependent variables $\mathbf{x}_m$ to their corresponding function-value $f(\mathbf{x}_m) = y_m$. The input to the neural network will then, for $N$ samples with $p$ dependent variables, just be the $[N,p]$-dimensional matrix of the dependent variables. The output will equally simply be the $[N,1]$-dimensional matrix of predicted values $\tilde{y}_m$, and the activation function for the output layer can be taken as the identity function, i.e. $\tilde{y}_m = a^L_{m,j=1}$. This corresponds to $p$ input nodes and a single output node in the network architecture. The most natural cost-function for this kind of output is, of course, the mean-squared error (MSE), where $y_m$ are the actual response-values of the samples:
+\begin{equation}
+\label{eq:cost_mse}
+C = \frac{1}{N} \sum_m (\tilde{y}_m - y_m)^2 = \frac{1}{N} \sum_m (a^L_{m,j=1} - y_m)^2 
+\end{equation}
+which is straightforward to differentiate with respect to the output activation functions when computing the error in the output layer $\delta^L$.for the backpropagation-algorithm.
+
+In classification the task is, for sample $m$, to go from some $p$ predictor variables $x_{mp}$ to determining whether or not the sample belongs to a certain class $k$. The input to the neural network will then be, for $N$ samples with $p$ predictors, the $[N,p]$-dimensional matrix of the predictors. Thus requiring $p$ input nodes in the network.
+
+In the present work we restrict ourselves to data-sets where the samples belong to one of $K$ distinct classes. When the samples belong to one, and only, of $K$ classes, the output can be represented as a $[N,K]$-dimensional matrix $\mathbf{\tilde{Y}}$ representing the model's confidence $\tilde{Y}_{mk}$ that sample $m$ is a member of class $k$. This means the number of output nodes should be $K$.
+
+A very convenient way to represent the actual class-membership of the samples for these kinds of problems is the so-called "one-hot vector-form". For each sample $m$ belonging to one of $K$ classes we can write a $K$-dimensional target vector $\mathbf{y}_m^{target}$ whose elements are, using the Kronecker-delta, $y^{target}_{mi} = \delta_{ik}$ where $k$ is the sample's actual class-number.
+
+As will be motivated in the subsequent discussion of logistic regression, there are two different activation functions commonly used for the output-layer in classifying applications: the sigmoid function and the SoftMax function.
+
+\begin{equation}
+\label{eq:cross_entropy_cost}
+C= - \frac{1}{N} \sum_m \sum_k y^{target}_{mk}  \ln (\tilde{Y}_{mk}) - (1-y^{target}_{mk})  \ln (1- \tilde{Y}_{mk}) 
+\end{equation}
+
+while for SoftMax the preferred cost-function is:
+\begin{equation}
+\label{eq:softmax_loss}
+C= - \frac{1}{N} \sum_m \sum_k y^{target}_{mk}  \ln (\tilde{Y}_{mk})
+\end{equation}
+which we will call the "SoftMax-loss". The reason for using different cost-functions is a practical one. While the sigmoid function activating the node $k$ in the ouput layer is independent of all the other inputs $z_{j\neq k}$ to the nodes in the output layer, the SoftMax function DOES depend on all the other $z_{j\neq k}$. We will not show this, it comes from a simple but rather long and tedious chain of chain-rule applications, but merely state as \cite{Nielsen} that this choice allows us to simply compute the error in the output layer as:
+\begin{equation}
+\label{eq:output_error_nn_classifier}
+\delta^L_mj = \tilde{Y}_{mj} - y^{target}_{mj}
+\end{equation}
+On the theoretical side, one might be given pause by the impression that eq. \ref{eq:cross_entropy_cost} penalizes both "underestimating" the correct class and "overestimating" the wrong classes, while eq. \ref{eq:softmax_loss} only appears to punish "underestimating" the correct class. In this case one should remember that the SoftMax-activation contains the "normalization sum" over the exponentials of all the $z_j$ inputs to the output-layer. This implicitly penalizes giving confidence to the wrong classes, so the explicit penalty in from the right-hand term in eq.\ref{eq:cross_entropy_cost} becomes somewhat redundant for the SoftMax case. 
+
+
+\subsection{Classification with Logistic Regression}
+\noindent
+
+We have previously described how neural networks can be used to do classification problems. A different method for performing classification is (Multinomial) Logistic Regression. As opposed to linear regression where the aim is to project data-points into some linear basis as to model some continuous function, logistic regression instead aims to project data unto some binary response: 0,1. I.e. whether or not some particular data point fits into some category $k$. Thus, we wish to fit our data unto some function $f : \mathbb R \rightarrow [0, 1]$ for each of the categories $K$ under consideration.
+
+As in linear regression one may start by assuming, for a given category $k$ and a given example, a response $S_k$ to be a linear combination of the data-features $x_{p}$:
+
+\begin{equation}
+\label{eq:logreg_input}
+S_k = \beta_{0k} + \sum_p \beta_{pk}  x_p
+\end{equation}
+
+where the $\beta$ are the regression coefficients including an intercept $\beta_{0k}$. The departure from linear regression is that the responses $S_k$ are further input to a function $f$ whose range is $[0,1]$. so that for each category $k$ the regression output becomes:
+
+\begin{equation}
+\label{eq:logreg_output}
+\tilde{y}_k = f(S_k)
+\end{equation}
+
+The output $\tilde{y_k}$ can be interpreted as the model's confidence that the example belongs to the class $k$. In the case of single-class problems (yes/no for membership in a single category/class) the use of the logistic function (also known as the sigmoid function) as $f$ allows one to directly interpret $\tilde{y}_k$ as a probability of class membership for a given set of features and regression weights. That is:
+
+\begin{equation}
+\label{eq:single_class_prob}
+P(y_{target} = 1 | x_p, \beta) = \frac{e^{S_k}}{1+e^{S_k}} = \tilde{y}_k
+\end{equation}
+
+For multiclass exclusive problems (i.e. the example belongs to one and only one of the $K$ considered classes $k$) one can achieve the same probability interpretation by using the SoftMax-function:
+
+\begin{equation}
+\label{eq:multi_class_prob}
+P(y^k_{target} = 1 | x_p, \beta) = \frac{e^{S_k}}{\sum_k e^{S_k}} = \tilde{y}_k
+\end{equation}
+
+It should be noted that the single-class binary problem is equivalent to a two-class exclusive problem. Thus the generalization in \ref{eq:multi_class_prob} can be equally well used for single-class binary problems, if the target $y_{target}$ is reformulated according to:
+
+\begin{equation}
+\label{eq:single_to_mult_target}
+y_{target} = 0 \rightarrow y_{target}^{k=0} = 1, \quad
+y_{target} = 1 \rightarrow y_{target}^{k=1} = 1
+\end{equation}
+
+The above equations describe the (multinomial) logistic predictions for a single example $\mathbf{x}_n, \mathbf{y}_n$ where the vector $\mathbf{x}_n$ contains the $p$ predictors for that example and the vector $\mathbf{y}_n$ is the K-dimensional one-hot form of the target.. These equations can be extended to deal with $N$ samples belonging to one of $K$ different classes, and rewritten in terms of matrices (including an intercept column of ones in the design matrix $\mathbf{X}$):
+
+\begin{equation}
+\label{eq:logreg_pred_matrix}
+\tilde{Y}_{nk} = \frac{ e^{[\mathbf{X} \mathbf{\beta}]_{nk}}} { \sum_k e^{[\mathbf{X} \mathbf{\beta}]_{nk}} }
+\end{equation}
+
+where $\mathbf{\tilde{Y}}$ is the $[N,K]$ matrix of the probabilities that example $n$ belongs to the class $k$, $\mathbf{X}$ is the $[N,p+1]$ design matrix and $\mathbb{\beta}$ is the $[p+1,K]$ matrix of regression coefficients.
+
+By using the SoftMax-loss as cost function:
+\begin{equation}
+\label{eq:logreg_cost}
+C(\mathbf{\beta}) = - \frac{1}{N} \sum_n \sum_k y^{target}_{nk}  \ln (\tilde{Y}_{nk})
+\end{equation}
+
+one can obtain (after some simple, but tedious, applications of the chain rule) the following expression for the gradient of the cost function with respect to the regression parameters $\mathbf{\beta}$ :
+
+ \begin{equation}
+\label{eq:logreg_grad}
+\nabla_{\mathbf{\beta}} C(\mathbf{\beta}) = \frac{1}{N} \mathbf{X}^T (\mathbf{\tilde{Y}} - \mathbf{Y} )
+\end{equation}
+
+which is a matrix of dimensions $[p+1, K]$. Having obtained the gradient, one can then optimize the regression parameters $\mathbf{\beta}$ by minimizing the cost-function using e.g. SGD. When the regression parameters have been optimized, the model \ref{eq:logreg_pred_matrix} is ready to predict the class memberships of the input data. If one wishes, one can easily include $l_2$-regularization by simply adding a term $\sum_{i} \sum_{j} \frac{\lambda}{2} \beta_{i,j}$ to the cost-function; that simply corresponds to adding the matrix $\lambda \mathbf{\beta}$ to equation \ref{eq:logreg_grad}. As a technical note, without further tweaking this will include the somewhat undesirable penalizing of the intercept coefficients $\mathbf{\beta}_{0k}$. So long as the penalty $\lambda$ is sufficiently small we do not expect this to produce any problems, but we do acknowledge that our current implementation does not avoid this intercept penalization when regularization is turned on.
+
+%%%%%%%%%%%%%%%%%% TEM: My draft ends here.
 
 \subsection{Logistic Regression}
 \noindent
