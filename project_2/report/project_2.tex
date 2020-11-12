@@ -244,13 +244,33 @@ and similarly for layers $l = 2, \dots, L$ as
 \end{align}
 The derivatives are then used to update the weights and biases by gradient descent in the same way as before. One may also following the same logic optimize for column-major storage, as is used in languages like Fortran, MATLAB, Julia, etc.
 
-\subsubsection{Weight Initialization}
+\subsubsection{Activation Functions}
 \noindent
-For neural networks, particularly larger ones, the way in which the weights may contribute significantly to the convergence of the Network. Where in particular the somewhat naive approach by sampling all the weights in a constant fashion from some normal, or uniform distribution may lead to poor convergence for deeper networks; particularly with a variable number of nodes. Where by virtue of the number of nodes; the product of the weights in one layer may blow up, which in turn will blow up the response of the Network. Several clever schemes are thus employed too initialize the weights in a clever way, which are often specialized to some particular type of Neural Network. One such method is the Xavier initialization, proposed by \textcite{xavier}. In this method, the initial weights are sampled individually for each layer from a uniform distribution\footnote{As a sidenote, some sources suggest it as being sampled from a Gaussian instead. As is seemingly quite common in the ML literature there seemingly no standard practice with a lot of competing conventions. We however, opt to follow the original paper.} bounded by $\pm \sqrt{6/(j + k)}$, where $j, k$ denotes the number of neurons in the current and previous layers respectively. Thus, the magnitude of the initial weights are scaled down with respect to the size of $w^l_{jk}$, thus avoiding the aforementioned problem. Another type of initialization proposed by \textcite{he2015delving} is observed to perform particularly well of a ReLU type activation functions, which we will return to later. In He's initialization method, the weights are sampled from a standard normal distribution $\mathcal N(0, 1)$ scaled down by a factor $\sqrt{2/k}$, where $k$ denotes the number of neurons in the previous layer.
+As mentioned, at each neuron within the neural network we have an activation function $\sigma$, for which there exists many choices with different properties and domains in which they excel. For convenience, we have compiled a list of some of the commonly used ones in Table.~\ref{tab: activation functions}. Historically, the Sigmoid\footnote{Sometimes also referred to as logistic} and $\tanh$ have been popular choices, however in recent years ReLU and other similar activations have gained in popularity \cite{Aggarwall}.
+
+However, for the output activation function $\tilde\sigma$ one is a bit more restricted in choice, as an important requirement is that the output activation function must map to the entire range of the target data.
+
+\subsubsection{Weight \& Bias Initialization}
+\noindent
+For neural networks, particularly larger ones, the way in which the weights are initialized may contribute significantly to the convergence of the Network. Where in particular the somewhat naive approach by sampling all the weights in a constant fashion from some normal, or uniform distribution may lead to poor convergence for larger and deeper networks. Where by virtue of the number of nodes; the product of the weights in one layer may blow up, which in turn will blow up the activations of the Network, or conversely, the weights may be initialized as being too small for some parts of the network. Thus, several clever schemes are employed too initialize the weights in such a way that avoid this issue, often specialized to some particular type of Neural Network. One such method is the Xavier initialization, proposed by \textcite{xavier}. In this method, the initial weights are sampled individually for each layer from a uniform distribution\footnote{As a side-note, some sources suggest it as being sampled from a Gaussian instead. As is seemingly quite common in the ML literature there seemingly a lack standard practice with a lot of competing conventions. We thus opted for the safe route and follow the original paper.} bounded by $\pm \sqrt{6/(j + k)}$, where $j, k$ denotes the number of neurons in the current and previous layers respectively. Thus, the magnitude of the initial weights are scaled down with respect to the size of $w^l_{jk}$, thus avoiding the aforementioned problem. Another type of initialization proposed by \textcite{he2015delving} is observed to perform particularly well for ReLU type of activation functions. In He's initialization method, the weights are sampled from a standard normal distribution $\mathcal N(0, 1)$ scaled down by a factor $\sqrt{2/k}$, where $k$ denotes the number of neurons in the previous layer.
+
+For the initialization of the bias', a standard choice is to set them all to zero \textcite{Aggarwall}. However, for ReLU type activations it may in some cases be beneficial to add a small bias $~0.01$ to ensure that the neurons activate from the beginning, however, whether this is beneficial in general is not clear \cite{CS231n}. There are of course again a wide range of different techniques that may or may not increase the performance of your network, and as such, experimentation seems to be the key.
 
 \subsection{Neural Network applications}
 \subsubsection{Regression}
+\noindent
+Having established some of the general ideas surrounding a FFNN, we now turn to the applications, starting with regression, the process of constructing some model which maps some measured data $\pmb X$ to a model $\tilde{\pmb Y}$ in such a way that it accurately predicts the ground truth of measured outcomes $\pmb Y$. It turns out that FFNN with at least one hidden layer is in principle capable of modeling any type of functional outcome, as proved by \textcite{HORNIK1989359}. Where the basic idea comes from the fact that neurons may form complicated, nonlinear terms as opposed to standard regression techniques like the ones we studied previously in \cite{4155_project_1}.
 
+For regression type problems, a simple choice for the cost function used in the outer layer of the network is simply the square error \cite{Nielsen}
+
+\begin{equation}
+    C\qty(\pmb y, a^L) = \frac{1}{2}\sum_j \qty(a^L_j - y_j)^2
+\end{equation}
+which due to the arbitrary pre-factor yields the gradient
+\begin{equation}
+    \pdv{C}{a^L_j} = a^L_j - y_j
+\end{equation}
+in a particularly nice form. This cost function is then used in the backpropagation algorithm to efficiently perform the gradients of the weights and biases in the network as discussed previously.
 \subsubsection{Classification}
 
 \begin{table*}[]
