@@ -61,7 +61,7 @@ It turns out that doing SGD in this way generally leads to faster, and better co
 \noindent
 Yet another modification of the SGD consists of performing the SGD on random subsets $\pmb Y_{MB} \subset \pmb Y$, rather than individual points $\pmb y_i$. These subsets are often called \textit{Mini-Batches} (MB), and their introduction may again improve the performance of SGD. To elaborate, this is performed by randomly splitting $\pmb Y$ into a set of mini-batches where each subset has $\approx N_{B}$ elements\footnote{If $\pmb Y$ is not exactly divisible, one may simply distribute the extra $\pmb y_i$ equally among the batches}. GD is then performed on each of the subsets, updating the weights each time. Once the subset has been exhausted, $\pmb Y$ is again randomly sampled to construct another similar set of mini-batches, where each shuffling of the mini-batches constitutes an epoch of the algorithm.
 
-The choice of $N_{B}$ somewhat decided by trial and error and is also strongly linked to the choice of learning rate $\nu$. However, it is usually chosen as relatively small number relative to the full dataset as to yield the benefits of the SGD method. One may also, as discussed in this excellent lecture by \textcite{ManyBodyML} intuitively link SGD to statistical mechanics, with the ratio $\eta / N_{B} \propto T$; representing an "effective temperature". Thus having small mini-batch sizes corresponds to a high effective temperature; where the system will be able to explore a much larger portion of the parameter space. Then by either increasing $N_B$, or decreasing $\eta$ one may slowly lower the effective temperature; annealing the system into the global minima. For the full justification of this view; i refer the reader to \textcite{ManyBodyML}.
+The choice of $N_{B}$ somewhat decided by trial and error and is also strongly linked to the choice of learning rate $\nu$. However, it is usually chosen as relatively small number relative to the full dataset as to yield the benefits of the SGD method. One may also, as discussed in this excellent lecture by \textcite{ManyBodyML} intuitively link SGD to statistical mechanics, with the ratio $\eta / N_{B} \propto T$; representing an "effective temperature". Thus having small mini-batch sizes corresponds to a high effective temperature; where the system will be able to explore a much larger portion of the parameter space. Then by either increasing $N_B$, or decreasing $\eta$ one may slowly lower the effective temperature; annealing the system into the global minima. For the full justification of this view; we refer the reader to \textcite{ManyBodyML}.
 
 Common choices for $N_B$ is often in the order of $\sim 10-100$, with larger batches often yields diminishing returns in terms of the performance gain along with a larger computational cost. Further, choosing batch sizes as powers of 2 may yield slight performance gain by virtue of how computer hardware works \cite{Aggarwall}.
 
@@ -73,11 +73,11 @@ One such scheme is the inverse decay, where the learning rate evolves like
 \begin{equation}
     \eta\qty(t) = \frac{\eta_0}{1 + \gamma t}
 \end{equation}
-where $\eta_0$ is the initial learning rate, $t$ the current epoch and the decay rate $\gamma$ which controlls the rate at which the learning rate will decrease. Similarly; we may also evole the learning rate by as exponential decay as
+where $\eta_0$ is the initial learning rate, $t$ the current epoch and the decay rate $\gamma$ which controls the rate at which the learning rate will decrease. Similarly; we may also evolve the learning rate by as exponential decay as
 \begin{equation}
     \eta(t) = \eta_0 e^{-\gamma t}
 \end{equation}
-where the appropriate choice must be determined on a per-dataset basis as the convergence of SGD will vary wildly. An additional, much more involved technique is to run the SGD for a certain number of epochs, then manually readjusting the learning rate, either as a constant or by the above methods, then running for another set of epochs. Whilst this sort of technique where one manually hand-tunes the hyperparameters requires much attention from the user, it may yield good results and even enable some of the simpler schemes to outperform some of the more sophisticated, adaptive schemes \cite{zhang2018yellowfin}.
+where the appropriate choice must be determined on a per-dataset basis as the convergence of SGD will vary wildly. An additional, much more involved technique is to run the SGD for a certain number of epochs, then manually readjusting the learning rate, either as a constant or by the above methods, then running for another set of epochs. Whilst this sort of technique where one manually hand-tunes the hyper-parameters requires much attention from the user, it may yield good results and even enable some of the simpler schemes to outperform some of the more sophisticated, adaptive schemes \cite{zhang2018yellowfin}.
 
 \subsubsection{SGD Variants}
 \noindent
@@ -103,15 +103,31 @@ Neural Networks are a class of algorithms in which a set of nodes, often referre
 \begin{equation}
     a = \sigma\qty(w_1 a_1' + w_2 a_2' + \dots + w_n a_n' + b)
 \end{equation}
-where $w_i$, $a_i'$ denotes the weights and activations of the connected nodes, and $sigma$ the activation function of the node, for which is chosen differently depending on the problem at hand. Lastly, we have also introduced a bias, $b$, which simply shifts the activation of the Node. In the very simple case where the activation function is chosen to be the identity function, the bias term simply reduces to being the intercept.
+where $w_i$, $a_i'$ denotes the weights and activations of the connected nodes, and $\sigma$ the activation function of the node, which is chosen differently depending on the problem at hand. Lastly, we have also have a bias, $b$, which simply shifts the activation of the Node in the case of a binary activation, or tn the case where the activation function is chosen to be the identity function, the bias is simply the intercept.
 
-The simplest type of neural network is the \textit{Feed-Forward Neural Network}, which is a directed graph, consisting of layers where each neuron in the preceding layer is connected to each neuron in the following layer as depicted in Fig.~\ref{fig: NN Fig}, which is directed from left to right.
+The simplest type of neural network is the \textit{Feed-Forward Neural Network} (FFNN), which is a directed graph, consisting of layers where every neuron in the preceding layer is connected to every neuron in the following layer as depicted in Fig.~\ref{fig: NN Fig}, which is directed going from left to right.
 
-As the name may suggest, the input layer is where the input data starts out, before being fed forward through the hidden layers of the network, weighted in-between each node before it finally reaches the output layer, the final model. In a similar fashion to other methods of supervised learning, the neural network must first undergo a process of training to obtain
+As the name may suggest, the input layer is where the input data starts out, before being fed forward through the hidden layers of the network, weighted in-between each node before reaching the output layer, the final model. In a similar fashion to other methods of supervised learning, the neural network must first undergo a process of training to obtain a suitable set of weights and biases. This is done by optimizing the all of the weights and biases in the network wrt to a chosen cost function usually by SGD. However, due to the costly nature of evaluating all of these cost functions; an algorithm which cleverly exploits the chain rule of differentiation has been developed to very efficiently compute all of the gradients in the network in a process which is called backpropagation.Neural Networks and Deep Learning
 
 \subsubsection{Backpropagation}
 \noindent
-Start by computing the response of each of the neurons in the network by the Feed-Forward algorithm, starting with the first hidden layer
+We base our explanation of the backpropagation algorithm following more or less directly from \textcite{Nielsen} and \textcite{Mehta_2019}, referring the reader to those texts for the finer details and derivations of how the algorithm actually works, focusing instead on the computational aspects in the present texts. However, in short; the algorithm may be summarized as a clever use of the chain rule of differentiation.
+
+Before we start, we first define a few quantities central to the network. First, we have the set of weights connecting each node in the network
+\begin{equation}
+    \{w^{1}_{jk}, \dots, w_{jk}^L\}
+\end{equation}
+where in a somewhat sloppy notation the $j, k$ indices denote the number of neurons in the current and previous layers respectively, thus spanning a different range for each $l$. We also define the set of inputs
+\begin{equation}
+    \{z_j^1, \dots, z_j^L\}
+\end{equation}
+which again adheres to the same convention of $j$ denoting the number of neurons in the current layer. These inputs then gets fed into the activation function $\sigma(z_j^l)$ of their corresponding neurons yielding the set of activations
+\begin{equation}
+    \{a_j^1, \dots, a_j^L\}
+\end{equation}
+where notably the activation function used in the output layer may differ from the one used in the hidden layers. We denote this special, output activation function as $\tilde \sigma(z_j^L)$.
+
+We then start the backpropagation algorithm by first computing the response of each of the neurons in the network by the Feeding the input data forward in the network, starting with the first hidden layer, which is activated directly by the input data $X_p$ like
 \begin{align}\label{eqn: FeedForward Initial}
     \begin{split}
         z^1_j &= w^1_{jk}X_k + b^1_j \\
@@ -119,7 +135,7 @@ Start by computing the response of each of the neurons in the network by the Fee
     \end{split}
 \end{align}
 where we adopt the Einstein summation convention by summing over repeated indices.
-We then compute
+We then similarly compute
 \begin{align}
     \begin{split}
         z^l_{j} &= w^l_{jk}a^{l-1}_k + b^l_j \\
@@ -133,13 +149,15 @@ for hidden layers $l = 2, \dots, L$. Then, for the output layer we compute
         a^{L}_j &= \tilde\sigma(z^{L}_j)
     \end{split}
 \end{align}
-where $a^{L}_j$ is the predicted response, and $\tilde\sigma$ is the activation function for the output layer, which may differ from the activation function of the hidden layers.
+where $a^{L}_j$ is the predicted response, and $\tilde\sigma$ is the activation function for the output layer, which as mentioned may differ from the activation function used in the hidden layers.
 
 We then compute the error of the output as
-\begin{equation}
+\begin{equation}\label{eqn: delta L}
     \delta^{L}_j = \pdv{C}{a^{L}_{j}} \odot \tilde\sigma'(z^{L}_j)
 \end{equation}
-and backpropagate the error like
+where $\odot$ denotes the Hadamard product, which is a form of element-wise multiplication of vectors and matrices. It is also worth to note that Eqn.~\ref{eqn: delta L} implicitly assumes that the derivatives of the output activation function $\pdv{z_j}\sigma(z^l_i) = 0 \enspace \forall \enspace i\neq j$. Whilst this holds true for a wide variety of activation functions; it does not hold for the SoftMax, which we will return to later on when we look at classification.
+
+We then continue on by backpropagating the error like
 \begin{equation}
     \delta^{l}_j = \qty(\delta^{l+1}_{k}\qty(w^{l+1})^T_{kj}) \odot \sigma'(z^l_j)
 \end{equation}
@@ -153,11 +171,11 @@ We may then easily compute the gradients of the cost function wrt. the weights \
         \pdv{C}{b^l_j} &= \delta_j^l
     \end{split}
 \end{align}
-which are then used to update the weights and biases via gradient descent. Notably, we have not justified in any detail as to why this algorithm works, for which we refer the reader to \textcite{Mehta_2019}, \textcite{hastie}, or any other text on machine learning. However, in summary, it is all made possible by utilizing the chain rule.
+which are then used to update the weights and biases via gradient descent. Whilst this is in principle all there is to backpropagation, the way in which this method is performed requires some further modifications when solved on a computer.
 
 \subsubsection{Backpropagation with mini-batches}
 \noindent
-In order to efficiently perform backpropagation simultaneously across several inputs at once, we need to slightly adjust our algorithm such that we may take advantage of the fast and efficient linear algebra libraries that are available, like i.e Numpy.
+In order to efficiently perform backpropagation simultaneously across several inputs at once, we need to slightly adjust our algorithm such that we may take advantage of the fast and efficient linear algebra libraries that are available, like in for example Numpy.
 
 We then structure our input and output matrices adhering to the row-major storage of Numpy arrays by letting $X\in[M\times P], \enspace Y\in[M\times Q]$ where $M$ denotes the number of data points in the mini-batch and $P, Q$ the dimensionality of the input and output respectively. Explicitly, our data then undergoes the structure change
 
@@ -224,10 +242,11 @@ and similarly for layers $l = 2, \dots, L$ as
         \pdv{C}{b^l_{j}} &= \sum_m \delta_{mj}
     \end{split}
 \end{align}
-The derivatives are then used to update the weights and biases by gradient descent in the usual way.
+The derivatives are then used to update the weights and biases by gradient descent in the same way as before. One may also following the same logic optimize for column-major storage, as is used in languages like Fortran, MATLAB, Julia, etc.
 
 \subsubsection{Weight Initialization}
-
+\noindent
+For neural networks, particularly larger ones, the way in which the weights may contribute significantly to the convergence of the Network. Where in particular the somewhat naive approach by sampling all the weights in a constant fashion from some normal, or uniform distribution may lead to poor convergence for deeper networks; particularly with a variable number of nodes. Where by virtue of the number of nodes; the product of the weights in one layer may blow up, which in turn will blow up the response of the Network. Several clever schemes are thus employed too initialize the weights in a clever way, which are often specialized to some particular type of Neural Network. One such method is the Xavier initialization, proposed by \textcite{xavier}. In this method, the initial weights are sampled individually for each layer from a uniform distribution\footnote{As a sidenote, some sources suggest it as being sampled from a Gaussian instead. As is seemingly quite common in the ML literature there seemingly no standard practice with a lot of competing conventions. We however, opt to follow the original paper.} bounded by $\pm \sqrt{6/(j + k)}$, where $j, k$ denotes the number of neurons in the current and previous layers respectively. Thus, the magnitude of the initial weights are scaled down with respect to the size of $w^l_{jk}$, thus avoiding the aforementioned problem. Another type of initialization proposed by \textcite{he2015delving} is observed to perform particularly well of a ReLU type activation functions, which we will return to later. In He's initialization method, the weights are sampled from a standard normal distribution $\mathcal N(0, 1)$ scaled down by a factor $\sqrt{2/k}$, where $k$ denotes the number of neurons in the previous layer.
 
 \begin{table*}[]
 \caption{\label{tab: activation functions}Various Activation functions used in Neural Networks}
