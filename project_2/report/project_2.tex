@@ -248,6 +248,11 @@ The derivatives are then used to update the weights and biases by gradient desce
 \noindent
 For neural networks, particularly larger ones, the way in which the weights may contribute significantly to the convergence of the Network. Where in particular the somewhat naive approach by sampling all the weights in a constant fashion from some normal, or uniform distribution may lead to poor convergence for deeper networks; particularly with a variable number of nodes. Where by virtue of the number of nodes; the product of the weights in one layer may blow up, which in turn will blow up the response of the Network. Several clever schemes are thus employed too initialize the weights in a clever way, which are often specialized to some particular type of Neural Network. One such method is the Xavier initialization, proposed by \textcite{xavier}. In this method, the initial weights are sampled individually for each layer from a uniform distribution\footnote{As a sidenote, some sources suggest it as being sampled from a Gaussian instead. As is seemingly quite common in the ML literature there seemingly no standard practice with a lot of competing conventions. We however, opt to follow the original paper.} bounded by $\pm \sqrt{6/(j + k)}$, where $j, k$ denotes the number of neurons in the current and previous layers respectively. Thus, the magnitude of the initial weights are scaled down with respect to the size of $w^l_{jk}$, thus avoiding the aforementioned problem. Another type of initialization proposed by \textcite{he2015delving} is observed to perform particularly well of a ReLU type activation functions, which we will return to later. In He's initialization method, the weights are sampled from a standard normal distribution $\mathcal N(0, 1)$ scaled down by a factor $\sqrt{2/k}$, where $k$ denotes the number of neurons in the previous layer.
 
+\subsection{Neural Network applications}
+\subsubsection{Regression}
+
+\subsubsection{Classification}
+
 \begin{table*}[]
 \caption{\label{tab: activation functions}Various Activation functions used in Neural Networks}
 \setlength{\tabcolsep}{20pt}
