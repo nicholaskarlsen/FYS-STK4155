@@ -36,23 +36,45 @@
 \section{Introduction}
 
 \section{Theory}
-\subsection{Stochastic Gradient Descent}
+\subsection{Gradient Descent}
 \noindent
 Consider a cost function in the form
 \begin{equation}
     C(\pmb Y, \tilde{\pmb Y}(\pmb w)) = \frac{1}{N}\sum_{i=1}^{N}c_i(\pmb y_i, \tilde{\pmb y}(\pmb w)_i)
 \end{equation}
-which quantifies the error for some data set $\pmb Y = \left\{\pmb y_1, \dots, \pmb y_N\right\}$ with respect to a corresponding set of modeled data $\tilde{\pmb Y}(\pmb w) = \left\{\tilde{\pmb y_1}(\pmb w), \dots, \tilde{\pmb y}_N(\pmb w)\right\}$, where $\pmb w$ are denotes the free parameters of the model.
+which quantifies the error for some data set $\pmb Y = \left\{\pmb y_1, \dots, \pmb y_N\right\}$ with respect to a corresponding set of modeled data $\tilde{\pmb Y}(\pmb w) = \left\{\tilde{\pmb y_1}(\pmb w), \dots, \tilde{\pmb y}_N(\pmb w)\right\}$, where $\pmb w$ denotes the free parameters of the model.
 
-Since we can not in general expect to have a way of minimizing the cost analytically, we may in stead optimize it by gradient descent (GD), where the set of free parameters are incremented by
-\begin{equation}
+Since we can not in general expect to have a way of minimizing the cost analytically, we may in stead optimize it by gradient descent (GD), where the set of free parameters $\pmb w$ are initialized in some way, and then incremented by
+\begin{equation}\label{eqn: GD}
     \pmb w^{(k+1)} = \pmb w^{(k)} - \eta \nabla_{w}C\qty(\pmb Y, \tilde{\pmb Y}(\pmb w))
 \end{equation}
-until the cost function has reached a is found, where the parameter $\eta \in \mathbb R_{>0}$ denotes the learning rate. However, since we do not know a priori the shape of the space spanned by the cost function wrt. the parameters $\pmb w$, we can not tell whether the minima is indeed a global one, or simply a local minima.
+for either a set number of epochs or in practice, until $\norm{\pmb w^{(k+1)} - \pmb w^{(k)}}_2< \varepsilon$, some tolerance. We also have the parameter $\eta \in \mathbb R_{>0}$, often called the learning rate, which can either be constant, or change wrt. $k$.
 
-One attempt at remedying this problem is the so-called \textit{Stochastic Gradient Descent} (SGD), in which stochasticity is introduced to the gradient descent by splitting the data set $\pmb Y$ into randomly sampled subsets $\pmb Y_{MB}$ called \textit{mini-batches} and then performing (GD) on each subset. Limiting the data-set in this way has the effect of "flattening" the space for each iteration, thus lessening the chance of getting stuck in local minima. This process is then repeated for multiple "epochs", where for each epoch we re-draw another random set of mini-batches from $\pmb Y$.
+A notable, and very substantial drawback of GD is that it will always converge to a local minima for a given data set \& initial weights, which for a particularly complicated high dimensional parameter space can not be expected to correspond to the global minima in general. This issue, along with many others \cite[pp.15-16]{Mehta_2019} motivates modifications to the GD method.
 
+\subsubsection{Stochastic Gradient Descent}
+\noindent
+One attempt at remedying the problems of GD is the so-called \textit{Stochastic Gradient Descent} (SGD), in which stochasticity is introduced to the gradient descent by instead of performing GD on the entirety of $\pmb Y$, it is performed on individual, randomly sampled points $\pmb y_i$ with replacement, and updating the weights for each individual sample.
+It turns out that doing SGD in this way generally leads to faster, and better convergence compared to the regular GD, with the added benefit of being computationally faster. It is worth noting however that it is often observed that doing SGD without replacement can yield faster convergence, and is in practice often done this way. The exact reasoning behind this remaining an open question \cite{shamir2016withoutreplacement}\cite{pmlr-v97-nagaraj19a}. For simplicity, we have opted to conform to this norm and will be performing SGD without replacement.
 
+\subsubsection{SGD with Mini-Batches}
+\noindent
+Yet another modification of the SGD consists of performing the SGD on random subsets $\pmb Y_{MB} \subset \pmb Y$, rather than individual points $\pmb y_i$. These subsets are often called \textit{Mini-Batches} (MB), and their introduction may again improve the performance of SGD. To elaborate, this is performed by randomly splitting $\pmb Y$ into a set of mini-batches where each subset has $\approx N_{B}$ elements\footnote{If $\pmb Y$ is not exactly divisible, one may simply distribute the extra $\pmb y_i$ equally among the batches}. GD is then performed on each of the subsets, updating the weights each time. Once the subset has been exhausted, $\pmb Y$ is again randomly sampled to construct another similar set of mini-batches, where each shuffling of the mini-batches constitutes an epoch of the algorithm.
+
+The choice of $N_{B}$ somewhat decided by trial and error and is also strongly linked to the choice of learning rate $\nu$. However, it is usually chosen as relatively small number relative to the full dataset as to yield the benefits of the SGD method. One may also, as discussed in this excellent lecture by \textcite{ManyBodyML} intuitively link SGD to statistical mechanics, with the ratio $\eta / N_{B} \propto T$; representing an "effective temperature". Thus having small mini-batch sizes corresponds to a high effective temperature; where the system will be able to explore a much larger portion of the parameter space. Then by either increasing $N_B$, or decreasing $\eta$ one may slowly lower the effective temperature; "annealing" the system into a global/ground state. For the full justification of this view; i refer the reader to \textcite{ManyBodyML}.
+
+Common choices for $N_B$ is often in the order of $\sim 10-100$, with larger batches often yields diminishing returns in terms of the performance gain along with a larger computational cost. Further, choosing batch sizes as powers of 2 may yield slight performance gain by virtue of how computer hardware works \cite{Aggarwall}.
+
+\subsubsection{SGD Variants}
+\noindent
+Beyond the basic iteration defined by Eqn.~\ref{eqn: GD}, there exists a large number of alterations which in some way aim to improve the convergence of SGD. Some of which generally yield performance gains, whilst other may yield performance gains for particular types of problems. Perhaps the simplest of which is SGD with momentum (SGDM), which as the name suggests adds some parameter to the update rule which somehow attempts to respect the current rate at which the algorithm is traversing parameter space; speeding past shallow dips and slowing down for deep, narrow ones. Much akin to the physical quantity from which it is named. The update scheme may then be summarized by the following equations
+\begin{align}\label{eqn: SGDM}
+    \begin{split}
+        \Delta \pmb w^{(k)} &= p \Delta\pmb w^{(k-1)} - \eta \nabla_wC(\pmb Y, \tilde{\pmb Y}(\pmb w)) \\
+        \pmb w^{(k+1)} &= \pmb w^{(k)} + \Delta\pmb w^{(k)}
+    \end{split}
+\end{align}
+where the momentum $p$ is usually set in the interval $[0, 1]$.
 
 \begin{figure}[h!tb]
     \center
@@ -190,7 +212,7 @@ and similarly for layers $l = 2, \dots, L$ as
 \end{align}
 The derivatives are then used to update the weights and biases by gradient descent in the usual way.
 
-\subsubsection{Considerations when fitting Neural Networks}
+\subsubsection{Weight Initialization}
 
 
 \begin{table*}[]
@@ -240,6 +262,17 @@ As opposed to linear regression where the aim is to project data-points into som
 \end{figure}
 
 \section{Results \& Discussion}
+
+\begin{figure*}[h!tb]
+    \center
+    \subfloat{
+    \includegraphics[width=\columnwidth]{SGD_learning_rate.pdf}
+    }
+    \subfloat{
+    \includegraphics[width=\columnwidth]{SGD_learning_penalty.pdf}
+    }
+\end{figure*}
+
 \section{Conclusion}
 
 \onecolumngrid
