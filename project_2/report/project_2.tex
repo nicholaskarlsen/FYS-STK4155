@@ -65,6 +65,19 @@ The choice of $N_{B}$ somewhat decided by trial and error and is also strongly l
 
 Common choices for $N_B$ is often in the order of $\sim 10-100$, with larger batches often yields diminishing returns in terms of the performance gain along with a larger computational cost. Further, choosing batch sizes as powers of 2 may yield slight performance gain by virtue of how computer hardware works \cite{Aggarwall}.
 
+\subsubsection{Learning Rate Adjustment}
+\noindent
+As somewhat motivated by the intuition motivated in the previous section, it is often quite useful to be able to adjust the learning rate of SGD over the epochs, as this will in principle allow the algorithm to initially very rapidly explore the parameter space, prior to relaxing slowly into the (hopefully) global minima as the learning rate is decreased.
+
+One such scheme is the inverse decay, where the learning rate evolves like
+\begin{equation}
+    \eta\qty(t) = \frac{\eta_0}{1 + \gamma t}
+\end{equation}
+where $\eta_0$ is the initial learning rate, $t$ the current epoch and the decay rate $\gamma$ which controlls the rate at which the learning rate will decrease. Similarly; we may also evole the learning rate by as exponential decay as
+\begin{equation}
+    \eta(t) = \eta_0 e^{-\gamma t}
+\end{equation}
+
 \subsubsection{SGD Variants}
 \noindent
 Beyond the basic iteration defined by Eqn.~\ref{eqn: GD}, there exists a large number of alterations which in some way aim to improve the convergence of SGD. Some of which generally yield performance gains, whilst other may yield performance gains for particular types of problems. Perhaps the simplest of which is SGD with momentum (SGDM), which as the name suggests adds some parameter to the update rule which somehow attempts to respect the current rate at which the algorithm is traversing parameter space; speeding past shallow dips and slowing down for deep, narrow ones. Much akin to the physical quantity from which it is named. The update scheme may then be summarized by the following equations
