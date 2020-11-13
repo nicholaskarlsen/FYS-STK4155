@@ -260,22 +260,26 @@ For neural networks, particularly larger ones, the way in which the weights are 
 
 For the initialization of the bias', a standard choice is to set them all to zero \textcite{Aggarwall}. However, for ReLU type activations it may in some cases be beneficial to add a small bias $~0.01$ to ensure that the neurons activate from the beginning, however, whether this is beneficial in general is not clear \cite{CS231n}. There are of course again a wide range of different techniques that may or may not increase the performance of your network, and as such, experimentation seems to be the key.
 
-\subsection{Neural Network applications}
-\subsubsection{Regression}
-\noindent
-Having established some of the general ideas surrounding a FFNN, we now turn to the applications, starting with regression, the process of constructing some model which maps some measured data $\pmb X$ to a model $\tilde{\pmb Y}$ in such a way that it accurately predicts the ground truth of measured outcomes $\pmb Y$. It turns out that FFNN with at least one hidden layer is in principle capable of modeling any type of functional outcome, as proved by \textcite{HORNIK1989359}. Where the basic idea comes from the fact that neurons may form complicated, nonlinear terms as opposed to standard regression techniques like the ones we studied previously in \cite{4155_project_1}.
+%%%% Subsumed,
 
-For regression type problems, a simple choice for the cost function used in the outer layer of the network is simply the square error \cite{Nielsen}
+%\subsection{Neural Network applications}
+%\subsubsection{Regression}
+%\noindent
+%Having established some of the general ideas surrounding a FFNN, we now turn to the applications, starting with regression, the process of constructing some model which maps some measured data $\pmb X$ to a model $\tilde{\pmb Y}$ in such a way that it accurately predicts the ground truth of measured outcomes $\pmb Y$. It turns out that FFNN with at least one hidden layer is in principle capable of modeling any type of functional outcome, as proved by \textcite{HORNIK1989359}. Where the basic idea comes from the fact that neurons may form complicated, nonlinear terms as opposed to standard regression techniques like the ones we studied previously in \cite{4155_project_1}.
+%
+%For regression type problems, a simple choice for the cost function used in the outer layer of the network is simply the square error \cite{Nielsen}
+%
+%\begin{equation}
+%    C\qty(\pmb y, a^L) = \frac{1}{2}\sum_j \qty(a^L_j - y_j)^2
+%\end{equation}
+%which due to the arbitrary pre-factor yields the gradient
+%\begin{equation}
+%    \pdv{C}{a^L_j} = a^L_j - y_j
+%\end{equation}
+%in a particularly nice form. This cost function is then used in the backpropagation algorithm to efficiently perform the gradients of the weights and biases in the network as discussed previously.
+%\subsubsection{Classification}
 
-\begin{equation}
-    C\qty(\pmb y, a^L) = \frac{1}{2}\sum_j \qty(a^L_j - y_j)^2
-\end{equation}
-which due to the arbitrary pre-factor yields the gradient
-\begin{equation}
-    \pdv{C}{a^L_j} = a^L_j - y_j
-\end{equation}
-in a particularly nice form. This cost function is then used in the backpropagation algorithm to efficiently perform the gradients of the weights and biases in the network as discussed previously.
-\subsubsection{Classification}
+%%%%%%End of subsumption. 
 
 \begin{table*}[]
 \caption{\label{tab: activation functions}Various Activation functions used in Neural Networks}
@@ -293,6 +297,11 @@ in a particularly nice form. This cost function is then used in the backpropagat
     $\sigma(x) = \frac{1}{1 + e^{-x}}$  &
     $\sigma'(x) =\sigma(x)\qty(1-\sigma(x))$ &
     $(0, 1)$
+    \\ \hline
+    SoftMax &
+    $\sigma(x_j) = \frac{e^{x_j}}{\sum_k e^{x_k}}$  &
+    $\frac{\partial \sigma(x_k)}{\partial x_j} = \sigma(z_k) (\delta_{kj} - \sigma(z_j))$ &
+    $(0, 1)$    
     \\ \hline
     Tanh &
     $\sigma(x) = \tanh(x)$  &
@@ -312,19 +321,18 @@ in a particularly nice form. This cost function is then used in the backpropagat
 \end{tabular}
 \end{table*}
 
-%%%%%%%%%%%%%%% TEM: My draft begins here:
 
 
-\subsubsection{Application of Neural Networks}
+\subsection{Application of Neural Networks}
 
-Having presented the general description of how neural networks work, it is now time to briefly look at the specifics of how they are applied to different types of problems. In this article we deal with two distinct tasks:, the approximation of continuous functions, and classification. These tasks are both highly amenable to treatment by neural networks, but require somewhat different setups for the input and output layers.
+Having presented the general description of how neural networks work, it is now time to briefly look at the specifics of how they are applied to different types of problems. In this article we deal with two distinct tasks:, the approximation of continuous functions, and classification. These tasks are both amenable to treatment by neural networks, but require somewhat different setups for the input and output layers.
 
 For function approximations the task is simply to map, for sample $m$,  a set of input dependent variables $\mathbf{x}_m$ to their corresponding function-value $f(\mathbf{x}_m) = y_m$. The input to the neural network will then, for $N$ samples with $p$ dependent variables, just be the $[N,p]$-dimensional matrix of the dependent variables. The output will equally simply be the $[N,1]$-dimensional matrix of predicted values $\tilde{y}_m$, and the activation function for the output layer can be taken as the identity function, i.e. $\tilde{y}_m = a^L_{m,j=1}$. This corresponds to $p$ input nodes and a single output node in the network architecture. The most natural cost-function for this kind of output is, of course, the mean-squared error (MSE), where $y_m$ are the actual response-values of the samples:
 \begin{equation}
 \label{eq:cost_mse}
 C = \frac{1}{N} \sum_m (\tilde{y}_m - y_m)^2 = \frac{1}{N} \sum_m (a^L_{m,j=1} - y_m)^2
 \end{equation}
-which is straightforward to differentiate with respect to the output activation functions when computing the error in the output layer $\delta^L$.for the backpropagation-algorithm.
+which is straightforward to differentiate with respect to the output activation functions when computing the error in the output layer $\delta^L$.for the backpropagation-algorithm. It turns out that FFNN with at least one hidden layer is in principle capable of modeling any type of functional outcome, as proved by \textcite{HORNIK1989359}. Where the basic idea comes from the fact that neurons may form complicated, nonlinear terms as opposed to standard regression techniques like the ones we studied previously in \cite{4155_project_1}.
 
 In classification the task is, for sample $m$, to go from some $p$ predictor variables $x_{mp}$ to determining whether or not the sample belongs to a certain class $k$. The input to the neural network will then be, for $N$ samples with $p$ predictors, the $[N,p]$-dimensional matrix of the predictors. Thus requiring $p$ input nodes in the network.
 
@@ -417,7 +425,8 @@ one can obtain (after some simple, but tedious, applications of the chain rule) 
 
 which is a matrix of dimensions $[p+1, K]$. Having obtained the gradient, one can then optimize the regression parameters $\mathbf{\beta}$ by minimizing the cost-function using e.g. SGD. When the regression parameters have been optimized, the model \ref{eq:logreg_pred_matrix} is ready to predict the class memberships of the input data. If one wishes, one can easily include $l_2$-regularization by simply adding a term $\sum_{i} \sum_{j} \frac{\lambda}{2} \beta_{i,j}$ to the cost-function; that simply corresponds to adding the matrix $\lambda \mathbf{\beta}$ to equation \ref{eq:logreg_grad}. As a technical note, without further tweaking this will include the potentially undesirable penalizing of the intercept coefficients $\mathbf{\beta}_{0k}$. So long as the penalty $\lambda$ is sufficiently small we do not expect this to produce any problems, but we do acknowledge that our current implementation does not avoid this intercept penalization when regularization is turned on.
 
-%%%%%%%%%%%%%%%%%% TEM: My draft ends here.
+Finally, we remark that our performance metric for the classification problem is not the values of the cost-functions, as it is for function-approximation. Rather we take, for both the neural network and logistic method, the so-called accuracy-score. The accuracy score is very simply defined as the number of correctly classified samples in a set divided by the total number of samples in the set. We, quite intuitively,  interpret the class $k$ corresponding to the largest the probability $\tilde{Y}_{nk}$ for a given sample $n$ to be the sample's class predicted by our models.
+
 
 \section{Results \& Discussion}
 \subsection{Testing hyper parameters in SGD}
