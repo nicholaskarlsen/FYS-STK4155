@@ -61,7 +61,7 @@ A notable, and very substantial drawback of GD is that it will always converge t
 One attempt at remedying the problems of GD is the so-called \textit{Stochastic Gradient Descent} (SGD), in which stochasticity is introduced to the gradient descent by instead of performing GD on the entirety of $\pmb Y$, it is performed on individual, randomly sampled points $\pmb y_i$ with replacement, and updating the weights for each individual sample.
 It turns out that doing SGD in this way generally leads to faster, and better convergence compared to the regular GD, with the added benefit of being computationally faster. It is worth noting however that it is often observed that doing SGD without replacement can yield faster convergence, and is in practice often done this way. The exact reasoning behind this remaining an open question \cite{shamir2016withoutreplacement}\cite{pmlr-v97-nagaraj19a}. For simplicity, we have opted to conform to this norm and will be performing SGD without replacement.
 
-\subsubsection{SGD with Mini-Batches}
+\subsubsection{SGD with Mini-Batches\label{sect: SGD with mini-batches}}
 \noindent
 Yet another modification of the SGD consists of performing the SGD on random subsets $\pmb Y_{MB} \subset \pmb Y$, rather than individual points $\pmb y_i$. These subsets are often called \textit{Mini-Batches} (MB), and their introduction may again improve the performance of SGD. To elaborate, this is performed by randomly splitting $\pmb Y$ into a set of mini-batches where each subset has $\approx N_{B}$ elements\footnote{If $\pmb Y$ is not exactly divisible, one may simply distribute the extra $\pmb y_i$ equally among the batches}. GD is then performed on each of the subsets, updating the weights each time. Once the subset has been exhausted, $\pmb Y$ is again randomly sampled to construct another similar set of mini-batches, where each shuffling of the mini-batches constitutes an epoch of the algorithm.
 
@@ -420,22 +420,36 @@ which is a matrix of dimensions $[p+1, K]$. Having obtained the gradient, one ca
 %%%%%%%%%%%%%%%%%% TEM: My draft ends here.
 
 \section{Results \& Discussion}
+\subsection{Testing hyper parameters in SGD}
+\noindent
+In order to get an understanding of the way in which the wide variety of hyper-parameters work in SGD, and by extension FFNN, we studied the evolution of the mean squared error (MSE) of a $6$th degree polynomial modeling the Franke Function wrt. the number of epochs the SGD had ran for. As a benchmark, we used the results found in our previous work \cite{4155_project_1} where the Franke function was studied rigorously using ordinary least squares (OLS), Ridge and LASSO regression, where in particular the OLS solution was found to perform optimally for our model of choice, and will thus be used as the primary benchmark.
 
-\begin{figure*}[h!tb]
+In order to facilitate a direct comparison, we prepared our data in a similar way by sampling 500 random points from a uniform distribution spanning $[0, 1]$, the domain of the Franke function. We then centered the response of the data by subtracting the mean, and scaled the data using sci-kits \lstinline{StandardScaler()} utility \cite{scikit-learn}. The dataset was then randomly split into a training and testing set at a $80:20$ ratio, where the testing set was set aside to measure the performance of the model for each epoch of the SGD using the MSE, which we previously found to be the most useful metric \cite{4155_project_1}.
+
+We begin our analysis by turning to Fig.~\ref{fig: SGD learning rate}, in which we have studied the effects of learning rates, as well as the addition of momentum and varying the size of mini-batches.
+\begin{figure}[h!tb]
     \center
-    \subfloat{
     \includegraphics[width=\columnwidth]{SGD_learning_rate.pdf}
-    }
-    \subfloat{
+    \caption{\label{fig: SGD learning rate}Franke Function modeled as a 6th degree polynomial using an OLS type cost function optimized using Stochastic Gradient Descent with momentum for varying learning rates benchmarked against the analytic solution}
+\end{figure}
+Firstly, we look at all 4 plots in isolation, ignoring any comparison. We very clearly the effect of adjusting the learning rates $\eta$, leading to a quicker convergence. But notably; for $\eta = 10^{-2}$ in the case of $p=0.75$ and MB size $=32$, we see that once converged; the MSE becomes somewhat unstable, likely fluctuating around a minima. Here, the intuition is that whilst the SGD has been able to locate a local minima, it is unable to dive deeper into the minima due to its fixed learning rate, which if we draw the comparison of a ball rolling up and down in a quadratic well with a frictionless surface, it will never be able to settle further down the well for a given, constant energy. Where in this case, the learning rate is analogous to the energy of the ball. Therefore; once converged in such a way, lowering the learning rate is a necessity in order to converge to a lower MSE.
+
+We then compare the vertically neighboring figures in Fig.~\ref{fig: SGD learning rate} by which may observe directly the result of varying the mini-batch size from $32$ to $128$, where the latter yields a more rapid initial convergence, but also a slightly more unstable exploration of the parameter space once converged, as exemplified by the SGDM plots on the left. More or less the same effect that we observe from varying increasing the learning rates, somewhat increasing our faith in the intuition proposed by \textcite{ManyBodyML}.
+
+We compare the horizontally neighboring figures in Fig.~\ref{fig: SGD learning rate}, where we observe the effect of adding momentum. We see observe that the general effect of adding momentum is an increase in the convergence rate. In particular, for $\eta = 10^{-3}$ in the cases with $MB = 32$, we see the clear benefit; by yielding a quick and relatively stable convergence compared to the same learning rate without momentum.
+
+We then turn our attention to Fig.~\ref{fig: SGD penalty}, where we observe the effect of adding a penalty parameter $\lambda$ to the cost function which punishes the weights, $\pmb w$ for having a large $L^2$ norm akin to Ridge regression \cite{4155_project_1}.
+\begin{figure}
     \includegraphics[width=\columnwidth]{SGD_learning_penalty.pdf}
-    }
-\end{figure*}
+    \caption{\label{fig: SGD penalty}Franke Function modeled as a 6th degree polynomial using an OLS type cost function optimized using Stochastic Gradient Descent with momentum $p=0.75$ for varying $L^2$ penalties $\lambda$ benchmarked against the analytic solution}
+\end{figure}
+
 
 \section{Conclusion}
 
 %%%%%%% Conclusion
 
-With the massive flexibility and freedom granted by the direct dearth of hyper-parameters to consider, it is very difficult to make definite statements about which method is the optimal onefor each problem. There may very well be far superior combinations of hyper-parameters, both in terms of speed and accuracy, than those we have tested for all the methods we have investigated in this paper. We can, however, highlight some considerations and tendencies based on our experiences throughout this work. 
+With the massive flexibility and freedom granted by the direct dearth of hyper-parameters to consider, it is very difficult to make definite statements about which method is the optimal onefor each problem. There may very well be far superior combinations of hyper-parameters, both in terms of speed and accuracy, than those we have tested for all the methods we have investigated in this paper. We can, however, highlight some considerations and tendencies based on our experiences throughout this work.
 
 % Regression type: main findings: learning rate, activation functions, regularization, convergence time and predictive performance
 
