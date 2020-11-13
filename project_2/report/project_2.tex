@@ -279,7 +279,7 @@ For the initialization of the bias', a standard choice is to set them all to zer
 %in a particularly nice form. This cost function is then used in the backpropagation algorithm to efficiently perform the gradients of the weights and biases in the network as discussed previously.
 %\subsubsection{Classification}
 
-%%%%%%End of subsumption. 
+%%%%%%End of subsumption.
 
 \begin{table*}[]
 \caption{\label{tab: activation functions}Various Activation functions used in Neural Networks}
@@ -301,7 +301,7 @@ For the initialization of the bias', a standard choice is to set them all to zer
     SoftMax &
     $\sigma(x_j) = \frac{e^{x_j}}{\sum_k e^{x_k}}$  &
     $\frac{\partial \sigma(x_k)}{\partial x_j} = \sigma(z_k) (\delta_{kj} - \sigma(z_j))$ &
-    $(0, 1)$    
+    $(0, 1)$
     \\ \hline
     Tanh &
     $\sigma(x) = \tanh(x)$  &
@@ -462,6 +462,11 @@ The task is then to develop a model which can classify and assign a label to an 
 \begin{equation*}
     \{0, 1, 2, 3, 4, 5, 6, 7, 8, 9\}
 \end{equation*}
+\begin{figure}[h!tb]
+    \center
+    \includegraphics[width=\columnwidth]{MNIST_example.pdf}
+    \caption{\label{fig: MNIST example}Examples from the MNIST data set}
+\end{figure}
 
 \section{Conclusion}
 

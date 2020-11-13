@@ -206,10 +206,10 @@ class FeedForwardNeuralNetwork:
     def __initialize_biases(self):
         for i in range(self.N_layers):
             # self.biases[i] = np.random.randn(self.network_shape[i])
-            self.biases[i] = np.zeros(self.network_shape[i])  # + 0.01
+            self.biases[i] = np.zeros(self.network_shape[i]) #+ 0.01
         # Last hidden layer -> Output layer
         # self.biases[-1] = np.random.randn(self.output_dim)
-        self.biases[-1] = np.zeros(self.output_dim)  # + 0.01
+        self.biases[-1] = np.zeros(self.output_dim) #+ 0.01
 
         return
 
@@ -360,7 +360,6 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
         activation_out=ActivationFunctions.Softmax,
         momentum=0,
         lambd=None,
-        init_method=None,
         init_weights_method=None,
         learning_rate_decay=None,
     ):
