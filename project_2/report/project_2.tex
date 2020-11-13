@@ -29,6 +29,10 @@
 \date{\today}
 
 \begin{abstract}
+%%%% ABSTRACT
+In this paper we implement from scratch a fully connected Feed-Forward Neural Network (FFNN) and investigate its application to function approximation and classification. To wit, we study the prediction/reconstruction of a set of terrain data from a subset of data-points as an example of function approximation, and we study the classification of hand-written digits 0-9 from the MNIST-dataset. As it is in a sense the motor of our neural network, we also look in some detail at the properties of the Stochastic Gradient Descent (SGD) method and its variant siblings. The performance of our network on the reconstruction of terrain data is compared and contrasted with previous results obtained via linear-regression methods. For the classification case the comparison is made with results from a logistic-regression based classifier that we also implement from scratch. We find that our FFNN fairly easily gives excellent results for the classification problem, and that it is significantly more accurate than our logistic-regression classifier; at least without further fine-tuning of the logistic classifier . For the terrain-predictions we observe, for some setups, sizable improvements over the previous results from linear-regression, but only after rather extensive fine-tuning of the network's hyper-parameters
+%%%%%%%
+
 \end{abstract}
 
 \maketitle
@@ -411,18 +415,9 @@ one can obtain (after some simple, but tedious, applications of the chain rule) 
 \nabla_{\mathbf{\beta}} C(\mathbf{\beta}) = \frac{1}{N} \mathbf{X}^T (\mathbf{\tilde{Y}} - \mathbf{Y} )
 \end{equation}
 
-which is a matrix of dimensions $[p+1, K]$. Having obtained the gradient, one can then optimize the regression parameters $\mathbf{\beta}$ by minimizing the cost-function using e.g. SGD. When the regression parameters have been optimized, the model \ref{eq:logreg_pred_matrix} is ready to predict the class memberships of the input data. If one wishes, one can easily include $l_2$-regularization by simply adding a term $\sum_{i} \sum_{j} \frac{\lambda}{2} \beta_{i,j}$ to the cost-function; that simply corresponds to adding the matrix $\lambda \mathbf{\beta}$ to equation \ref{eq:logreg_grad}. As a technical note, without further tweaking this will include the somewhat undesirable penalizing of the intercept coefficients $\mathbf{\beta}_{0k}$. So long as the penalty $\lambda$ is sufficiently small we do not expect this to produce any problems, but we do acknowledge that our current implementation does not avoid this intercept penalization when regularization is turned on.
+which is a matrix of dimensions $[p+1, K]$. Having obtained the gradient, one can then optimize the regression parameters $\mathbf{\beta}$ by minimizing the cost-function using e.g. SGD. When the regression parameters have been optimized, the model \ref{eq:logreg_pred_matrix} is ready to predict the class memberships of the input data. If one wishes, one can easily include $l_2$-regularization by simply adding a term $\sum_{i} \sum_{j} \frac{\lambda}{2} \beta_{i,j}$ to the cost-function; that simply corresponds to adding the matrix $\lambda \mathbf{\beta}$ to equation \ref{eq:logreg_grad}. As a technical note, without further tweaking this will include the potentially undesirable penalizing of the intercept coefficients $\mathbf{\beta}_{0k}$. So long as the penalty $\lambda$ is sufficiently small we do not expect this to produce any problems, but we do acknowledge that our current implementation does not avoid this intercept penalization when regularization is turned on.
 
 %%%%%%%%%%%%%%%%%% TEM: My draft ends here.
-
-\subsection{Logistic Regression}
-\noindent
-As opposed to linear regression where the aim is to project data-points into some linear basis as to model some continuous function, logistic regression instead aims to project data unto some binary response. This may in turn be used classify whether or not some particular data point fits into some category. Thus, we wish to fit our data unto some function $f : \mathbb R \rightarrow [0, 1]$.
-\begin{figure}[h!tb]
-    \center
-    \input{../figs/logistic.tex}
-    \caption{The logistic function}
-\end{figure}
 
 \section{Results \& Discussion}
 
@@ -437,6 +432,18 @@ As opposed to linear regression where the aim is to project data-points into som
 \end{figure*}
 
 \section{Conclusion}
+
+%%%%%%% Conclusion
+
+With the massive flexibility and freedom granted by the direct dearth of hyper-parameters to consider, it is very difficult to make definite statements about which method is the optimal onefor each problem. There may very well be far superior combinations of hyper-parameters, both in terms of speed and accuracy, than those we have tested for all the methods we have investigated in this paper. We can, however, highlight some considerations and tendencies based on our experiences throughout this work. 
+
+% Regression type: main findings: learning rate, activation functions, regularization, convergence time and predictive performance
+
+% Classification type: main findings: learning rate, activation functions, regularization, convergence time and predictive performance
+
+In summary, if you are pressed for time and want something that very easily just works, and works pretty well, your best bet seems to be linear-regression methods for predicting terrain-type data. There is improvement to be had from neural networks, but the cost in time spent tuning is steep. For the classification case both the neural network and logistic regression are fairly easy to get going well, but the neural network does have a marked performance with minimal mucking around required.
+
+%%%%%%%%%
 
 \onecolumngrid
 \bibliography{bibfile}
