@@ -12,4 +12,4 @@
 
 **SGD_test.ipynb** - Notebook containing the code used to produce the results included in the report pertaining to stochastic gradient descent
 
-**Terrain_grid_search.ipynb ** - Notebook which performs a cross-validated grid search of parameters for a the Neural network modeling terrain data using Sigmoid, ReLU and LeakyReLU. However, nothing of interest was found due to the rather computationally expensive nature of this approach limiting the runtime.
+**Terrain_grid_search.ipynb** - Notebook which performs a cross-validated grid search of parameters for a the Neural network modeling terrain data using Sigmoid, ReLU and LeakyReLU. However, nothing of interest was found due to the rather computationally expensive nature of this approach limiting the runtime.
