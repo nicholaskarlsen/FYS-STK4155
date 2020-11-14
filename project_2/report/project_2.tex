@@ -337,7 +337,7 @@ For the initialization of the bias', a standard choice is to set them all to zer
 
 
 
-\subsection{Application of Neural Networks}
+\subsection{Application of Neural Networks\label{sect: application of Neural Networks}}
 
 Having presented the general description of how neural networks work, it is now time to briefly look at the specifics of how they are applied to different types of problems. In this article we deal with two distinct tasks:, the approximation of continuous functions, and classification. These tasks are both amenable to treatment by neural networks, but require somewhat different setups for the input and output layers.
 
@@ -470,17 +470,21 @@ We then turn our attention to Fig.~\ref{fig: SGD penalty}, where we observe the 
 
 \subsection{Classification of the MNIST dataset}
 \noindent
-We now turn to our analysis of the MNIST dataset \cite{lecun2010mnist}, consisting of $28\times28$ pixel images of handwritten numbers. The images also come with labels, which lets us easily
-
-The task is then to develop a model which can classify and assign a label to an image as one of the 10 possible classes
+We now turn to our analysis of the MNIST dataset \cite{lecun2010mnist}, consisting of $70\,000$ images each $28\times28$ pixels of labeled handwritten numbers, a small subset of which is shown in Fig.~\ref{fig: MNIST example}.
+\begin{figure}[h!tb]
+    \center
+    \includegraphics[width=.75\columnwidth]{MNIST_example.pdf}
+    \caption{\label{fig: MNIST example}Examples from the MNIST data set}
+\end{figure}
+We wish to develop a model which can classify and assign a label to a previously unseen image as one of the 10 possible classes
 \begin{equation*}
     \{0, 1, 2, 3, 4, 5, 6, 7, 8, 9\}
 \end{equation*}
-\begin{figure}[h!tb]
-    \center
-    \includegraphics[width=\columnwidth]{MNIST_example.pdf}
-    \caption{\label{fig: MNIST example}Examples from the MNIST data set}
-\end{figure}
+by the use of a FFNN and logistic regression, then to compare the performance of these two approaches. We randomly split the complete dataset into sets of training and testing data at a ratio of 80:20 respectively. Further, the labels are converted to one-hot form.
+
+\subsubsection{FFNN Classification}
+\noindent
+We started by building a FFNN based classification model using the ReLU and Sigmoid activation functions for a single-layer neural network with varying number of neurons and the SoftMax activation function on the output layer, with its corresponding cost function Eqn.~\ref{eq:softmax_loss} as discussed in Sect.~\ref{sect: application of Neural Networks}. We then trained the network for 100 epochs with $\eta = 0.01$ and no penalty or momentum, monitoring the MSE wrt. testing set for each epoch. The result is seen in Fig.~\ref{fig: single layer MNIST relu and sigmoid}.
 
 \begin{figure}[h!tb]
     \subfloat[ReLU]{
@@ -491,6 +495,7 @@ The task is then to develop a model which can classify and assign a label to an 
     }
     \caption{\label{fig: single layer MNIST relu and sigmoid}FFNN trained on the MNIST dataset for a single-layer NN of various sizes for using both the ReLU (a) and Sigmoid (b) activation functions in the hidden layer and SoftMax in the outer layer. Notably, the final score for ReLU with 100 neurons was $\approx 0.978$}
 \end{figure}
+The first thing we observe is the relatively large jump in accuracy score when going from 10 neurons to 30, then much less so in the subsequent steps. We postulate then that 10 neurons in a single layer structure simply isn't able to recreate the full feature set of the data set, but the network gains freedom to do so, there is diminishing returns from adding further neurons.
 
 \section{Conclusion}
 
