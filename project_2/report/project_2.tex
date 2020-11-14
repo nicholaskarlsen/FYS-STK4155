@@ -466,7 +466,23 @@ We then turn our attention to Fig.~\ref{fig: SGD penalty}, where we observe the 
     \includegraphics[width=\columnwidth]{SGD_learning_penalty.pdf}
     \caption{\label{fig: SGD penalty}Franke Function modeled as a 6th degree polynomial using an OLS type cost function optimized using Stochastic Gradient Descent with momentum $p=0.75$ for varying $L^2$ penalties $\lambda$ benchmarked against the analytic solution}
 \end{figure}
+We curiously enough observe behaviour much akin to that of increasing the learning rate, $\nu$, where the MSE very quickly converges to a floor before it starts to destabilize, oscillating rather rapidly. We may understand this by considering the way in which the $L^2$ penalty enters into the cost function like
+\begin{equation}
+    C(\pmb Y, \tilde{\pmb Y}) = \frac{1}{N}\sum c_i\qty(\pmb y_i, \tilde{\pmb y}(\pmb w)_i) + \lambda \norm{\pmb w}_2
+\end{equation}
+which will affect the update rule in the GD given by Eqn.~\ref{eqn: GD} somewhat. Firstly, it will fulfill its job by preventing the $L^2$ norm of $\pmb w$ of blowing up by adding an extra negative term in the update rule which will grow proportionally with $\norm{\pmb w}_2$. However, this additional term will not completely vanish in the cases where $\pmb w$ is "well behaved", and will thus serve as a roughly constant term continuously perturbing he weights irrespective of the gradient of the cost function. As such, we may expect a similar effect as we found in our previous report \cite{4155_project_1}, in which the penalty serves as an excellent tool in preventing over-fitting thus yielding a stable MSE, but also does not yield the most precise models. As such; we are tempted to believe that the penalty parameters are mostly suited for unsupervised methods, in which one does not closely monitor the model as we have been doing.
+%
+Lastly we discuss the usage of variable learning rates. During our experimentation of these, with both SGD and later on with FFNN, we found little gain in our performance. Quite the opposite, we did not find it worthwhile tweaking yet another hyper-parameter and ultimately opted for a hand-tuning strategy where in we manually adjusted the learning rate depending based on MSE/Epoch plots as we have looked at in this section. However, qualitatively the benefit of decaying the learning is clear based on the results we have seen in this section, an
 
+Lastly, we discuss the usage of variable learning rates. During our experimentation both with the SGD and later on with FFNN, we did not find it particularly beneficial to employ either the inverse or exponential decay schemes as discussed in the theory section. We believe this is ultimately comes down to the fact that we aren't training our models for a particularly high number of epochs, as this would make the analysis much more computationally expensive and we are ultimately interested in the overarching behaviour of the models. However, based on our findings in this present section with the SGD, we can definitely appreciate the benefit of training a network for at an initially higher rate, gradually lowering the rate as the model converges leading to and overall faster training process. This also lead to us employing a hand-tuning strategy for trying to optimize our models in the following sections, where we let the model train for a set number of epochs, monitoring its performance and tweaking the learning rate up/down depending on the change recent change in MSE.
+
+\subsection{Building a FFNN model for terrain data}
+\noindent
+As a way to explore the performance of our FFNN on a regression problem, we opted to revisit the terrain data which we studied previously in \cite{4155_project_1}. In short summary, we studied a $1801\times1801$ section of terrain data which we down-sampled to every 40th pixel. We then parametrized the horizontal and vertical pixels as $x, y \in [0, 1]$, split the dataset into a 80:20 split of training and testing data. Our final models fitting the data as a 25th degree polynomial using OLS, Ridge and LASSO regression is reproduced here for convenience in Fig.\ref{fig:3d_terrain PROJECT 1}, where the best MSE scores where found to be in the range $\approx 2 \cdot 10^{4} - 3 \cdot 10^{4}$.
+% Discuss the grid search
+As our first approach, we performed a grid search over various combinations of penalties and learning rates with $k=5$ fold cross validation, training the network for $500$ epochs each time for Sigmoid, ReLU and LeakyReLU activation functions for $50\times50$ hidden layers, with the identity function as the activation of the output. We found this approach to be rather uninformative in constructing a good model with the behaviour across the different learning rates for a given penalty being rather uniform. Given that this approach was rather computationally expensive, we opted to abandon it in favor hand tuning the learning rate. Nevertheless, our efforts is documented in the \lstinline{Terrain_grid_search.ipynb} jupyter notebook found in the notebooks directory of our github.
+
+% Discuss the hand-tuned fine search
 
 \subsection{Classification of the MNIST dataset}
 \noindent
@@ -549,7 +565,19 @@ In summary, if you are pressed for time and want something that very easily just
 
 \onecolumngrid
 \bibliography{bibfile}
-\newpage
 \twocolumngrid
-\appendix
+
+
+\begin{figure*}[h!tb]
+    \center
+    \subfloat[][]{
+    \includegraphics[width=\columnwidth]{TERRAIN_FIT_3D_PROJ_1.pdf}
+    }
+    \subfloat[][]{
+    \includegraphics[width=\columnwidth]{TERRAIN_FIT_CONTOUR_PROJ_1.pdf}
+    }
+    \caption{Main results for the terrain data in Project one, where the terrain data was modeled as a 25th order polynomial using OLS, Ridge and LASSO regression with optimized penalty parameters compared with the true terrain data}
+    \label{fig:3d_terrain PROJECT 1}
+\end{figure*}
+
 \end{document}
