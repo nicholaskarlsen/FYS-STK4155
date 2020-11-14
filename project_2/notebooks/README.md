@@ -1,8 +1,10 @@
 ## Explenation of notebooks
 
 **LeakyRELU_production.ipynb** - The notebook which was used to produce the best hand-tuned model for the terrain data using a neural network with the Leaky ReLU activation function.
+
 **Sigmoid_production.ipynb** - Same as above, but with Sigmoid as the activation function.
-**RELU_production_bestFFNN.ipynb ** - Same as above, but with ReLU as the activation function. This was the best overall model that we included in the report, the rest being ommited (and instead presented in the above two notebooks)
+
+**RELU_production_bestFFNN.ipynb** - Same as above, but with ReLU as the activation function. This was the best overall model that we included in the report, the rest being ommited (and instead presented in the above two notebooks)
 
 **Logreg.ipynb** - Notebook used to produce a model for classifying the MNIST dataset using logistic regression with SGD.
 
