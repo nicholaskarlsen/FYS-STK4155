@@ -42,13 +42,13 @@ In this paper we implement from scratch a fully connected Feed-Forward Neural Ne
 
 Neural networks are among the most hyped techniques in modern machine learning. Being that they are extremely flexible and applicable to a wide range of problems from general function approximations to all sorts of classification tasks, this is hardly surprising. The blessing of flexibility can, however, be a curse in disguise as it gives rise to veritably vast range of hyper-parameters that must be tuned to the specific problems at hand. They have great potential, but the art of applying them optimally can at times appear akin to black magic.
 
-In the present work we implement from scratch a Feed-Forward Neural Network (FFNN), aiming to explore its application both to linear-regression type problems and to classification tasks. We hope to gain some sense for the relative importance and the general effects of the various hyper-parameters the network can take in. 
+In the present work we implement from scratch a Feed-Forward Neural Network (FFNN), aiming to explore its application both to linear-regression type problems and to classification tasks. We hope to gain some sense for the relative importance and the general effects of the various hyper-parameters the network can take in.
 
 In somewhat simple terms, one can consider neural networks to be a collection of various weighting parameters that combine the inputs to the network in complicated non-linear ways to produce a predictive output. In order for the network to make useful predictions, it must be trained. That is, its weights must be optimized in some problem-specific way. In our present case, this optimization/training is driven by Stochastic Gradient Descent (SGD) methods. In a certain sense the neural network can be thought of as a car frame, translating the work of the SGD engine into movement/improved predictions. As such we will begin with testing the tuning of SGD (and some of its myriad siblings) applied to a simple linear-regression type problem where we have analytical solutions for the optimal model parameters. The goal is to gain insights into the properties of the SGD-type engines, which hopefully can guide our investigations of the full networks.
 
-Armed with insights from the investigation of the SGD-methods, we turn to study the application of our neural network to a linear-regression type problem, namely the terrain-prediction considered in \cite{4155_project_1}. We vary a select set, guided by the results for the SGD-methods, of the network's hyper-parameters and try to find combinations which give better predictions than those obtained in \cite{4155_project_1}. The flexibility of neural networks can be expected to better predict such highly non-linear functions than regular (polynomial) linear-regression; but finding the combinations of hyper-parameters which actually perform better than plain old linear-regression is not trivial. 
+Armed with insights from the investigation of the SGD-methods, we turn to study the application of our neural network to a linear-regression type problem, namely the terrain-prediction considered in \cite{4155_project_1}. We vary a select set, guided by the results for the SGD-methods, of the network's hyper-parameters and try to find combinations which give better predictions than those obtained in \cite{4155_project_1}. The flexibility of neural networks can be expected to better predict such highly non-linear functions than regular (polynomial) linear-regression; but finding the combinations of hyper-parameters which actually perform better than plain old linear-regression is not trivial.
 
-Subsequently we test the application of our network on a classification problem, specifically the classification of hand-written digits 0-9 from the MNIST data set. Once again we tune our network in an effort to obtain the best possible performance we can manage. In order to compare the neural network's results with another machine learning method, we then implement a simple multinomial logistic regression and apply it to the same classification problem. 
+Subsequently we test the application of our network on a classification problem, specifically the classification of hand-written digits 0-9 from the MNIST data set. Once again we tune our network in an effort to obtain the best possible performance we can manage. In order to compare the neural network's results with another machine learning method, we then implement a simple multinomial logistic regression and apply it to the same classification problem.
 
 Finally we summarize and compare how the different methods perform, both in terms of accuracy and computational speed, but also in terms of the time cost and difficulty for the user to find reasonable hyper-parameters. We do not aim to make definite statements as to which method is "best" since that very much varies from case-to-case; both in terms of how the various aspects like accuracy and computational speed are valued, but also in terms of how the various hyper-parameters relate to the problem at hand. Instead we wish point out some tendencies of a hopefully somewhat general nature, which can serve as a guidelines for which methods one might prefer to try first for a given case.
 
@@ -480,6 +480,16 @@ The task is then to develop a model which can classify and assign a label to an 
     \center
     \includegraphics[width=\columnwidth]{MNIST_example.pdf}
     \caption{\label{fig: MNIST example}Examples from the MNIST data set}
+\end{figure}
+
+\begin{figure}[h!tb]
+    \subfloat[ReLU]{
+    \includegraphics[width=.5\columnwidth]{MNIST_layers_ReLU.pdf}
+    }
+    \subfloat[Sigmoid]{
+    \includegraphics[width=.5\columnwidth]{MNIST_layers_Xavier.pdf}
+    }
+    \caption{\label{fig: single layer MNIST relu and sigmoid}FFNN trained on the MNIST dataset for a single-layer NN of various sizes for using both the ReLU (a) and Sigmoid (b) activation functions in the hidden layer and SoftMax in the outer layer. Notably, the final score for ReLU with 100 neurons was $\approx 0.978$}
 \end{figure}
 
 \section{Conclusion}
