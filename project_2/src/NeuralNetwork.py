@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# import SGD
 import ActivationFunctions
 import CostFunctions
 import SGD
@@ -26,7 +25,7 @@ class FeedForwardNeuralNetwork:
         init_weights_method=None,
         learning_rate_decay=None,
     ):
-        """Models implements a Feed Forward Neural Network
+        """Implements a Feed Forward Neural Network
 
         NOTE: Elaborate as to how this class can also handle
         the binary classification problem. Use sigmoid as
@@ -53,10 +52,10 @@ class FeedForwardNeuralNetwork:
             lambd (Float): Hyper parameter corresponding to a L2 penalty in the cost function akin
                 to that of Ridge regression.
 
-            init_method (String): Parameter determining the type of initialization to be used for
+            init_weights_method (String): Parameter determining the type of initialization to be used for
                 the weights. If none, or an invalid value is choosen it will default to sampling
                 weights from the standard normal distribution N(0,1).
-                Available options are: [xavier, he]
+                Available options are: ["xavier", "he"]
 
             learning_rate_decay (String): Choose which method to decay the learning rate.
                 'inverse' or 'exponential'. If none are choosen; keep it constant.
@@ -130,7 +129,7 @@ class FeedForwardNeuralNetwork:
         # Note: These arrays will be re-used. But avoid re-initialization duiring
         # each itteration to reduce time spent on garbage collection
 
-        # Assign method
+        # Assign learning decay method
         if learning_rate_decay == "exponential":
             self.learning_rate_func = self.__exponential_decay
         elif learning_rate_decay == "inverse":
@@ -184,32 +183,26 @@ class FeedForwardNeuralNetwork:
         sample_bound = lambda j, k: np.sqrt(6) / np.sqrt(j + k)
         k = self.input_dim
         j = self.network_shape[0]
-        self.weights[0] = np.random.uniform(
-            -sample_bound(j, k), sample_bound(j, k), size=(j, k)
-        )
+        self.weights[0] = np.random.uniform(-sample_bound(j, k), sample_bound(j, k), size=(j, k))
         # Hidden layers
         for i in range(1, self.N_layers):  # l = 1,..., L-1
             k = self.network_shape[i - 1]
             j = self.network_shape[i]
-            self.weights[i] = np.random.uniform(
-                -sample_bound(j, k), sample_bound(j, k), size=(j, k)
-            )
+            self.weights[i] = np.random.uniform(-sample_bound(j, k), sample_bound(j, k), size=(j, k))
         # Last hidden layer -> Output layer
         k = self.network_shape[-1]
         j = self.output_dim
-        self.weights[-1] = np.random.uniform(
-            -sample_bound(j, k), sample_bound(j, k), size=(j, k)
-        )
+        self.weights[-1] = np.random.uniform(-sample_bound(j, k), sample_bound(j, k), size=(j, k))
 
         return
 
     def __initialize_biases(self):
         for i in range(self.N_layers):
             # self.biases[i] = np.random.randn(self.network_shape[i])
-            self.biases[i] = np.zeros(self.network_shape[i]) #+ 0.01
+            self.biases[i] = np.zeros(self.network_shape[i])  # + 0.01
         # Last hidden layer -> Output layer
         # self.biases[-1] = np.random.randn(self.output_dim)
-        self.biases[-1] = np.zeros(self.output_dim) #+ 0.01
+        self.biases[-1] = np.zeros(self.output_dim)  # + 0.01
 
         return
 
@@ -251,9 +244,9 @@ class FeedForwardNeuralNetwork:
 
         # Backpropogate the error from l = L-1,...,1
         for l in range(self.N_layers - 1, -1, -1):
-            self.error[l] = (
-                self.error[l + 1] @ self.weights[l + 1]
-            ) * self.activation.evaluate_derivative(self.z[l])
+            self.error[l] = (self.error[l + 1] @ self.weights[l + 1]) * self.activation.evaluate_derivative(
+                self.z[l]
+            )
 
         self.cost_weight_gradient[0] = self.error[0].T @ X_mb
         self.cost_bias_gradient[0] = np.sum(self.error[0], axis=0)
@@ -270,6 +263,10 @@ class FeedForwardNeuralNetwork:
         return
 
     def __feed_forward_output(self, X_out):
+        """
+        Don't need to store all of the activations when making predictions, so created a "duplicate"
+        of feed forward method that is used specifically for this purpose
+        """
         z_out = X_out @ self.weights[0].T + self.biases[0]
         a_out = self.activation.evaluate(z_out)
         # Feed Forward
@@ -307,9 +304,7 @@ class FeedForwardNeuralNetwork:
                 # k = np.random.randint(M)
                 X_mb = self.X[mb[i]]
                 Y_mb = self.Y[mb[i]]
-                M = X_mb.shape[
-                    0
-                ]  # Size of each minibach (NOT constant, see SGD.minibatch)
+                M = X_mb.shape[0]  # Size of each minibach (NOT constant, see SGD.minibatch)
                 # Feed-Forward to compute all the activations
                 self.__feed_forward(X_mb, M)
                 # Back-propogate to compute the gradients
@@ -320,15 +315,9 @@ class FeedForwardNeuralNetwork:
                 # Update the weights and biases using gradient descent
                 for l in range(self.N_layers + 1):
                     # Change of weights
-                    dw = (
-                        self.weights[l] * self.momentum
-                        - lr / M * self.cost_weight_gradient[l]
-                    )
+                    dw = self.weights[l] * self.momentum - lr / M * self.cost_weight_gradient[l]
                     # Change of bias
-                    db = (
-                        self.biases[l] * self.momentum
-                        - lr / M * self.cost_bias_gradient[l]
-                    )
+                    db = self.biases[l] * self.momentum - lr / M * self.cost_bias_gradient[l]
                     # Update weights and biases
                     self.weights[l] += dw
                     self.biases[l] += db
@@ -339,6 +328,7 @@ class FeedForwardNeuralNetwork:
         return a_out
 
     def score(self, y_test, X_test, metric="default"):
+        # Compute the MSE (or R2) of the model wrt. testing data X_test (input), y_test (output)
         y_test_model = self.predict(X_test)
 
         if metric == "r2":
@@ -363,11 +353,21 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
         init_weights_method=None,
         learning_rate_decay=None,
     ):
-        # NOTE: remove activation & activation out
+        """
+        Specialized FFNN that performs classification using either SoftMax or sigmoid activations,
+        where the backpropogation method has been overwritten to do this efficiently (see report).
+
+        Note: Because of some rather odd behaviour of python when it comes to utilizing overwritten
+            methods properly; we copy-pasted the train and feedforward methods into this class,
+            as a quick and dirty fix. These two methods are thus unchanged.
+
+        For documentation of all the parameters; please refer to the superclass.
+        """
 
         # Pre-proccess output data to onehot form
         Y_processed, labels = self.preprocess_classification_data(Y, return_labels=True)
         self.labels = labels
+
         # Let the constructor of the superclass handle everything else
         super().__init__(
             X,
@@ -379,7 +379,7 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
             momentum=momentum,
             lambd=lambd,
             init_weights_method=init_weights_method,
-            learning_rate_decay=learning_rate_decay
+            learning_rate_decay=learning_rate_decay,
         )
         return
 
@@ -410,14 +410,14 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
             self.error[l] = np.zeros([M, self.network_shape[l]])
         self.error[-1] = np.zeros([M, self.output_dim])
 
-        # Compute the error at the output
+        # Compute the error at the output (This line is specialized in the override! see report)
         self.error[-1] = self.a[-1] - Y_mb
 
         # Backpropogate the error from l = L-1,...,1
         for l in range(self.N_layers - 1, -1, -1):
-            self.error[l] = (
-                self.error[l + 1] @ self.weights[l + 1]
-            ) * self.activation.evaluate_derivative(self.z[l])
+            self.error[l] = (self.error[l + 1] @ self.weights[l + 1]) * self.activation.evaluate_derivative(
+                self.z[l]
+            )
 
         self.cost_weight_gradient[0] = self.error[0].T @ X_mb
         self.cost_bias_gradient[0] = np.sum(self.error[0], axis=0)
@@ -447,9 +447,7 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
                 # k = np.random.randint(M)
                 X_mb = self.X[mb[i]]
                 Y_mb = self.Y[mb[i]]
-                M = X_mb.shape[
-                    0
-                ]  # Size of each minibach (NOT constant, see SGD.minibatch)
+                M = X_mb.shape[0]  # Size of each minibach (NOT constant, see SGD.minibatch)
                 # Feed-Forward to compute all the activations
                 self.__feed_forward(X_mb, M)
                 # Back-propogate to compute the gradients
@@ -460,15 +458,9 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
                 # Update the weights and biases using gradient descent
                 for l in range(self.N_layers + 1):
                     # Change of weights
-                    dw = (
-                        self.weights[l] * self.momentum
-                        - lr / M * self.cost_weight_gradient[l]
-                    )
+                    dw = self.weights[l] * self.momentum - lr / M * self.cost_weight_gradient[l]
                     # Change of bias
-                    db = (
-                        self.biases[l] * self.momentum
-                        - lr / M * self.cost_bias_gradient[l]
-                    )
+                    db = self.biases[l] * self.momentum - lr / M * self.cost_bias_gradient[l]
                     # Update weights and biases
                     self.weights[l] += dw
                     self.biases[l] += db
@@ -484,6 +476,7 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
         return a_labels
 
     def score(self, y_test, X_test):
+        # Compute the accuracy score of the model wrt. testing data X_test (input), y_test (output)
         y_test_model = self.predict(X_test)
         return sum(np.equal(y_test, y_test_model)) / len(y_test)
 
@@ -533,59 +526,3 @@ class FFNNClassifier(FeedForwardNeuralNetwork):
             labels (array) - labels corresponding to the onehot form of Y
         """
         return labels[np.argmax(Y, axis=1)]
-
-
-if __name__ == "__main__":
-    from sklearn.model_selection import train_test_split
-    from FrankeFunction import *
-    import linear_regression
-
-    # NOTE: NN is meant to be magical black box that takes
-    # (x, y) -> z. Why bother with an arbitrary design matrix itermediary step?
-
-    # x = np.random.uniform(0, 1, 500)
-    # y = np.random.uniform(0, 1, 500)
-    N = 500
-    xy = np.random.uniform(0, 1, [N, 2])
-    z = FrankeFunction(xy[:, 0], xy[:, 0])
-    z = z.reshape(-1, 1)
-
-    xy_train, xy_test, z_train, z_test = train_test_split(xy, z, test_size=0.2)
-
-    # deg = 6
-    # X = linear_regression.design_matrix_2D(x, y, deg)
-
-    # Define the network
-    FFNN = FeedForwardNeuralNetwork(
-        X=xy_train,
-        Y=z_train,
-        cost=CostFunctions.SquareError,
-        activation=ActivationFunctions.Sigmoid,
-        activation_out=ActivationFunctions.LeakyReLU,
-        network_shape=[50, 50],
-    )
-
-    FFNN.train(N_minibatches=32, learning_rate=0.02, n_epochs=1000)
-    z_test_prediction = FFNN.predict(xy_test)
-
-    print(sum((z_test - z_test_prediction) ** 2) / N)
-
-    # xv = np.random.uniform(0, 1, 50)
-    # yv = np.random.uniform(0, 1, 50)
-    # zv = FrankeFunction(x, y)
-    # zv = z.reshape(-1,1)
-    # X = linear_regression.design_matrix_2D(x, y, deg)
-
-    """
-    X = np.random.randn(1000)
-    X = X.reshape(-1, 1)
-    Y = X * 2
-
-
-    FFNN = FeedForwardNeuralNetwork(X=X, Y=Y, cost=CostFunctions.SquareError,
-        activation=ActivationFunctions.ID, activation_out=ActivationFunctions.ID,
-        network_shape = [1]
-        )
-
-    FFNN.train(N_minibatches=32, learning_rate=0.001, n_epochs=10000)
-    """

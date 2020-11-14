@@ -52,18 +52,18 @@ def logreg(x, y, M, init_w, n_epochs, learning_rate, momentum, lambd=None):
             # Pick out a random mini-batch index
             k = np.random.randint(M)
             # compute gradient with random minibatch
-            X, Y = x[mb[k]] , y[mb[k]]
+            X, Y = x[mb[k]], y[mb[k]]
             # Probabilities from Softmax:
-            prob = np.exp(X @ w)/np.sum(np.exp(X @ w),axis=1,keepdims=True)
+            prob = np.exp(X @ w) / np.sum(np.exp(X @ w), axis=1, keepdims=True)
 
-            #cost_function = -np.sum(Y * np.ln(prob)) gives:
+            # cost_function = -np.sum(Y * np.ln(prob)) gives:
             grad = X.T @ (prob - Y)
 
             # Add l2 penalty:
             if lambd != None:
-                grad += 2*lambd * w
+                grad += 2 * lambd * w
 
             # increment weights
-            dw = momentum * dw - learning_rate * grad/X.shape[0]
+            dw = momentum * dw - learning_rate * grad / X.shape[0]
             w = w + dw
     return w

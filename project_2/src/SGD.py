@@ -154,6 +154,10 @@ def RMSprop(x, y, M, init_w, n_epochs, learning_rate, forgetting_factor, cost_gr
 
 
 if __name__ == "__main__":
+    """
+    Some very early testing
+    """
+
     np.random.seed(123)
     x = np.random.uniform(0, 1, 500)
     y = np.random.uniform(0, 1, 500)

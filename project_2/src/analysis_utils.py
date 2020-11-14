@@ -36,6 +36,12 @@ def CrossValidation(X, y, score_func, k_folds):
     return score
 
 
+"""
+Functions which generates functions that score their respective methods for usage with the
+CrossValidation function above
+"""
+
+
 def generate_SGDM_scorefunc(M, init_w, n_epochs, learning_rate, momentum, cost_gradient, *lambd):
     def SGDM_score_func(X_training, y_training, X_test, y_test):
         weights = SGD.SGDM(

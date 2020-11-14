@@ -1,12 +1,18 @@
 import numpy as np
 
-# Wrap all the activation functions in classes with static methods
+"""
+Wrap all the activation functions in classes with static method, in that way we can simply feed
+the class to the FeedForwardNeuralNet checking that the input class is a subclass of the
+ActivationFunction interface, making it trivial to test new activation functions without
+having to tweak the Neural network class.
+"""
 
 
 class ActivationFunction:
     @staticmethod
     def evaluate(x):
         pass
+
     @staticmethod
     def evaluate_derivative(x):
         pass
@@ -14,20 +20,22 @@ class ActivationFunction:
     def __repr__(self):
         pass
 
+
 class Softmax(ActivationFunction):
     @staticmethod
     def evaluate(x):
-        return np.exp(x)/np.sum(np.exp(x),axis=1,keepdims=True)
+        return np.exp(x) / np.sum(np.exp(x), axis=1, keepdims=True)
 
     @staticmethod
     def evaluate_derivative(x):
         # Not complete, this only gives da(zj)/dzj. Also needs cross-terms
         # da(zk)/dzj. Not used in current implementations.
-        softmax_eval = np.exp(x)/np.sum(np.exp(x),axis=1,keepdims=True)
-        return softmax_eval - softmax_eval**2
+        softmax_eval = np.exp(x) / np.sum(np.exp(x), axis=1, keepdims=True)
+        return softmax_eval - softmax_eval ** 2
 
     def __repr__(self):
         return "Softmax"
+
 
 class ReLU(ActivationFunction):
     @staticmethod
@@ -53,6 +61,7 @@ class LeakyReLU(ActivationFunction):
 
     def __repr__(self):
         return "LeakyReLU"
+
 
 class ID(ActivationFunction):
     @staticmethod
@@ -103,7 +112,7 @@ class Tanh(ActivationFunction):
 
     @staticmethod
     def evaluate_derivative(x):
-        return 1 - np.tanh(x)**2
+        return 1 - np.tanh(x) ** 2
 
     def __repr__(self):
         return "Tanh"
