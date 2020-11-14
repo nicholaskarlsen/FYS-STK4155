@@ -497,6 +497,31 @@ We started by building a FFNN based classification model using the ReLU and Sigm
 \end{figure}
 The first thing we observe is the relatively large jump in accuracy score when going from 10 neurons to 30, then much less so in the subsequent steps. We postulate then that 10 neurons in a single layer structure simply isn't able to recreate the full feature set of the data set, but the network gains freedom to do so, there is diminishing returns from adding further neurons.
 
+%%%%% Logreg results and analysis
+\subsubsection{Classification with Logistic Regression}
+
+For our logistic-regression implementation we do a very similar analysis of the MNIST data. We once again use a 80/20 train/test-split and investigate the effect of various hyper-parameters on the obtained accuracy score for 100 epochs. Fig. \ref{fig:logreg_learning_rate} shows the score of the test set for the indicated choices of hyper-parameters, with the notable absence of any regularization penalty. The only noteworthy change in setup from the neural network is how we initialize the regression parameters $\mathbf{\beta}$. In the interest of simplicity we simply initialize them according to a standard normal distribution.We once again see that, for the better combinations of parameters, the performance fairly rapidly reaches fairly good scores, around 0.90 in these cases, before plateauing. Even the best combinatios have not yet fully converged, but the convergence rate rapidly slows down significantly; indicating that many, many more iterations are required to match the performance of our neural network, if it can be matched at all. Though not shown here (but see the logreg notebook in the test folder at \cite{4155_repo}), we have compared our results with the default logistic-regression classifier in sci-kit, and found nearly identical performance. Furthermore, the small discrepancy we did find vanishes completely when we downscale our $\mathbf{\beta}$-initialization, yielding a score of $\approx$ 0.92 as the best case after 100 epochs. It is eminently imaginable that further tuning could improve on this, but as it stands this is significantly worse than what we achieve with our neural network.
+
+
+\begin{figure}
+    \includegraphics[width=\columnwidth]{logreg_learning_rate.pdf}
+    \caption{\label{fig:logreg_learning_rate}Accuracy score on the test set for our logistic-regression method applied to the MNIST data set as a function of epochs run, for the indicated hyper-parameters and no regularization penalty.}
+\end{figure}
+
+
+We also take a look at the effects of adding a regularization parameter to our better choices of learning rates and minibatch-sizes. Fig. \ref{fig:logreg_regularization} shows the accuracy score on the test set for 100 epochs, using the indicated hyper-parameters such as the regularization parameters $\lambda$ and learning rates $\eta$, notably not adding a momentum hyper-parameter. We see that the regularization penalty does a remarkable job of killing the learning, keeping the results very stable around the result of the first epoch. Not shown here (but available for verification in the logreg notebook at \cite{4155_repo}), we find that the addition of a momentum term of 0.75 does make our best combinations immediately (i.e. already after just one epoch) start, and stay stable, at an accuracy score of $\approx$ 0.90-0.92, consistent with the default performance of sci-kit's logistic-regression classifier. 
+
+In summary, we find that logistic-regression classifiers are capable of very quickly getting quite reasonable (accuracy score on test set of $\approx$ 0.91) performance, but that further refinement is slow as molasses without further fine-tuning. Meanwhile our neural network can fairly easily achieve a significantly better performance in the same number of epochs. The only advantage of the logistic-regression classifier seems to be that it can pretty much start (after one epoch of training) at close to its best performance when using regularization and momentum, while the neural network does require som epochs of training before it really gives superior performance.
+
+
+\begin{figure}
+    \includegraphics[width=\columnwidth]{logreg_regularization.pdf}
+    \caption{\label{fig:logreg_regularization}Accuracy score on the test set for our logistic-regression method applied to the MNIST data set as a function of epochs runs for the indicated hyper-parameters and no momentum.}
+\end{figure}
+
+%%%%%%%% End logreg results and analysis
+
+
 \section{Conclusion}
 
 %%%%%%% Conclusion
