@@ -82,7 +82,25 @@ class DiffEqNeuralNetwork(FeedForwardNeuralNetwork):
                 # Back-propogate to compute the gradients
                 self.__backpropogation(X_mb, M)
 
+                # update the learning rate using the choosen rate using the chosen method
+                lr = self.learning_rate_func(learning_rate, decay_rate)
+                # Update the weights and biases using gradient descent
+                for l in range(self.N_layers + 1):
+                    # Change of weights
+                    dw = self.weights[l] * self.momentum - lr / M * self.cost_weight_gradient[l]
+                    # Change of bias
+                    db = self.biases[l] * self.momentum - lr / M * self.cost_bias_gradient[l]
+                    # Update weights and biases
+                    self.weights[l] += dw
+                    self.biases[l] += db
+
 		return
+
+	def train_ADAM(self):
+		pass
+
+	def __call__(self, X, P):
+		return 
 
 
 if __name__ == '__main__':

@@ -80,11 +80,11 @@ We then move on to the temporal part, $G(t)$, which we write as
 \end{equation}
 which we immediately recognize as having a general solution
 \begin{equation}
-    G(t) = c_n e^{-n\pi t / L}
+    G(t) = c_n e^{-n^2\pi^2 t / L^2}
 \end{equation}
 Thus, $u(x, t)$ is solved by a superposition of the discrete set of eigenfunctions
 \begin{equation}
-    u_n\qty(x, t) = \sum_{n=1}^{\infty} c_n \sin\qty(\frac{n\pi x}{L}) e^{-n\pi t / L}
+    u_n\qty(x, t) = \sum_{n=1}^{\infty} c_n \sin\qty(\frac{n\pi x}{L}) e^{-n^2\pi^2 t / L^2}
 \end{equation}
 with initial condition
 \begin{equation}
@@ -100,7 +100,7 @@ if we set the initial condition $f(x) = \sin(\pi x)$ and fix $L = 1$, we get coe
 \end{equation}
 we thus have an analytical solution for the Heat equation with boundary conditions $u(0, t) = u(L, t) = 0$, $L = 1$, and initial condition $u(x, 0) = \sin(\pi x)$ as
 \begin{equation}
-    u(x, t) = \sin\qty(\pi x) e^{-\pi t}
+    u(x, t) = \sin\qty(\pi x) e^{-\pi^2 t}
 \end{equation}
 a plot of which for $t \in [0, 1]$ is shown in Fig.~\ref{fig: heat eqn analytic}.
 \begin{figure}[h!tb]
