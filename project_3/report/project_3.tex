@@ -34,9 +34,26 @@
 \section{Introduction}
 
 \section{Theory \& Methods}
+
+\subsection{Solving Differential Equations with Neural Networks}
+\noindent
+In general, a ordinary differential equation (ODE) may be written in the form
+\begin{equation}
+    F \qty[x, u(x), u'(x), u''(x), \dots, g^{(n)}(x)] = 0
+\end{equation}    
+where $u(x)$ denotes the solution of the ODE. One may then propose a trial solution $u_t(x,P)$ in the form
+\begin{equation}
+    u_{t}(x, P) = u_{bc}(x) + u_{nn}(x)N(x, P) 
+\end{equation}
+where $u_{bc}(x), u_{nn}(x)$ are functions which enforce the boundary conditions of the ODE and $N(x, P)$ is a neural network with independent variables denoted by $P = \{W\},\{\pmb b\}$, the weights and biases in the network respectively.. In order to optimize $N(x, P)$ such that $u_t(x)$ yields a solution of the ODE, we define the cost function by the $L^2$ norm of $F$ as
+\begin{equation}
+    \mathcal C\qty[u\qty(x)] = \frac{1}{N} \sum_{i=1}^{N}\qty(F\qty[x, u(x_i), u'(x_i), \dots, u^{(n)}(x_i)])^2
+\end{equation}
+where we have discretized as $x \rightarrow \{x_1, x_2 ,\dots, x_{N}\}$. We can then construct a Feed-Forward Neural network with $L-1$ hidden layers which for each itteration updates the weights and biases of the network wrt. to the current trial solution $u_t(x)$ evaluated with the cost function. See \cite{4155_project_2}
+
 \subsection{The Heat Equation}
-\noindent 
-In physics, the Heat equation models how the temperature of some material $u\qty(\pmb r, t)$ evolves over time by the partial differential equation (PDE)
+
+As our first example we investigate the application of Neural Networks for solving the so-called Heat Equation. In physics, the Heat equation models how the temperature of some material $u\qty(\pmb r, t)$ evolves over time by the partial differential equation (PDE)
 \begin{equation}
     \pdv{u}{t} = c^2\nabla^2 u 
 \end{equation}
@@ -46,6 +63,9 @@ This may be reduced to a one dimensional problem, modelling i.e a thin, insulati
     \pdv{u}{t} = \pdv[2]{u}{x}
 \end{equation}
 where we have also for simplicity set $c^2 = 1$. We may then solve this analytically with boundary conditions $u\qty(0, t) = u\qty(L,t) = 0$ and initial condition $u(x, 0) = f(x)$.
+
+\subsubsection{Solving the Heat Equation analytically}
+\noindent 
 
 We start by making the assumption that $u(x, t)$ is separable, giving 
 \begin{equation}
@@ -108,29 +128,19 @@ a plot of which for $t \in [0, 1]$ is shown in Fig.~\ref{fig: heat eqn analytic}
     \caption{\label{fig: heat eqn analytic}}
 \end{figure}
 
-\subsection{Forward-Euler}
+\subsubsection{Solving the Heat Equation through a simple Finite-Difference scheme}
+
+While we in this case were able to obtain a simple analytic solution to the differential equation, that is generally not possible for most PDEs so numerical methods must be used instead. The simplest, though neither the most accurate nor the most stable, class of numerical methods for solving PDEs are the so-called explicit finite-difference schemes. The main idea consists of dividing the computational domain into a set of grid points, and discretizing the differential equations to obtain relations between the function values at those grid-points. 
+
+The distinction between explicit and implicit schemes is, of course, that with an explicit scheme the values at the next grid points can be explicitly calculated from the previous grid points so that given the boundary conditions one obtains a rule for calculating the function values of the whole domain one step at the time. Oppositely, implicit schemes give the value at a grid-point as a function of both that grid-point's value and the values of the previous grid-points thus requiring the (usually numerical) solution of a linear system of equations for each grid-point. The benefit of implicit methods is that they usually have more lax restrictions on how the grid-points must be spaced in order to maintain stability of the solution.
+
+For the case at hand one rewrites %% u(x_i,t_i) = (u(x_i-1,t_i-1) - 2*u(x_i,t_i-1) + u(x_i+1,t_i-1) * dt/dx2. First setup grid, then discretize du/dx2 into (u(x_i-1)-2*u(x_i) + u(x_i+1))/dx2 and du/dt = (u(t_i) - u(t_i-1))/dt. Move around these two equations and you get the formula. Can be rewritten as a matrix equation: u_vector(t_i+1) = tridiagonal matrix * u_vector(t_i) * dt/dx2 with zero-padding on top and bottom row to accomodate the BC. Stability criterion dt/dx2 <= 1/2, if not fulfilled round-off errors will cause the solution to explode. 
 
 
-\subsection{Solving Differential Equations with Neural Networks}
+
+\subsubsection{Solving the Heat Equation with Neural Networks}
 \noindent
-In general, a ordinary differential equation (ODE) may be written in the form
-\begin{equation}
-    F \qty[x, u(x), u'(x), u''(x), \dots, g^{(n)}(x)] = 0
-\end{equation}    
-where $u(x)$ denotes the solution of the ODE. One may then propose a trial solution $u_t(x,P)$ in the form
-\begin{equation}
-    u_{t}(x, P) = u_{bc}(x) + u_{nn}(x)N(x, P) 
-\end{equation}
-where $u_{bc}(x), u_{nn}(x)$ are functions which enforce the boundary conditions of the ODE and $N(x, P)$ is a neural network with independent variables denoted by $P = \{W\},\{\pmb b\}$, the weights and biases in the network respectively.. In order to optimize $N(x, P)$ such that $u_t(x)$ yields a solution of the ODE, we define the cost function by the $L^2$ norm of $F$ as
-\begin{equation}
-    \mathcal C\qty[u\qty(x)] = \frac{1}{N} \sum_{i=1}^{N}\qty(F\qty[x, u(x_i), u'(x_i), \dots, u^{(n)}(x_i)])^2
-\end{equation}
-where we have discretized as $x \rightarrow \{x_1, x_2 ,\dots, x_{N}\}$. We can then construct a Feed-Forward Neural network with $L-1$ hidden layers which for each itteration updates the weights and biases of the network wrt. to the current trial solution $u_t(x)$ evaluated with the cost function. See \cite{4155_project_2}
-
-
-\subsection{Solving the Heat Equation with Neural Networks}
-\noindent
-We may now using the methods introduced in the previous section design a method to solve the Heat equation using a neural network. We start by re-writing Eqn.~\ref{eqn: 1D heat eqn} to the form
+We now turn to the use of a neural network as an alternative method for obtaining the solution of the Heat Equation. We start by re-writing Eqn.~\ref{eqn: 1D heat eqn} to the form
 \begin{equation}
     \pdv{u}{t} - \pdv[2]{u}{x} = 0
 \end{equation}
@@ -146,11 +156,34 @@ setting the boundary conditions $u(0, t) = u(L, t) = 0$ and initial condition $u
 \begin{figure}[h!tb]
    \center
    \input{../figs/NN.tex} 
-   \caption{Possible network structure of a Feed-Forward network with input $(x,t)$ and 2 hidden layers each with 3 neurons with activations denoted as $a^l_j$} and a single output $N$.
+   \caption{Possible network structure of a Feed-Forward network with input $(x,t)$ and 2 hidden layers each with 3 neurons with activations denoted as $a^l_j$ and a single output $N$.}
 \end{figure}
 
 
+\subsection{A Nonlinear System of Ordinary Differential Equations for Finding Eigenvalues and Eigenvectors of Real Symmetric Matrices}
+
+For our second example, we investigate the use of neural networks for the solution of a nonlinear system of ordinary differential equations. The particular use case is the system of differential equations presented by \cite{Yi_2004} for finding the largest eigenvalue $\lambda_{1}$ and corresponding eigenvector $\mathbb{v_1}$ of an $N \times N$ real and symmetric matrix $\mathbb{A}$:
+
+%% Yi-equation
+
+%% where blabla.
+
+
+
+
+\subsubsection{Solution through the Forward-Euler Method}
+
+
+
+\subsubsection{Solution through Neural Networks}
+
+
+
 \section{Results \& Discussion}
+
+\subsection{The Heat Equation}
+
+\subsection{The Eigen-problem}
 
 \section{Conclusion}
 
