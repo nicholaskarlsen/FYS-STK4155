@@ -51,6 +51,8 @@ where $u_{bc}(x), u_{nn}(x)$ are functions which enforce the boundary conditions
 \end{equation}
 where we have discretized as $x \rightarrow \{x_1, x_2 ,\dots, x_{N}\}$. We can then construct a Feed-Forward Neural network with $L-1$ hidden layers which for each itteration updates the weights and biases of the network wrt. to the current trial solution $u_t(x)$ evaluated with the cost function. See \cite{4155_project_2}
 
+As a note, for some network architectures it is possible to obatin fairly simple derivatives of these types of cost-functions with respect to the network parameters, see e.g. \cite{Lagaris_1998}. However, it is in general quite burdensome to set up the network-derivatives by hand. Thus a major boost for the use of Neural Networks in solving differential equations comes from the advent of Automatic Differentiation, which by tracking the elementary operations performed in the network computations is capable of accurately and automatically producing the sought-after gradients. In the present work we rely on the autograd-functionality of PyTorch, to produce all necessary derivatives.
+
 \subsection{The Heat Equation}
 
 As our first example we investigate the application of Neural Networks for solving the so-called Heat Equation. In physics, the Heat equation models how the temperature of some material $u\qty(\pmb r, t)$ evolves over time by the partial differential equation (PDE)
@@ -162,21 +164,50 @@ setting the boundary conditions $u(0, t) = u(L, t) = 0$ and initial condition $u
 
 \subsection{A Nonlinear System of Ordinary Differential Equations for Finding Eigenvalues and Eigenvectors of Real Symmetric Matrices}
 
-For our second example, we investigate the use of neural networks for the solution of a nonlinear system of ordinary differential equations. The particular use case is the system of differential equations presented by \cite{Yi_2004} for finding the largest eigenvalue $\lambda_{1}$ and corresponding eigenvector $\mathbb{v_1}$ of an $N \times N$ real and symmetric matrix $\mathbb{A}$:
+For our second example, we investigate the use of neural networks for the solution of a nonlinear system of ordinary differential equations. The particular use case is the system of differential equations presented by \cite{Yi_2004} for finding the largest eigenvalue $\lambda_{1}$ and corresponding eigenvector $\mathbf{v}_1$ of an $N \times N$ real and symmetric matrix $\mathbf{A}$:
 
-%% Yi-equation
+\begin{equation}
+\label{eq:yi_eq}
+\frac{d \mathbf{x}(t)}{dt} = - \mathbf{x}(t) + [\mathbf{x}(t)^T \mathbf{x} \mathbf{A} - (1 - \mathbf{x}(t)^T \mathbf{x}(t)) \mathbf{I} ] \mathbf{x}(t)
+\end{equation}
 
-%% where blabla.
+where $\mathbf{x}(t)$ is a $ 1 \times N$ column vector and $\mathbf{I}$ is an $N \times N$ identity matrix. In \cite{Yi_2004} it is shown that for any initial vector $\mathbf{x}(0)$ which is not orthogonal to eigenspace of the eigenvalue $\lambda_1$, the solution $\mathbf{x}(t)$ of the system \ref{eq:yi_eq} as $t$ goes to infinity converges to an eigenvector $\mathbf{v}_1$ corresponding to the largest eigenvalue of $\mathbf{A}$. It is further shown in \cite{Yi_2004} that replacing $\mathbf{A}$ with $\mathbf{-A}$ in \ref{eq:yi_eq} makes the solution converge instead to an eigenvector of the smallest eigenvalue $\lambda_N$ belonging to $\mathbf{A}$, so long as the initial vector $\mathbf{x}(0)$ is not orthogonal to the eigenspace of that eigenvalue $\lambda_N$. Finally, they give the following recipe for obtaining the eigenvalue from the converged eigenvector:
 
+\begin{equation}
+\label{eq:yi_eigenvalue}
+\lambda = \frac{\mathbf{v}^T \mathbf{A} \mathbf{v}}{\mathbf{v}^T \mathbf{v}}
+\end{equation}
+which follows immediately from the definition of eigenvectors and eigenvalues.
 
-
+Thus, given a real and symmetric matrix, the largest and smallest eigenvalues along with their corresponding eigenvectors can easily obtained from solving \ref{eq:yi_eq} with an appropriate initial vector $\mathbf{x}(0)$. Now, in order to obtain the remaining eigenvalues and eigenvectors one could in principle apply a deflation technique, like Hotelling's or Wielandt's deflation \cite{Saad_2011} \cite{Roberts}, to the matrix $\mathbf{A}$ and repeat the process for the deflated matrix $\mathbf{A}_D$. That is, however, beyond the scope of our present work; and furthermore, non-trivial numerical issues might be expected to arise in such repeated solutions of \ref{eq:yi_eq}.
 
 \subsubsection{Solution through the Forward-Euler Method}
 
+The authors of \cite{Yi_2004} presented the equation \ref{eq:yi_eq} in the context of Recurrent Neural Networks (RNN), where it describes the dynamics of a certain class of such networks. RNNs are outside our current areas of expertise; however, to the best of our knowledge, the simplest RNN that obeys the dynamics prescribed by \ref{eq:yi_eq} should be completely equivalent to the following explicit integration method (Forward-Euler):
 
+\begin{equation}
+\label{eq:yi_euler}
+\mathbf{x}(t_{i+1}) = \mathbf{x}(t_i) + \frac{d \mathbf{x}(t_i)}{dt}  dt
+\end{equation}
+where $dt = t_{i+1} -t_{i}$ is a suitably small time-step,  $\frac{d \mathbf{x}(t_i)}{dt}$ is equation \ref{eq:yi_eq} evaluated at $t=t_i$, and the iterations are started from some initial vector $\mathbf{x}(0)$.
+
+This is, in any case, the simplest numerical integration scheme for solving equation \ref{eq:yi_eq}, and is what we will be using to compare our Neural Network-based solutions with.
 
 \subsubsection{Solution through Neural Networks}
 
+The procedure for solving equation \ref{eq:yi_eq} with a Neural Network is very much the same as for the Heat Equation. First a trial solution satisfying the initial conditions is constructed, in this case we use:
+
+%% TRIAL FUNCTION
+
+Then the cost-function to be optimized is defined, in this case as:
+
+%% COST FUNCTION
+
+Finally the derivatives of the cost-function with respect to the network parameters are computed, and the network parameters are updated:
+
+%% UPDATE
+
+The only real change from the case of the Heat Equation is that the network now must produce $N$ outputs for each input $t$, as opposed to one output for each pair $x,t$ of inputs.
 
 
 \section{Results \& Discussion}
