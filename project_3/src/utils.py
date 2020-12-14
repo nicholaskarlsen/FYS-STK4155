@@ -1,3 +1,5 @@
+import numpy as np
+
 def minibatch(N, M):
     """Splits data set x into M roughly equally minibatches. If not evenly divisible, the excess
     is evenly spread throughout some of the batches.
@@ -12,3 +14,7 @@ def minibatch(N, M):
     indices = np.random.permutation(N)  # random permutation of [0, ..., len(x)-1]
     indices = np.array_split(indices, M)  # Split permutation into M sub-arrays
     return indices
+
+
+def u_analytic(x, t):
+    return np.sin(np.pi * x) * np.exp(- np.pi * t)
