@@ -26,13 +26,14 @@
 \date{\today}
 
 \begin{abstract}
+    \noindent
     We investigate the application of neural networks to the solution of both partial differential equations, examplified by the 1-D heat equation; as well as systems of nonlinear ordinary differential equations, examplified by a system of equations describing the dynamics of a class of Recurrent Neural Networks that can be used to find eigenvalues and eigenvectors of a real, symmetric matrix. For the heat equation we compare the solution from a neural network with both the analytic solution and a numerical solution from a simple Finite-Difference scheme for different resolutions of the computational grid and different amounts of training points for the network. We perform a similar analysis for the nonlinear system; this time comparing the networks solution with a numerical integration using the Forward-Euler method. However, as the nonlinear system does not readily admit an analytical solution, only the equilibrium state of the system can be independently computed (through standard numerical eigendecomposition of the mentioned matrix) as a "ground truth" of the solution. In general we find that the neural network-based solution can reach a reasonable level of accuracy with fewer grid-points/training points than the standard numerical integration schemes, and with far less stringent requirements on the distance between grid-points. Notably, the neural network-solution does not need its training grid-points to satisfy the famously restrictive stability criterion for the Finite-Difference method applied to the heat equation. We do find, however, that it is more difficult to scale up the accuracy of the network-based solutions, as compared to more traditional schemes.
 \end{abstract}
 
 \maketitle
 
 \section{Introduction}
-
+\noindent
 Per the preponderating proliferation of differential equations in the sciences, both natural and otherwise, there is intense and inherent interest in novel ways of obtaining their solutions. Thus, one of the more exciting developments in machine learning, and the topic of this paper, is the application of neural networks to the task of solving differential equations. 
 
 We will be looking at two distinct problem types; partial differential equations (PDE) and systems of nonlinear ordinary differential equations (ODE). Concretely, we will be using the 1-D heat equation as an example of a PDE, while a method from \cite{Yi_2004} for finding eigenvalues and eigenvectors of real and symmetric matrices will serve as the example of nonlinear systems of ODEs.
@@ -41,7 +42,10 @@ In both cases we will compare solutions obtained from neural network-based appro
 
 Structurally, we begin with a brief discussion of how neural networks can be applied to solve differential equations in general. We then move on to a more detailed description of the two particular use cases, starting with a short introduction to the context in which they arise, as well as some aspects of their analytically known properties. Continuing on we describe the traditional methods we use for solving the equations, before presenting the specific setup of the neural network-based methods.
 
+%% NOTE: Some of this should probably go to the conclusion/abstract rather than introduction
+
 Subsequently we compare the performance of the network-based methods with the traditional numerical integration-methods, paying special attention to the effects and requirements of the computational grids' sizes on the convergence of the methods. We find that, in general, the neural networks place far laxer demands on the computational grids for achieving reasonable convergence. Especially noteworthy, we find that the distance between training grid-points for the neural network in the PDE-case do not have to satisfy the same strict stability criterion as the Finite-Difference scheme. However, we do note that it is more difficult to increase the accuracy of the network-methods, as compared to the traditional schemes. In most regards, we conclude that the network-based methods are inferior to the standard methods for the toy problems at hand. However, for different/larger problem dimensions we recognize the possibility of the network-based methods to achieve superior performance in terms of computational cost for some levels of accuracy.
+
 
 \section{Theory \& Methods}
 
@@ -57,28 +61,32 @@ where $u(x)$ denotes the solution of the ODE. One may then propose a trial solut
 \end{equation}
 where $u_{bc}(x), u_{nn}(x)$ are functions which enforce the boundary conditions of the ODE and $N(x, P)$ is a neural network with independent variables denoted by $P = \{W, \pmb b\}$, the set of weights and biases in the network respectively. In order to optimize $N(x, P)$ such that $\tilde u(x)$ yields a solution of the ODE, we define the cost function by the $L^2$ norm of $F$ as
 \begin{equation}
-    \mathcal C\qty[u\qty(x)] = \frac{1}{N} \sum_{i=1}^{N}\qty(F\qty[x, u(x_i), u'(x_i), \dots, u^{(n)}(x_i)])^2
+    \mathcal C\qty[u\qty(x)] = \frac{1}{n} \sum_{i=1}^{n}\qty(F\qty[x, u(x_i), u'(x_i), \dots, u^{(n)}(x_i)])^2
 \end{equation}
-where we have discretized as $x \rightarrow \{x_1, x_2 ,\dots, x_{N}\}$. We can then construct a Feed-Forward Neural network with $L-1$ hidden layers which for each itteration updates the weights and biases of the network wrt. to the current trial solution $\tilde u(x)$ evaluated with the cost function. See \cite{4155_project_2}
+where we have discretized as $x \rightarrow \{x_1, x_2 ,\dots, x_{n}\}$. We can then construct a Feed-Forward Neural network with $L-1$ hidden layers which for each iteration updates the weights and biases of the network wrt. to the current trial solution $\tilde u(x)$ evaluated with the cost function. 
 
-<<<<<<< HEAD
+%% Elaborate on how backprop no longer works
+%% Cost function is dependent on the
+%% Check nielsen for reference on assumptions in backprop
 %% Backwards pass
 
-As a note, for some network architectures it is possible to obatin fairly simple derivatives of these types of cost-functions with respect to the network parameters, see e.g. \cite{Lagaris_1998}. However, it is in general quite burdensome to set up the network-derivatives by hand. Thus a major boost for the use of Neural Networks in solving differential equations comes from the advent of Automatic Differentiation, which by tracking the elementary operations performed in the network computations is capable of accurately and automatically producing the sought-after gradients. In the present work we rely on the autograd-functionality of PyTorch, to produce all necessary derivatives.
-=======
-As a note, for some network architectures it is possible to obatin fairly simple derivatives of these types of cost-functions with respect to the network parameters, see e.g. \cite{Lagaris_1998}. However, it is in general quite burdensome to set up the network-derivatives by hand. Thus a major boost for the use of neural networks in solving differential equations comes from the advent of Automatic Differentiation, which by tracking the elementary operations performed in the network computations is capable of accurately and automatically producing the sought-after gradients. In the present work we rely on the autograd-functionality of PyTorch, to produce all necessary derivatives.
->>>>>>> 3a09fb21a0b884679e87e1d3e2a61001665b7e8b
+As a note, for some network architectures it is possible to obtain fairly simple derivatives of these types of cost-functions with respect to the network parameters, see e.g. \cite{Lagaris_1998}. However, it is in general quite burdensome to set up the network-derivatives by hand. Thus a major boost for the use of neural networks in solving differential equations comes from the advent of Automatic Differentiation, which by tracking the elementary operations performed in the network computations is capable of accurately and automatically producing the sought-after gradients. In the present work we rely on the automatic differentiation functionality of PyTorch, to produce all necessary derivatives.
 
 %% ADAM
+Further, we also utilize the ADAM optimization algorithm \cite{kingma2017adam}. 
+% Note relation to AdaGRAD and RMSPROP
+% Cite previous report for more detials
+% Consider typing up the algorithm
+% Mention the standard parameters proposed by the authors
 
-\subsection{The Heat Equation}
-
+\subsection{The Heat Equation\label{sec:Heat equation analytical}}
+\noindent
 As our first example we investigate the application of neural networks for solving the so-called heat equation. In physics, the heat equation models how the temperature of some material $u\qty(\pmb r, t)$ evolves over time by the partial differential equation (PDE)
 \begin{equation}
     \pdv{u}{t} = c^2\nabla^2 u 
 \end{equation}
 where $c^2$, the thermal diffusivity is a material dependent constant. 
-This may be reduced to a one dimensional problem, modelling i.e a thin, insulating wire of length $L$ as
+This may be reduced to a one dimensional problem, modeling i.e a thin, insulating wire of length $L$ as
 \begin{equation}\label{eqn: 1D heat eqn}
     \pdv{u}{t} = \pdv[2]{u}{x}
 \end{equation}
@@ -86,7 +94,6 @@ where we have also for simplicity set $c^2 = 1$. We may then solve this analytic
 
 \subsubsection{Solving the Heat Equation analytically}
 \noindent 
-
 We start by making the assumption that $u(x, t)$ is separable, giving 
 \begin{equation}
     u(x, t) = F(x) \cdot G(t)
@@ -149,7 +156,7 @@ a plot of which for $t \in [0, 1]$ is shown in Fig.~\ref{fig: heat eqn analytic}
 \end{figure}
 
 \subsubsection{Solving the Heat Equation through a simple Finite-Difference scheme}
-
+\noindent
 While we in this case were able to obtain a simple analytic solution to the differential equation, that is generally not possible for most PDEs so numerical methods must be used instead. The simplest, though neither the most accurate nor the most stable, class of numerical methods for solving PDEs are the so-called explicit finite-difference schemes. The main idea consists of dividing the computational domain into a set of grid points, and discretizing the differential equations to obtain relations between the function values at those grid-points. 
 
 The distinction between explicit and implicit schemes is, of course, that with an explicit scheme the values at the next grid points can be explicitly calculated from the previous grid points so that given the boundary conditions one obtains a rule for calculating the function values of the whole domain one step at the time. Oppositely, implicit schemes give the value at a grid-point as a function of both that grid-point's value and the values of the previous grid-points thus requiring the (usually numerical) solution of a linear system of equations for each grid-point. The benefit of implicit methods is that they usually have more lax restrictions on how the grid-points must be spaced in order to maintain stability of the solution.
@@ -157,7 +164,6 @@ The distinction between explicit and implicit schemes is, of course, that with a
 For the case at hand one rewrites 
 \begin{widetext}
 \begin{equation}
-    %u(x_i,t_i) = (u(x_i-1,t_i-1) - 2*u(x_i,t_i-1) + u(x_i+1,t_i-1) * dt/dx2. 
     u(x_i,t_i) = \qty(u(x_i - \Delta x,t_i - \Delta t) - 
                  2u(x_i,t_i-\Delta t) + 
                  u(x_i+\Delta x,t_i-\Delta t)) \cdot \frac{\Delta t}{\Delta x^2} 
@@ -173,11 +179,11 @@ and
 \end{equation}
 Move around these two equations and you get the formula. Can be rewritten as a matrix equation in the form
 \begin{equation}
-    \pmb u(t_i+\Delta t) = B \pmb u(t_i) \frac{\Delta t}{\Delta x^2}
+    \pmb u(t_i+\Delta t) = \mathbf{B} \pmb u(t_i) \frac{\Delta t}{\Delta x^2}
 \end{equation}
-where $\pmb u(t_i) = (u(x_0, t_i), u(x_1, t_i), \dots)^T$ and $B$ is a tridiagonal matrix in the form
+where $\pmb u(t_i) = (u(x_0, t_i), u(x_1, t_i), \dots)^T$ and $\bf B$ is a tridiagonal matrix in the form
 \begin{equation} \label{eqn: Az = b}
-    B = \qty[
+    \mathbf B = \qty[
     \begin{matrix}
     0 \\
     1 & -2 & 1 \\
@@ -213,56 +219,55 @@ setting the boundary conditions $u(0, t) = u(L, t) = 0$ and initial condition $u
 
 
 \subsection{A Nonlinear System of Ordinary Differential Equations for Finding Eigenvalues and Eigenvectors of Real Symmetric Matrices}
-
-For our second example, we investigate the use of neural networks for the solution of a nonlinear system of ordinary differential equations. The particular use case is the system of differential equations presented by \cite{Yi_2004} for finding the largest eigenvalue $\lambda_{1}$ and corresponding eigenvector $\mathbf{v}_1$ of an $N \times N$ real and symmetric matrix $\mathbf{A}$:
+\noindent
+For our second example, we investigate the use of neural networks for the solution of a nonlinear system of ordinary differential equations. The particular use case is the system of differential equations presented by \cite{Yi_2004} for finding the largest eigenvalue $\lambda_{1}$ and corresponding eigenvector $\pmb{v}_1$ of an $N \times N$ real and symmetric matrix $\mathbf{A}$:
 
 \begin{equation}
 \label{eq:yi_eq}
-\frac{d \mathbf{x}(t)}{dt} = - \mathbf{x}(t) + [\mathbf{x}(t)^T \mathbf{x} \mathbf{A} - (1 - \mathbf{x}(t)^T \mathbf{x}(t)) \mathbf{I} ] \mathbf{x}(t)
+\frac{\dd \pmb{x}(t)}{\dd t} = - \pmb{x}(t) + [\pmb{x}(t)^T \pmb{x} \mathbf{A} - (1 - \pmb{x}(t)^T \pmb{x}(t)) \mathbb{I} ] \pmb{x}(t)
 \end{equation}
 
-where $\mathbf{x}(t)$ is a $ 1 \times N$ column vector and $\mathbf{I}$ is an $N \times N$ identity matrix. In \cite{Yi_2004} it is shown that for any initial vector $\mathbf{x}(0)$ which is not orthogonal to eigenspace of the eigenvalue $\lambda_1$, the solution $\mathbf{x}(t)$ of the system \ref{eq:yi_eq} as $t$ goes to infinity converges to an eigenvector $\mathbf{v}_1$ corresponding to the largest eigenvalue of $\mathbf{A}$. It is further shown in \cite{Yi_2004} that replacing $\mathbf{A}$ with $\mathbf{-A}$ in \ref{eq:yi_eq} makes the solution converge instead to an eigenvector of the smallest eigenvalue $\lambda_N$ belonging to $\mathbf{A}$, so long as the initial vector $\mathbf{x}(0)$ is not orthogonal to the eigenspace of that eigenvalue $\lambda_N$. Finally, they give the following recipe for obtaining the eigenvalue from the converged eigenvector:
+where $\pmb{x}(t)$ is a $ 1 \times N$ column vector and $\mathbf{I}$ is an $N \times N$ identity matrix. In \cite{Yi_2004} it is shown that for any initial vector $\pmb{x}(0)$ which is not orthogonal to eigenspace of the eigenvalue $\lambda_1$, the solution $\pmb{x}(t)$ of the system \ref{eq:yi_eq} as $t$ goes to infinity converges to an eigenvector $\pmb{v}_1$ corresponding to the largest eigenvalue of $\mathbf{A}$. It is further shown in \cite{Yi_2004} that replacing $\mathbf{A}$ with $\mathbf{-A}$ in \ref{eq:yi_eq} makes the solution converge instead to an eigenvector of the smallest eigenvalue $\lambda_N$ belonging to $\mathbf{A}$, so long as the initial vector $\pmb{x}(0)$ is not orthogonal to the eigenspace of that eigenvalue $\lambda_N$. Finally, they give the following recipe for obtaining the eigenvalue from the converged eigenvector:
 
 \begin{equation}
 \label{eq:yi_eigenvalue}
-\lambda = \frac{\mathbf{v}^T \mathbf{A} \mathbf{v}}{\mathbf{v}^T \mathbf{v}}
+\lambda = \frac{\pmb{v}^T \mathbf{A} \pmb{v}}{\pmb{v}^T \pmb{v}}
 \end{equation}
 which follows immediately from the definition of eigenvectors and eigenvalues.
 
-Thus, given a real and symmetric matrix, the largest and smallest eigenvalues along with their corresponding eigenvectors can easily obtained from solving \ref{eq:yi_eq} with an appropriate initial vector $\mathbf{x}(0)$. Now, in order to obtain the remaining eigenvalues and eigenvectors one could in principle apply a deflation technique, like Hotelling's or Wielandt's deflation \cite{Saad_2011} \cite{Roberts}, to the matrix $\mathbf{A}$ and repeat the process for the deflated matrix $\mathbf{A}_D$. That is, however, beyond the scope of our present work; and furthermore, non-trivial numerical issues might be expected to arise in such repeated solutions of \ref{eq:yi_eq}.
+Thus, given a real and symmetric matrix, the largest and smallest eigenvalues along with their corresponding eigenvectors can easily obtained from solving \ref{eq:yi_eq} with an appropriate initial vector $\pmb{x}(0)$. Now, in order to obtain the remaining eigenvalues and eigenvectors one could in principle apply a deflation technique, like Hotelling's or Wielandt's deflation \cite{Saad_2011} \cite{Roberts}, to the matrix $\mathbf{A}$ and repeat the process for the deflated matrix $\mathbf{A}_D$. That is, however, beyond the scope of our present work; and furthermore, non-trivial numerical issues might be expected to arise in such repeated solutions of \ref{eq:yi_eq}.
 
 \subsubsection{Solution through the Forward-Euler Method}
-
+\noindent
 The authors of \cite{Yi_2004} presented the equation \ref{eq:yi_eq} in the context of Recurrent Neural Networks (RNN), where it describes the dynamics of a certain class of such networks. RNNs are outside our current areas of expertise; however, to the best of our knowledge, the simplest RNN that obeys the dynamics prescribed by \ref{eq:yi_eq} should be completely equivalent to the following explicit integration method (Forward-Euler):
 
 \begin{equation}
-\label{eq:yi_euler}
-\mathbf{x}(t_{i+1}) = \mathbf{x}(t_i) + \frac{d \mathbf{x}(t_i)}{dt}  dt
+    \label{eq:yi_euler}
+    \pmb{x}(t_{i} + \Delta t) = \pmb{x}(t_i) + \frac{\dd \pmb{x}(t_i)}{\dd t}  \Delta t
 \end{equation}
-where $dt = t_{i+1} -t_{i}$ is a suitably small time-step,  $\frac{d \mathbf{x}(t_i)}{dt}$ is equation \ref{eq:yi_eq} evaluated at $t=t_i$, and the iterations are started from some initial vector $\mathbf{x}(0)$.
+where $\Delta t = t_{i+1} -t_{i}$ is a suitably small time-step,  $\frac{d \pmb{x}(t_i)}{dt}$ is equation \ref{eq:yi_eq} evaluated at $t=t_i$, and the iterations are started from some initial vector $\pmb{x}(0)$.
 
 This is, in any case, the simplest numerical integration scheme for solving equation \ref{eq:yi_eq}, and is what we will be using to compare our neural network-based solutions with.
 
 \subsubsection{Solution through Neural Networks}
-
+\noindent
 The procedure for solving equation \ref{eq:yi_eq} with a neural network is very much the same as for the heat equation. First a trial solution satisfying the initial conditions is constructed, in this case we use:
 
 %% TRIAL FUNCTION
+\begin{equation}
+    \tilde f(t) = \pmb x_0 e^{-t} + (1 - e^{-t}) N(t, P)
+\end{equation}
 
 Then the cost-function to be optimized is defined, in this case as:
 
 %% COST FUNCTION
+\begin{equation}
+    \mathcal C =  - (- \pmb x + \qty(\pmb x^T\pmb x \mathbf{A} + (1 - \pmb x^T \mathbf{A} \pmb x) \mathbb I) \pmb x)
+\end{equation}
 
-Finally the derivatives of the cost-function with respect to the network parameters are computed, and the network parameters are updated:
-
-%% UPDATE
+Finally the derivatives of the cost-function with respect to the network parameters are computed, and the network parameters are updated using ADAM.
 
 The only real change from the case of the heat equation is that the network now must produce $N$ outputs for each input $t$, as opposed to one output for each pair $x,t$ of inputs.
-
-
-\section{Results \& Discussion}
-
-\subsection{The Heat Equation}
 
 \begin{figure*}[h!tb]
     \center
@@ -288,6 +293,29 @@ The only real change from the case of the heat equation is that the network now 
     \caption{\label{fig:ReLU composite figure}Feed-Forward Neural Networks with 4 hidden layers each consisting of 100 Neurons using the ReLU activation function trained on $11\times11$ (Model I) and $100\times100$ (Model II) points in the intervals $[x,t]\in[0,1]\times[0,0.3]$}, where absolute error, and mean absolute error (MAE) are computed with respect to the analytic solution of the PDE on a grid of $200\times200$ points.
 \end{figure*}
 
+\section{Results \& Discussion}
+
+\subsection{The Heat Equation}
+
+% Mention network structure; describe process of implementation, experimentation etc
+\noindent
+We solved the heat equation (Eqn.~\ref{fig: heat eqn analytic}) in the domain $[x,y] \in [0,1]\times[0,0.3]$ using a Feed-Forward Neural network and an explicit Forward-Euler scheme. Both methods where then benchmarked against the analytical solution to the PDE which we derived in Section~\ref{sec:Heat equation analytical}. All the results contained in this report may also be reproduced by running the Jupyter notebooks located in our Github repository \cite{github_repo}, which also contains some additional supplementary results.
+
+The Neural Network was implemented using the PyTorch \cite{NEURIPS2019_9015} machine learning library, chosen for its flexible interface enabling us to easily tailor our network to fit the problem at hand. When designing our model, we experimented with various network depths and layer sizes as well as activation functions, and found a reasonable balance between convergence rate and computational cost by using deep neural network with 4 hidden layers each consisting of 100 neurons. We also found good convergence with a learning weight of 0.002 and utilizing the standard parameter set in the ADAM optimizer as proposed by its authors \textcite{kingma2017adam}. 
+
+
+% Present the results, compare with FW euler scheme
+
+% Intrepret the results:
+% - small and large sets produce approximately the same error
+% - Both are worse than FW euler scheme
+% - Does not suffer from the constraints of having a stability criterion
+% - May thus be useful for high-dimensional problems suffering strongly from the curse of dimensionality; as an alternative to MC methods
+% - Limited time spend optimizing the problem, but showed that it is a viable way of solving PDES, further optimization/and or computation time may converge better.
+% - Surprised by difference in accuracy; may imply poor modeling and/or a bug in the implementation. leaning on the  latter given the observations in the Eigenvalue problem.
+% used MAE over MSE as a metric as to not be overly optimistic of the error.
+
+
 \begin{figure}[h!tb]
     \subfloat[$\Delta x = 1/10,\enspace \Delta t =  1/200$]{
     \includegraphics[width=.5\columnwidth]{heat_eq_euler_err_10.pdf} 
@@ -299,25 +327,31 @@ The only real change from the case of the heat equation is that the network now 
 \end{figure}
 
 \subsection{The Eigen-problem}
-
+\noindent 
+We wish to find the extrema eigenpairs of a Real, Symmetric matrix matrix by solving a set of coupled, nonlinear differential equations following the method proposed by \textcite{Yi_2004}. We prepared a random matrix by sampling a $\mathbf Q= [6\times 6]$ array of random numbers from the standard normal distribution $\mathcal N(0, 1)$ using a fixed seed ensuring that our results are reproducible. The matrix $\mathbf Q$ was then transformed to a real, symmetric matrix $\mathbf A$ by
 \begin{equation}
-    A = \qty(
-    \begin{matrix}
-     -0.0 & 0.7 & -2.4 & 0.6 & 0.3 & -3 \\
-     0.7 & -3.4 & 1.2 & -0.2 & -1.4 & -1 \\
-     -2.4 & 1.2 & -1.7 & -0.4 & -1.1 & -0 \\
-     0.6 & -0.2 & -0.4 & 1.7 & 2.1 & -1 \\
-     0.3 & -1.4 & -1.1 & 2.1 & -3.5 & 1 \\
-     -2.8 & -1.0 & -0.4 & -0.7 & 0.5 & -2 \\
-    \end{matrix}
-    )
+    \mathbf A = \mathbf Q^T + \mathbf Q
 \end{equation}
+Following our work on the PDE, we used a similar approach by solving the differential equations using a Neural Network as well as an explicit Forward-Euler scheme, where the latter was used to gauge how well the network is able to reproduce the dynamics of the system. The eigenpairs produced by the network were benchmarked against the eig method in Numpy, which calls on numerically robust methods in LAPACK\footnote{See: \url{https://github.com/numpy/numpy/blob/v1.9.1/numpy/linalg/umath_linalg.c.src}}.
+
+
+
+% Mention network structure; describe process of implementation, experimentation etc
+
+% - Manages to qualitatively reproduce the main features of the dynamics of the highly non-linear system of coupled DE's 
+% - Eigenvalue & Eigenvalues are approximated to a pretty good degree of accuracy, but pales in comparrison to numpy
+% - More training & model optimization is likely required to achieve better accuracy; but serves as a good proof of concept
+
 \begin{figure}[h!tb]
    \center
    \includegraphics[width=.8\columnwidth]{eigenvec_dynamics.pdf} 
-   \caption{\label{fig:eigenvector} Dynamics of the eigenvector components of the largest eigenvalue of the matrix $A$ modelled by the Neural network (Solid lines) as well as the same dynamics solved using a Forward Euler method (dotted lines) where ground truth is indicated by the semi-transparrent dashed lines.}
+   \caption{\label{fig:eigenvector} Dynamics of the eigenvector components of the largest eigenvalue of the matrix $A$ modeled by the Neural network (Solid lines) as well as the same dynamics solved using a Forward Euler method (dotted lines) where ground truth is indicated by the semi-transparrent dashed lines.}
 \end{figure}
+
+
 \section{Conclusion}
+% - The true benefit of the may become apparent my looking at higher dimensional problems
+% - "trivial" to implement; no need to discretize, setting up finite-diff schemes is tedious for higher dimensions
 
 \onecolumngrid
 \bibliography{bibfile}
