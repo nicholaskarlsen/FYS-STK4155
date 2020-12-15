@@ -225,12 +225,59 @@ The only real change from the case of the Heat Equation is that the network now 
 
 \subsection{The Heat Equation}
 
+\begin{figure*}[h!tb]
+    \center
+    \subfloat[Model I evaluated on 11x11 grid]{
+    \includegraphics[width=.66\columnwidth]{PDE_RELU_10_10x1000.pdf}
+    }
+    \subfloat[Model I evaluated on 100x100 grid]{
+    \includegraphics[width=.66\columnwidth]{PDE_RELU_10_100x100.pdf}
+    }
+    \subfloat[Error of model I]{
+    \includegraphics[width=.66\columnwidth]{PDE_RELU_10_ERR.pdf}
+    }
+    \\
+    \subfloat[Model II evaluated on 11x11 grid]{
+    \includegraphics[width=.66\columnwidth]{PDE_RELU_100_10x10.pdf}
+    }
+    \subfloat[Model II evaluated on 100x100 grid]{
+    \includegraphics[width=.66\columnwidth]{PDE_RELU_100_100x100.pdf}
+    }
+    \subfloat[Error of model II]{
+    \includegraphics[width=.66\columnwidth]{PDE_RELU_100_ERR.pdf}
+    }
+    \caption{\label{fig:ReLU composite figure}Feed-Forward Neural Networks with 4 hidden layers each consisting of 100 Neurons using the ReLU activation function trained on $11\times11$ (Model I) and $100\times100$ (Model II) points in the intervals $[x,t]\in[0,1]\times[0,0.3]$}, where absolute error, and mean absolute error (MAE) are computed with respect to the analytic solution of the PDE on a grid of $200\times200$ points.
+\end{figure*}
+
 \begin{figure}[h!tb]
-     
+    \subfloat[$\Delta x = 1/10,\enspace \Delta t =  1/200$]{
+    \includegraphics[width=.5\columnwidth]{heat_eq_euler_err_10.pdf} 
+    }
+    \subfloat[$\Delta x = 1/100,\enspace \Delta t = 1/20000$]{
+    \includegraphics[width=.5\columnwidth]{heat_eq_euler_err_100.pdf} 
+    }
+    \caption{\label{fig:fw euler PDE error}Absolute error of the heat equation solved using an explicit forward euler scheme wrt. the analytic solution for $\Delta x = 1/10$ and $\Delta x = 1/100$}
 \end{figure}
 
 \subsection{The Eigen-problem}
 
+\begin{equation}
+    A = \qty(
+    \begin{matrix}
+     -0.0 & 0.7 & -2.4 & 0.6 & 0.3 & -3 \\
+     0.7 & -3.4 & 1.2 & -0.2 & -1.4 & -1 \\
+     -2.4 & 1.2 & -1.7 & -0.4 & -1.1 & -0 \\
+     0.6 & -0.2 & -0.4 & 1.7 & 2.1 & -1 \\
+     0.3 & -1.4 & -1.1 & 2.1 & -3.5 & 1 \\
+     -2.8 & -1.0 & -0.4 & -0.7 & 0.5 & -2 \\
+    \end{matrix}
+    )
+\end{equation}
+\begin{figure}[h!tb]
+   \center
+   \includegraphics[width=.8\columnwidth]{eigenvec_dynamics.pdf} 
+   \caption{\label{fig:eigenvector} Dynamics of the eigenvector components of the largest eigenvalue of the matrix $A$ modelled by the Neural network (Solid lines) as well as the same dynamics solved using a Forward Euler method (dotted lines) where ground truth is indicated by the semi-transparrent dashed lines.}
+\end{figure}
 \section{Conclusion}
 
 \onecolumngrid
