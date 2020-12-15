@@ -16,5 +16,5 @@ def minibatch(N, M):
     return indices
 
 
-def u_analytic(x, t):
-    return np.sin(np.pi * x) * np.exp(- np.pi * t)
+def heat_eq_analytic(x, t):
+    return np.sin(np.pi * x) * np.exp(- np.pi**2 * t)
