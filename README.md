@@ -6,3 +6,6 @@ This repository contains the work of Nicholas Karlsen and Thore Espedal Moe in c
 
 
 [Project 2: Classification and Regression: From Linear and Logistic Regression to Neural Networks](https://github.com/nicholaskarlsen/FYS-STK4155/tree/master/project_2)
+
+
+[Project 3: Solving partial differential equations with neural networks ](https://github.com/nicholaskarlsen/FYS-STK4155/tree/master/project_3)
