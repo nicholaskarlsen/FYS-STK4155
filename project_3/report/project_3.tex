@@ -114,7 +114,7 @@ starting with the spatial equation, we have a general solution in the form
 \begin{equation}
     F(x) = c_1 \cos(\rho x) + c_2 \sin(\rho x)
 \end{equation}
-where $c_1 = 0$ is fixed by $u(0, t) = $. Similarly, $u(L, t) = 0$ imposes the requirement $\sin(\rho x) = 0$ which is satisfied by setting $\rho = n\pi/L$, yielding a discrete spectrum of solutions
+where $c_1 = 0$ is fixed by $u(0, t) = 0$. Similarly, $u(L, t) = 0$ imposes the requirement $\sin(\rho x) = 0$ which is satisfied by setting $\rho = n\pi/L$, yielding a discrete spectrum of solutions
 \begin{equation}
     F_n(x) = \sin\qty(\frac{n\pi x}{L})
 \end{equation}
@@ -204,8 +204,9 @@ We now turn to the use of a neural network as an alternative method for obtainin
 \end{equation}
 which gives rise to the cost function 
 \begin{equation}
-    \mathcal C\qty[u\qty(x, y)] = \frac{1}{N}\sum_{i=1}^N \qty(\pdv{u}{t} - \pdv[2]{u}{x})^2
+    \mathcal C\qty[u\qty(x, y)] = \qty(\pdv{u}{t} - \pdv[2]{u}{x})^2
 \end{equation}
+for a single point $(x,t)$. For a mini-batch, one would sum and average the cost over the entire batch.
 setting the boundary conditions $u(0, t) = u(L, t) = 0$ and initial condition $u(x, 0) = \sin(\pi x)$, we then have a trial solution in the form
 \begin{equation}
     u_t(x, t, P) = \qty(1 - t)\sin(\pi x) + x(1 - x)t N(x, t, P)
@@ -255,21 +256,48 @@ The procedure for solving equation \ref{eq:yi_eq} with a neural network is very 
 
 %% TRIAL FUNCTION
 \begin{equation}
-    \tilde f(t) = \pmb x_0 e^{-t} + (1 - e^{-t}) N(t, P)
+    \tilde{\pmb f}(t) = \pmb x_0 e^{-t} + (1 - e^{-t}) \pmb N(t, P)
 \end{equation}
 
 Then the cost-function to be optimized is defined, in this case as:
 
 %% COST FUNCTION
+\begin{widetext}
 \begin{equation}
-    \mathcal C =  - (- \pmb x + \qty(\pmb x^T\pmb x \mathbf{A} + (1 - \pmb x^T \mathbf{A} \pmb x) \mathbb I) \pmb x)
+    \mathcal C\qty[\tilde{\pmb f}(t)] = \frac{1}{M}\sum_{i}^M \qty[ 
+    \dv{\tilde{\pmb f}_i(t)}{t} - \qty(- \tilde{\pmb f}_i(t) + \qty(\tilde{\pmb f}_i^T(t)\tilde{\pmb f}_i(t) \mathbf{A} + 
+    \qty(1 - \tilde{\pmb f}^T_i(t) \mathbf{A} \tilde{\pmb f}_i(t)) \mathbb I) \tilde{\pmb f}_i(t))]^2
 \end{equation}
+\end{widetext}
+Where again, this cost function is valid for a single sample $t$, and for mini-batches one would sum the cost over all the sampled $t$ and take the mean.
 
 Finally the derivatives of the cost-function with respect to the network parameters are computed, and the network parameters are updated using ADAM.
 
-The only real change from the case of the heat equation is that the network now must produce $N$ outputs for each input $t$, as opposed to one output for each pair $x,t$ of inputs.
+The only real change from the case of the heat equation is that the network now must produce $M$ outputs for each input $t$, as opposed to one output for each pair $x,t$ of inputs.
 
-
+\begin{figure*}[h!tb]
+    \center
+    \subfloat[Model I evaluated on 11x11 grid]{
+    \includegraphics[width=.5\columnwidth]{PDE_RELU_10_10x1000.pdf}
+    }
+    \subfloat[Model I evaluated on 100x100 grid]{
+    \includegraphics[width=.5\columnwidth]{PDE_RELU_10_100x100.pdf}
+    }
+    \subfloat[Error of model I]{
+    \includegraphics[width=.5\columnwidth]{PDE_RELU_10_ERR.pdf}
+    }
+    \\
+    \subfloat[Model II evaluated on 11x11 grid]{
+    \includegraphics[width=.5\columnwidth]{PDE_RELU_100_10x10.pdf}
+    }
+    \subfloat[Model II evaluated on 100x100 grid]{
+    \includegraphics[width=.5\columnwidth]{PDE_RELU_100_100x100.pdf}
+    }
+    \subfloat[Error of model II]{
+    \includegraphics[width=.5\columnwidth]{PDE_RELU_100_ERR.pdf}
+    }
+    \caption{\label{fig:ReLU composite figure}Feed-Forward Neural Networks with 4 hidden layers each consisting of 100 Neurons using the ReLU activation function trained on $11\times11$ (Model I) and $100\times100$ (Model II) equispaced points in the intervals $[x,t]\in[0,1]\times[0,1]$, where absolute error, and mean absolute error (MAE) are computed with respect to the analytic solution of the PDE on a grid of $200\times200$ equispaced points in the same interval.}
+\end{figure*}
 
 \section{Results \& Discussion}
 
@@ -281,25 +309,35 @@ We solved the heat equation (Eqn.~\ref{fig: heat eqn analytic}) in the domain $[
 
 The Neural Network was implemented using the PyTorch \cite{NEURIPS2019_9015} machine learning library, chosen for its flexible interface enabling us to easily tailor our network to fit the problem at hand. When designing our model, we experimented with various network depths and layer sizes as well as activation functions, and found a reasonable balance between convergence rate and computational cost by using deep neural network with 4 hidden layers each consisting of 100 neurons. We also found good convergence with a learning weight of 0.002 and utilizing the standard set of parameters in the ADAM optimizer as proposed by its authors \textcite{kingma2017adam}. Lastly, we used an identity activation in the outer layer, as we may not in general infer about the range of a solution a priori. 
 
-The main results of our investigations are presented in Fig.~\ref{fig:ReLU composite figure}, where we compared the output of of two identical Neural networks trained on $[11\times11]$\footnote{11 being chosen instead of 10 for more symmetric plots!} and $[100\times100]$ equispaced grids for $10^4$ and $10^2$ epochs respectively, with mini-batches of size $16$. The differing training time being justified by the fact that both networks will undergo approximately\footnote{Approximately because $11^2 \approx 100$} the same number of total iterations. We then computed the absolute error as well as the mean absolute error (MAE) with respect to the analytic solution on a $[200\times200]$ equispaced grid to gauge the performance of both models. We further present identical networks also trained on $[11\times11]$ equispaced grids, but instead using the Sigmoid and Tanh activation functions where the evaluation and error is computed in the same way as before. The results for this is found at the end of the report in Fig.~\ref{fig:tanh sig composite figure}.
+The main results of our investigations are presented in Fig.~\ref{fig:ReLU composite figure}, where we compared the output of of two identical Neural networks using the ReLU activation in the hidden layers trained on $[11\times11]$\footnote{11 being chosen instead of 10 for more symmetric plots!} and $[100\times100]$ equispaced grids for trained for $10^4$ and $10^2$ epochs respectively, with mini-batches of size $16$. The differing training time being justified by the fact that both networks will undergo approximately\footnote{Approximately because $11^2 \approx 100$} the same number of total iterations. We then computed the absolute error as well as the mean absolute error (MAE) with respect to the analytic solution on a $[200\times200]$ equispaced grid to gauge the performance of both models. We further present identical networks also trained on $[11\times11]$ equispaced grids, but instead using the Sigmoid and $\tanh$ activation functions where the evaluation and error is computed in the same way as before. The results for this is found at the end of the report in Fig.~\ref{fig:tanh sig composite figure}.
 
-Lastly, we solved the Heat equation using the Finite-Difference scheme discussed in section~\ref{sec:finite difference theory} in the same domain for step-sizes $\Delta x = 1/10$ and $\Delta x = 1/100$ with $\Delta t$ being chosen as to satisfy the stability criterion $\Delta t / \Delta x \leq 1/2$.
+Lastly, we solved the Heat equation using the Finite-Difference scheme discussed in section~\ref{sec:finite difference theory} in the same domain for step-sizes $\Delta x = 1/10$ and $\Delta x = 1/100$ with $\Delta t$ being chosen as to satisfy the stability criterion $\Delta t / \Delta x \leq 1/2$, both the solutions and the associated errors are presented in Fig~\ref{fig:fw euler PDE error}.
 
 \begin{figure}[h!tb]
+    \center
+    \subfloat[$\Delta x = 1/10,\enspace \Delta t =  1/200$]{
+    \includegraphics[width=.5\columnwidth]{heat_eq_euler_10.pdf} 
+    }
+    \subfloat[$\Delta x = 1/100,\enspace \Delta t = 1/20000$]{
+    \includegraphics[width=.5\columnwidth]{heat_eq_euler_100.pdf} 
+    }
+    \\
     \subfloat[$\Delta x = 1/10,\enspace \Delta t =  1/200$]{
     \includegraphics[width=.5\columnwidth]{heat_eq_euler_err_10.pdf} 
     }
     \subfloat[$\Delta x = 1/100,\enspace \Delta t = 1/20000$]{
     \includegraphics[width=.5\columnwidth]{heat_eq_euler_err_100.pdf} 
     }
-    \caption{\label{fig:fw euler PDE error}Absolute error of the heat equation solved using an explicit forward euler scheme wrt. the analytic solution for $\Delta x = 1/10$ and $\Delta x = 1/100$}
+    \caption{\label{fig:fw euler PDE error}Solution of the heat equation solved by finite difference (Top row) as well as the  Absolute error (Bottom row) with respect to the analytic solution for $\Delta x = 1/10$ and $\Delta x = 1/100$}
 \end{figure}
 
-We observe in Fig.~\ref{fig:ReLU composite figure} that both models seems to yield essentially the same performance, where in particular the smaller data set is able to produce similar accuracy to the much larger dataset, while being two orders of magnitude smaller in size. The absolute relative is then computed against the analytic solution at the same points in which the PDE was solved, presented in Fig.~\ref{fig:fw euler PDE error}.
+In our initial experimentation with different activation functions, we found that ReLU seemed the most consistent at capturing the qualitative results of the heat equation, as observed by monitoring the evolution of the cost-functions as the networks were being trained. The full results of these models are omitted from the report, but can be found in the fully rendered Jupyter notebooks in our repo. We thus used the ReLU activation as a basis for our subsequent analysis.
 
+We observe in Fig.~\ref{fig:ReLU composite figure} that both models seems to yield essentially the same performance, where in particular the smaller data set is able to produce similar accuracy to the much larger dataset, whilst being two orders of magnitude smaller in size. However, when compared to the solutions by Finite-Difference, the Neural network performs rather poorly in terms of accuracy. However, one thing to note in favor of the Neural network is that we are able to evaluate over the entirety of the domain $[0,1]\times[0,1]$, not just on the grid points we trained it on, but any other points in the domain. In contrast, for the solution provided by the finite difference method, we would have to utilize interpolation methods or redo the calculation with the desired points included in the computational grid. Significantly, we do not need the training points to obey the same constraints as the finite-difference method, that is; the stability criterion $\Delta t / \Delta x \leq 1/2$. That is, if we were to increase the resolution in $x$, the resolution in $t$ must be increased quadratically, blowing up if one wishes high resolution in $x$ for the finite-difference scheme. This is in stark contrast to the Neural Network, which can be trained on equispaced, or anyway similarly resolutions in both dimensions.
+
+It should further be noted that we are not entirely confident that our network is optimized, and one may possibly with further time and tweaking obtain a neural network yielding a higher accuracy. However, given that our network has successfully reproduced the general features of the true solution, the method seems to work for solving PDEs. 
 
 % Present the results, compare with FW euler scheme
-
 % Intrepret the results:
 % - small and large sets produce approximately the same error
 % - Both are worse than FW euler scheme
@@ -314,20 +352,40 @@ We observe in Fig.~\ref{fig:ReLU composite figure} that both models seems to yie
 
 \subsection{The Eigen-problem}
 \noindent 
-We wish to find the extrema eigenpairs of a Real, Symmetric matrix matrix by solving a set of coupled, nonlinear differential equations following the method proposed by \textcite{Yi_2004}. We prepared a random matrix by sampling a $\mathbf Q= [6\times 6]$ array of random numbers from the standard normal distribution $\mathcal N(0, 1)$ using a fixed seed ensuring that our results are reproducible. The matrix $\mathbf Q$ was then transformed to a real, symmetric matrix $\mathbf A$ by
+We wish to find the extrema eigenpairs of a Real, Symmetric matrix matrix by solving a set of coupled, nonlinear differential equations presented by \textcite{Yi_2004}, Eqn.~\ref{eq:yi_eq}. We prepared a random matrix by sampling a $\mathbf Q= [6\times 6]$ array of random numbers from the standard normal distribution $\mathcal N(0, 1)$ using a fixed seed ensuring that our results are reproducible. The matrix $\mathbf Q$ was then transformed to a real, symmetric matrix $\mathbf A$ by
 \begin{equation}
     \mathbf A = \mathbf Q^T + \mathbf Q
 \end{equation}
-Following our work on the heat equation, we used a similar approach by solving the differential equations using a Neural Network as well as an explicit Forward-Euler scheme, where the latter was only used to gauge how well the network is able to reproduce the dynamics of the system. The eigenpairs produced by the network were benchmarked against the eigh method in Numpy, which calls on numerically robust methods in LAPACK\footnote{See: \url{https://github.com/numpy/numpy/blob/v1.9.1/numpy/linalg/umath_linalg.c.src}}. We again wished to infer about the way in which the NN solution is affected by sample sizes, and thus trained two identical neural networks on the interval $t = [0,3]$ using 30 and 300 data points. Where the appropriate interval was determined by observing whether the explicit scheme had converged. 
+%  MENTION HOW LONG THE NETWORKS ARE TRAINED, SAME AS PREVIOUSLY
+Following our work on the heat equation, we used a similar approach by solving the differential equations using a Neural Network as well as an explicit Forward-Euler scheme, where the latter was used to gauge how well the network is able to reproduce the dynamics of the system. The eigenpairs produced by the network were benchmarked against the eigh method in Numpy, which calls on numerically robust methods in LAPACK. We again wished to infer about the way in which the NN solution is affected by sample sizes, and thus trained two identical neural networks on the interval $t = [0,3]$ using 30 and 300 data points. Where the appropriate interval was determined by observing whether the explicit scheme had converged. 
+\vspace{5mm}
+\begin{table}
+    \center
+    \caption{\label{tab:eigenvecs}Maximal eigenpairs predicted with the 30pt ($N_{30}$) and 300pt ($N_{300}$) models}
+   \begin{tabular}{|l |r | r @{\hspace{1em}} r @{\hspace{1em}} r @{\hspace{1em}} r @{\hspace{1em}} r @{\hspace{1em}} r|}
+    \hline
+              & $\lambda_{max}$ & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $x_5$ & $x_6$ \\ \hline 
+    $N_{30}$  & 3.689 & 0.535 & -0.007 & -0.281 & 0.696 & 0.223 & -0.318 \\
+    $N_{300}$ & 3.707 & 0.551 & -0.019 & -0.306 & 0.676 & 0.224 & -0.308 \\
+    Numpy     & 3.722 & 0.578 & -0.021 & -0.337 & 0.627 & 0.239 & -0.318 \\
+    \hline
+    \end{tabular} 
+\end{table}
+The predicted eigenpairs are shown in Table~\ref{tab:eigenvecs} for both the models, along with the eigenpairs produced by Numpy. We further present the full dynamics of the differential equations in Fig.~\ref{fig:eigenvector}. From this, we also computed the inner products between the eigenvector produced by Numpy and the eigenvectors produced by our neural networks, which yielded $\langle \pmb x_{np}, \pmb x_{30}\rangle = 0.995$ and $\langle \pmb x_{np}, \pmb x_{300}\rangle = 0.998$ for the 30 and 300 point neural networks respectively, where we note that the eigenvectors are normalized.
 
+As our first and most striking observation, we see in Fig.~\ref{fig:eigenvector} that the network based solution to a large degree, but not fully, mimics the solution from the Forward-Euler scheme. Where notably the results seems to be largely independent of the number of points used in the training set given a comparable amount of training in both cases. Whilst not entirely precise, the qualitative features reproduced by the models are such to suggest that given more training and tweaking of the networks, one may obtain a more accurate reproduction.
+
+Secondly, we remark that the eigenpairs computed by both networks provide reasonable estimates of the ground truth. There is however a problem with relying solely on the solutions to the differential equations produced by the neural network to infer about the eigenpairs, namely due to the difficulty in determining whether the end of the time domain corresponds to a steady state solution. If one wishes to compute the eigenpairs, one needs to pick a time domain such that the true solutions have reached a steady state and converged to the components of the eigenvector, however, we do not in general have a method for picking a suitable time domain without prior knowledge of the dynamics. To illustrate this point; if we did not know the dynamics of the solutions a priori, the choice between time domains of $[0,3]$ and for example $[0,0.5]$ is completely arbitrary, where in the latter case one could never hope to produce the eigenvectors, as seen in Fig.~\ref{fig:eigenvector}. At the other extreme, experiments with overly large time-domains seemed to indicate an untenable slowdown in learning. Thus, we are not convinced that using neural networks to solve the differential equations (Eqn.~\ref{eq:yi_eq}) is a very useful way of computing eigenpairs.
+
+We also computed the minimal eigenpairs in a completely identical manner by substituting $\mathbf A$ with $- \mathbf A$, given that the results are rather similar to the ones we have already looked at, we will not discuss there further and simply refer the reader to the Jupyter notebook for the results.
 
 
 % Mention network structure; describe process of implementation, experimentation etc
-
 % - Manages to qualitatively reproduce the main features of the dynamics of the highly non-linear system of coupled DE's 
 % - Eigenvalue & Eigenvalues are approximated to a pretty good degree of accuracy, but pales in comparrison to numpy
 % - More training & model optimization is likely required to achieve better accuracy; but serves as a good proof of concept
 % - Attempted to find eigenvalues by longer durations; however eigenvalues where rather poor. Thus implying that proper sampling of the early system may be an important factor in the final prediction of the network. This makes the network a rather poor candidate for finding eigenvalus, given that it would require a priori knowledge of the appropriate timespan to solve the sytstem for, which for anything past a toy problem is not feasable. Given that you may as well use a standard DE solver in that case. We did in fact encounter this exact problem, where the positive eigenvalues where converged, but the negative ones were not. 
+% When we went on find the smalles eigenvalue; we found that the explicit scheme had not yet converged to a steady state, meaning that no matter what, our eigenvalues would not be correct.
 
 \begin{figure*}[h!tb]
    \center
@@ -344,56 +402,5 @@ Following our work on the heat equation, we used a similar approach by solving t
 \onecolumngrid
 \bibliography{bibfile}
 \twocolumngrid
-
-
-\begin{figure*}
-    \center
-    \subfloat[Model I evaluated on 11x11 grid]{
-    \includegraphics[width=.66\columnwidth]{PDE_RELU_10_10x1000.pdf}
-    }
-    \subfloat[Model I evaluated on 100x100 grid]{
-    \includegraphics[width=.66\columnwidth]{PDE_RELU_10_100x100.pdf}
-    }
-    \subfloat[Error of model I]{
-    \includegraphics[width=.66\columnwidth]{PDE_RELU_10_ERR.pdf}
-    }
-    \\
-    \subfloat[Model II evaluated on 11x11 grid]{
-    \includegraphics[width=.66\columnwidth]{PDE_RELU_100_10x10.pdf}
-    }
-    \subfloat[Model II evaluated on 100x100 grid]{
-    \includegraphics[width=.66\columnwidth]{PDE_RELU_100_100x100.pdf}
-    }
-    \subfloat[Error of model II]{
-    \includegraphics[width=.66\columnwidth]{PDE_RELU_100_ERR.pdf}
-    }
-    \caption{\label{fig:ReLU composite figure}Feed-Forward Neural Networks with 4 hidden layers each consisting of 100 Neurons using the ReLU activation function trained on $11\times11$ (Model I) and $100\times100$ (Model II) equispaced points in the intervals $[x,t]\in[0,1]\times[0,1]$, where absolute error, and mean absolute error (MAE) are computed with respect to the analytic solution of the PDE on a grid of $200\times200$ equispaced points in the same interval.}
-\end{figure*}
-
-
-\begin{figure*}[h!tb]
-    \center
-    \subfloat[$\tanh$ model evaluated on 11x11 grid]{
-    \includegraphics[width=.66\columnwidth]{PDE_TANH_10x10.pdf}
-    }
-    \subfloat[$\tanh$ model evaluated on 100x100 grid]{
-    \includegraphics[width=.66\columnwidth]{PDE_TANH_100x100.pdf}
-    }
-    \subfloat[Error of $\tanh$ model]{
-    \includegraphics[width=.66\columnwidth]{PDE_TANH_ERR.pdf}
-    }
-    \\
-    \subfloat[Sigmoid model evaluated on 11x11 grid]{
-    \includegraphics[width=.66\columnwidth]{PDE_SIG_10x10.pdf}
-    }
-    \subfloat[Sigmoid model evaluated on 100x100 grid]{
-    \includegraphics[width=.66\columnwidth]{PDE_SIG_100x100.pdf}
-    }
-    \subfloat[Error of Sigmoid model]{
-    \includegraphics[width=.66\columnwidth]{PDE_SIG_ERR.pdf}
-    }
-    \caption{\label{fig:tanh sig composite figure}
-    Feed-Forward Neural Networks with 4 hidden layers each consisting of 100 Neurons using the $\tanh$ and Sigmoid activation functions trained on $11\times11$ equispaced points in the intervals $[x,t]\in[0,1]\times[0,1]$, where absolute error, and mean absolute error (MAE) are computed with respect to the analytic solution of the PDE on a grid of $200\times200$ equispaced points in the same interval}
-\end{figure*}
 
 \end{document}
