@@ -63,7 +63,7 @@ where $u_{bc}(x), u_{nn}(x)$ are functions which enforce the boundary conditions
 \begin{equation}
     \mathcal C\qty[u\qty(x)] = \frac{1}{n} \sum_{i=1}^{n}\qty(F\qty[x, u(x_i), u'(x_i), \dots, u^{(n)}(x_i)])^2
 \end{equation}
-where we have discretized as $x \rightarrow \{x_1, x_2 ,\dots, x_{n}\}$. We can then construct a Feed-Forward Neural network with $L-1$ hidden layers which for each iteration updates the weights and biases of the network with respect to the current trial solution $\tilde u(x)$ evaluated with the cost function. 
+where we have discretized as $x \rightarrow \{x_1, x_2 ,\dots, x_{n}\}$. We may then construct a Feed-Forward Neural network where for each iteration updates the weights and biases of the network with respect to the current trial solution $\tilde u(x)$ evaluated with the cost function. 
 
 %% Elaborate on how backprop no longer works
 %% Cost function is dependent on the
@@ -73,7 +73,7 @@ where we have discretized as $x \rightarrow \{x_1, x_2 ,\dots, x_{n}\}$. We can 
 As a note, for some network architectures it is possible to obtain fairly simple derivatives of these types of cost-functions with respect to the network parameters, see e.g. \cite{Lagaris_1998}. However, it is in general quite burdensome to set up the network-derivatives by hand. Thus a major boost for the use of neural networks in solving differential equations comes from the advent of Automatic Differentiation, which by tracking the elementary operations performed in the network computations is capable of accurately and automatically producing the sought-after gradients. In the present work we rely on the automatic differentiation functionality of PyTorch, to produce all necessary derivatives.
 
 %% ADAM
-Further, we also utilize the ADAM optimization algorithm \cite{kingma2017adam}. 
+Further, we also utilize the ADAM optimization algorithm \cite{kingma2017adam} for updating the weights and biases...
 % Note relation to AdaGRAD and RMSPROP
 % Cite previous report for more detials
 % Consider typing up the algorithm
@@ -347,7 +347,6 @@ It should further be noted that we are not entirely confident that our network i
 % - Surprised by difference in accuracy; may imply poor modeling and/or a bug in the implementation. leaning on the  latter given the observations in the Eigenvalue problem.
 % used MAE over MSE as a metric as to not be overly optimistic of the error.
 
-% The full "landscape" may be reproduced well by small, incomplete datasets. Also observed in terrain data previously => Neural networks may be suitable for high dimensional problems with limited sampling.
 
 
 \subsection{The Eigen-problem}
@@ -398,6 +397,7 @@ We also computed the minimal eigenpairs in a completely identical manner by subs
 \section{Conclusion}
 % - The true benefit of the may become apparent my looking at higher dimensional problems
 % - "trivial" to implement; no need to discretize, setting up finite-diff schemes is tedious for higher dimensions
+% The full "landscape" may be reproduced well by small, incomplete datasets. Also observed in terrain data previously => Neural networks may be suitable for high dimensional problems with limited sampling.
 
 \onecolumngrid
 \bibliography{bibfile}
