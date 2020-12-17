@@ -1,4 +1,4 @@
-# Project 2: Solving partial differential equations with neural networks 
+# Project 3: Solving partial differential equations with neural networks 
 
 <ADD LINK TO FINAL REPORT HERE>
 
