@@ -74,8 +74,8 @@ For some network architectures it is possible to obtain fairly simple representa
 
 %% Add a reference for AutoDiff+pytorch to the last sentence in above paragraph?
 %% ADAM
-Further, we also utilize the ADAM optimization algorithm \cite{kingma2017adam} for updating the weights and biases...
-% Note relation to AdaGRAD and RMSPROP
+Further, we also utilize the Adam optimization algorithm \cite{kingma2017adam} for updating the weights and biases, an adaptive variant of stochastic gradient decent which we previously discussed in \cite{4155_project_2}. The model also benefits from being rather simple, only containing four free parameters. The learning rate $\alpha$, exponential decay rates $\beta_1, \beta_2$ and a small term $\epsilon$, usually set to $10^{-8}$, which role is to prevent division by zero. The authors also a propose a set of default parameters $\alpha=0.001\enspace \beta_1=0.9$ and $\beta_2 = 0.999$, which serves as a good starting point when using Adam. For the full context of these parameters, we refer the reader to the original paper by \textcite{kingma2017adam} which lists and describes the algorithm in full detail.
+ % Note relation to AdaGRAD and RMSPROP
 % Cite previous report for more detials
 % Consider typing up the algorithm
 % Mention the standard parameters proposed by the authors
@@ -273,7 +273,7 @@ Then the cost-function to be optimized is defined, in this case as:
 \end{widetext}
 Where again, this cost function is valid for a single sample $t$, and for mini-batches one would sum the cost over all the sampled $t$ and take the mean.
 
-Finally the derivatives of the cost-function with respect to the network parameters are computed, and the network parameters are updated using ADAM.
+Finally the derivatives of the cost-function with respect to the network parameters are computed, and the network parameters are updated using Adam.
 
 The only real change from the case of the heat equation is that the network now must produce $M$ outputs for each input $t$, as opposed to one output for each pair $x,t$ of inputs.
 
@@ -388,12 +388,12 @@ We also computed the minimal eigenpairs in a completely identical manner by subs
 % - Attempted to find eigenvalues by longer durations; however eigenvalues where rather poor. Thus implying that proper sampling of the early system may be an important factor in the final prediction of the network. This makes the network a rather poor candidate for finding eigenvalus, given that it would require a priori knowledge of the appropriate timespan to solve the sytstem for, which for anything past a toy problem is not feasable. Given that you may as well use a standard DE solver in that case. We did in fact encounter this exact problem, where the positive eigenvalues where converged, but the negative ones were not. 
 % When we went on find the smalles eigenvalue; we found that the explicit scheme had not yet converged to a steady state, meaning that no matter what, our eigenvalues would not be correct.
 
-\begin{figure*}[h!tb]
+\begin{figure}[h!tb]
    \center
-   \subfloat[30 Points]{\includegraphics[width=.8\columnwidth]{eigenvec_dynamics.pdf}}
-   \subfloat[300 Points]{\includegraphics[width=.8\columnwidth]{eigenvec_dynamics_100.pdf}}
+   \subfloat[30 Points]{\includegraphics[width=.5\columnwidth]{eigenvec_dynamics.pdf}}
+   \subfloat[300 Points]{\includegraphics[width=.5\columnwidth]{eigenvec_dynamics_100.pdf}}
    \caption{\label{fig:eigenvector} Dynamics of the eigenvector components of the largest eigenvalue of the matrix $A$ modeled by Neural networks (Solid lines) trained on 30 and 300 datapoints as well as the same dynamics solved using a Forward Euler method (dotted lines) where Numpy eigenvector components is indicated by the semi-transparent dashed lines.}
-\end{figure*}
+\end{figure}
 
 
 \section{Conclusion}
