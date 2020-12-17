@@ -399,9 +399,22 @@ We also computed the minimal eigenpairs in a completely identical manner by subs
 \section{Conclusion}
 
 We have successfully applied neural networks to the solution of both partial differential equations and systems of nonlinear ordinary differential equations.
-% - The true benefit of the may become apparent my looking at higher dimensional problems
+
+%Okay, but not great accuracy
+%Gets the qualitative behaviour mostly right
+%Difficult to increase accuracy
+%%Trial functions are far from unique, possible to use better ones
+%%For most domains we tried, largely independent on number of training points; so long as the total number of training iterations was similar. Limitation that the points were either randomly sampled from uniform distribution, or taken as an equidistant grid.
+%Seems, but not tested extensively, sensitive to the problems domain, indicates that it requires far more training when the solutions vary between staying stable for a long stretch and changing rapidly
+% Ideas for improving accuracy: nonuniform sampling of points, much more patience with the training, additional tweaking of the optimizer and/or the learning rate, more experimentation with different trial functions.
+% Particularly, small changes to the solution over large training periods indicate need for more aggresive learning rates and/or error in our implementation. Though the qualitative reproduction gives us confidence in the correctness of our results, it is not definite proof.
+%% For the considered example cases, NN were not competetive with standard methods.
+%% Particularly, for eigenproblem it seems like a bad approach if the goal is the eigenpairs themselves; RNNs, on the other hand, may be better suited. That is after all the context of Yi-etal. For our examples RNN's (or forward-euler) would probably be overkill, but at higher dimensionality one might expect better scaling.
+%% But there are advantages.
+% - The true benefit of the may become apparent by looking at higher dimensional problems
 % - "trivial" to implement; no need to discretize, setting up finite-diff schemes is tedious for higher dimensions
-% The full "landscape" may be reproduced well by small, incomplete datasets. Also observed in terrain data previously => Neural networks may be suitable for high dimensional problems with limited sampling.
+% The full "landscape" may be reproduced well by small, incomplete datasets. Also observed in terrain data previously => Neural networks may be suitable for high dimensional problems with limited sampling. More sampling of rapidly changing regions could easily be done to conceivably improve the solution. Not completely trivial to locally refine a finite-difference grid for high-dimensionalities.
+% In summary, very interesting  for continued study. Accuracy is an issue, but there are many avenues to investigate in search of improvement.
 
 \onecolumngrid
 \bibliography{bibfile}
