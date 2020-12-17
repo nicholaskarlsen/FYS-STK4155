@@ -1,6 +1,6 @@
 # Project 3: Solving partial differential equations with neural networks 
 
-<ADD LINK TO FINAL REPORT HERE>
+[Final version of the report](https://github.com/nicholaskarlsen/FYS-STK4155/blob/master/project_3/project_3_final.pdf)
 
 
 ## Overview of project structure
