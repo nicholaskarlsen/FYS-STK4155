@@ -53,25 +53,26 @@ Subsequently we compare the performance of the network-based methods with the tr
 \noindent
 In general, a ordinary differential equation (ODE) may be written as a function in the form
 \begin{equation}
+\label{eq:ode_general}
     F \qty[x, u(x), u'(x), u''(x), \dots, g^{(n)}(x)] = 0
 \end{equation}    
 where $u(x)$ denotes the solution of the ODE. One may then propose a trial solution $\tilde u(x,P)$ in the form
 \begin{equation}
     \tilde u(x, P) = u_{bc}(x) + u_{nn}(x)N(x, P) 
 \end{equation}
-where $u_{bc}(x), u_{nn}(x)$ are functions which enforce the boundary conditions of the ODE and $N(x, P)$ is a neural network with independent variables denoted by $P = \{W, \pmb b\}$, the set of weights and biases in the network respectively. In order to optimize $N(x, P)$ such that $\tilde u(x)$ yields a solution of the ODE, we define the cost function by the $L^2$ norm of $F$ as
+where $u_{bc}(x), u_{nn}(x)$ are functions which enforce the boundary conditions of the ODE and $N(x, P)$ is a neural network with independent variables denoted by $P = \{W, \pmb b\}$, the set of weights and biases in the network respectively. In order to optimize $N(x, P)$ such that $\tilde u(x)$ yields a solution of the ODE, we define the (scalar) cost function $\mathcal{C}$ as
 \begin{equation}
-    \mathcal C\qty[u\qty(x)] = \frac{1}{n} \sum_{i=1}^{n}\qty(F\qty[x, u(x_i), u'(x_i), \dots, u^{(n)}(x_i)])^2
+    \mathcal C\qty[u\qty(x)] = \qty(F\qty[x, u(x), u'(x), \dots, u^{(n)}(x)])^2
 \end{equation}
-where we have discretized as $x \rightarrow \{x_1, x_2 ,\dots, x_{n}\}$. We may then construct a Feed-Forward Neural network where for each iteration updates the weights and biases of the network with respect to the current trial solution $\tilde u(x)$ evaluated with the cost function. 
+for each training point $x$. In essence, the problem of solving the differential equation through neural networks then becomes the convex optimization problem of making the equation \ref{eq:ode_general} self-consistent for the chosen trial solution. For vector-valued functions (systems of differential equation) the above cost-function is straightforwardly modified to become instead the mean of the scalar cost-functions for the individual vector-components. The extension to partial differential equations (PDE) and functions of several variables should be obvious. We may then construct a Feed-Forward Neural Network (FFNN) where, for each iteration, we update the weights and biases of the network according to some optimizaton scheme containing the derivatives of  the cost-function with respect to the network parameters. 
 
-%% Elaborate on how backprop no longer works
-%% Cost function is dependent on the
-%% Check nielsen for reference on assumptions in backprop
-%% Backwards pass
+In our previous paper \citep{4155_project_2} we gave an overview of FFNNs and how they can be trained using the backpropagation algorithm with stochastic gradient descent and mini-batching. For a more in-depth exposition, along with a derivation of the backpropagation algorithm, the reader is referred to the excellent textbook by Nielsen \citep{Nielsen}. We will thus not repeat much of our previous discussion regarding FFNNs in the present report. Instead, we only note the considerations unique to the application of FFNNs for solving differential equations in general; and some aspects of our chosen optimization scheme in particular.
 
-As a note, for some network architectures it is possible to obtain fairly simple derivatives of these types of cost-functions with respect to the network parameters, see e.g. \cite{Lagaris_1998}. However, it is in general quite burdensome to set up the network-derivatives by hand. Thus a major boost for the use of neural networks in solving differential equations comes from the advent of Automatic Differentiation, which by tracking the elementary operations performed in the network computations is capable of accurately and automatically producing the sought-after gradients. In the present work we rely on the automatic differentiation functionality of PyTorch, to produce all necessary derivatives.
+The key difference between the regression and classification problems considered in \citep{4155_project_2} and the currently considered differential equations lies in the form of the cost-function. Whereas we previously worked with cost-functions only having a functional dependence on the network output, we are now faced with a cost-function depending on both the network output and the derivatives of the network output with respect to the network input. This renders the backpropagation algorithm, at least without modifications, rather inapplicable. In order to start the backpropagation one needs to evaluate the error in the outermost layer of the network (which is given by the partial derivatives of the cost-function with respect to the output activations), before one propagates it towards the inner layers according to repeated invocations of the chain rule. For our previously pondered problems this was very simple, as the error in the outermost layer could be computed in a single step yielding a number. Now, however, the computation of the network derivatives with respect to the inputs in the cost-function requires the whole chain of chain rule applications to already have been performed before even starting the backpropagation. The input-derivatives must be set up in advance of the backpropagation, defeating the purpose of using the algorithm for simplifying the chain-rule computations. Furthermore, once one has obtained by hand an expression for the derivatives of the network with respect to the inputs, it becomes a nontrivial, or at least an extremely tedious, task to ensure that the functional dependencies of the input-derivatives are carried correctly through the backpropagation, should one insist on maintaining that scheme. It is more straightforward, though still very tedious, to obtain expressions for all the desired derivatives by hand and evaluating these expressions directly. The unique challenge presented by differential equations is thus the computation of the network derivatives.
 
+For some network architectures it is possible to obtain fairly simple representations of the derivatives of these types of cost-functions with respect to the network parameters, see e.g. \cite{Lagaris_1998}. However, it is in general quite burdensome to set up the network-derivatives by hand. Thus a major boost for the use of neural networks in solving differential equations comes from the advent of Automatic Differentiation, which by tracking the elementary operations performed in the network computations is capable of accurately and automatically producing the sought-after gradients. In the present work we rely on the automatic differentiation functionality of PyTorch, to produce all necessary derivatives.
+
+%% Add a reference for AutoDiff+pytorch to the last sentence in above paragraph?
 %% ADAM
 Further, we also utilize the ADAM optimization algorithm \cite{kingma2017adam} for updating the weights and biases...
 % Note relation to AdaGRAD and RMSPROP
@@ -157,19 +158,20 @@ a plot of which for $t \in [0, 1]$ is shown in Fig.~\ref{fig: heat eqn analytic}
 
 \subsubsection{Solving the Heat Equation through a simple Finite-Difference scheme\label{sec:finite difference theory}}
 \noindent
-While we in this case were able to obtain a simple analytic solution to the differential equation, that is generally not possible for most PDEs so numerical methods must be used instead. The simplest, though neither the most accurate nor the most stable, class of numerical methods for solving PDEs are the so-called explicit finite-difference schemes. The main idea consists of dividing the computational domain into a set of grid points, and discretizing the differential equations to obtain relations between the function values at those grid-points. 
+While we in this case were able to obtain a simple analytic solution to the differential equation, that is generally not possible for most PDEs so numerical methods must be used instead. The simplest, though neither the most accurate nor the most stable, class of numerical methods for solving PDEs are the so-called explicit finite-difference (FD) schemes. The main idea consists of dividing the computational domain into a set of grid points, and discretizing the differential equations to obtain relations between the function values at those grid-points. 
 
 The distinction between explicit and implicit schemes is, of course, that with an explicit scheme the values at the next grid points can be explicitly calculated from the previous grid points so that given the boundary conditions one obtains a rule for calculating the function values of the whole domain one step at the time. Oppositely, implicit schemes give the value at a grid-point as a function of both that grid-point's value and the values of the previous grid-points thus requiring the (usually numerical) solution of a linear system of equations for each grid-point. The benefit of implicit methods is that they usually have more lax restrictions on how the grid-points must be spaced in order to maintain stability of the solution.
 
-For the case at hand one rewrites 
+For the case at hand one we utilize the following FD scheme:
 \begin{widetext}
 \begin{equation}
+\label{eq:FD}
     u(x_i,t_i) = \qty(u(x_i - \Delta x,t_i - \Delta t) - 
                  2u(x_i,t_i-\Delta t) + 
                  u(x_i+\Delta x,t_i-\Delta t)) \cdot \frac{\Delta t}{\Delta x^2} 
 \end{equation}
 \end{widetext}
-First setup grid, then discretize 
+The scheme is obtained by first discretizing the computational domain into a set of grid points $x_i$ and $t_i$ with equidistant spacing $\Delta x$ and $\Delta t$, and subsequently approximating the derivatives by the function $u$ evaluated at neighboring grid points in the following manner:
 \begin{equation}
    \pdv[2]{u}{x} \approx \frac{u(x_i-\Delta x)-2u(x_i) + u(x_i+\Delta x)}{\Delta x^2} 
 \end{equation}
@@ -177,7 +179,7 @@ and
 \begin{equation}
     \pdv{u}{t} \approx \frac{u(t_i + \Delta t) - u(t_{i})}{\Delta t}
 \end{equation}
-Move around these two equations and you get the formula. Can be rewritten as a matrix equation in the form
+Simple algebraic manipulations of the two equations above yields the scheme \ref{eq:FD}, which step by step yields the solution starting from the boundary conditions on $t_0 = 0$ and $x_0 = 0$. The scheme can be compactly rewritten as a matrix equation in the form
 \begin{equation}
     \pmb u(t_i+\Delta t) = \mathbf{B} \pmb u(t_i) \frac{\Delta t}{\Delta x^2}
 \end{equation}
@@ -194,7 +196,7 @@ where $\pmb u(t_i) = (u(x_0, t_i), u(x_1, t_i), \dots)^T$ and $\bf B$ is a tridi
     \end{matrix}
     ]
  \end{equation}
-with zero-padding on top and bottom rows to accommodate the BC. Stability criterion $\Delta t/\Delta x2 \leq 1/2$, if not fulfilled round-off errors will cause the solution to explode. 
+where the zero-padding on top and bottom rows takes care of the boundary conditions. It is thus extremely easy to setup the computation of this FD-scheme, and should computational speed critical there are robust, standard numerical linear-algebra-techniques for sparse matrices that outperform naive matrix-vector-multiplication. The really crushing caveat for this approach to differential equations, is however as mentioned stability concerns. It is a standard exercise in numerical analysis courses to show that this method is only stable so long as the stability criterion $\Delta t/\Delta x2 \leq 1/2$ is fulfilled. Quite separately from the local approximation error in each step due to the discretization of the computational grid and the derivates, failure to obey the stability criterion will lead to rounding errors eventually hijacking the solution's trajectory, pushing it off-course and blowing it up. For a discussion of stability vs approximation error the reader is referred to e.g. chapter 4 in \cite{Iserles}. The main point, for our purposes, is to note that an e.g. tenfold decrease in the separation between grid-points in the $x$-dimension ($\Delta x$) necessitates a hundredfold decrease in the separation between grid-points in the $t$-dimension ($\Delta t$). That is, a linear increase in resolution (number of grid-points) along one dimension comes at the cost of a quadratic increase in grid-points for the other dimension in order to maintain stability. Thus the cost of increasing the accuracy/approximation error of the solution (determined by the combined effects of both grid-spacings) as well as the resolution (synonymous with the number of grid points the solution is computed at) scales rather poorly.
 
 \subsubsection{Solving the Heat Equation with Neural Networks}
 \noindent
@@ -333,7 +335,7 @@ Lastly, we solved the Heat equation using the Finite-Difference scheme discussed
 
 In our initial experimentation with different activation functions, we found that ReLU seemed the most consistent at capturing the qualitative results of the heat equation, as observed by monitoring the evolution of the cost-functions as the networks were being trained. The full results of these models are omitted from the report, but can be found in the fully rendered Jupyter notebooks in our repo. We thus used the ReLU activation as a basis for our subsequent analysis.
 
-We observe in Fig.~\ref{fig:ReLU composite figure} that both models seems to yield essentially the same performance, where in particular the smaller data set is able to produce similar accuracy to the much larger dataset, whilst being two orders of magnitude smaller in size. However, when compared to the solutions by Finite-Difference, the Neural network performs rather poorly in terms of accuracy. However, one thing to note in favor of the Neural network is that we are able to evaluate over the entirety of the domain $[0,1]\times[0,1]$, not just on the grid points we trained it on, but any other points in the domain. In contrast, for the solution provided by the finite difference method, we would have to utilize interpolation methods or redo the calculation with the desired points included in the computational grid. Significantly, we do not need the training points to obey the same constraints as the finite-difference method, that is; the stability criterion $\Delta t / \Delta x \leq 1/2$. That is, if we were to increase the resolution in $x$, the resolution in $t$ must be increased quadratically, blowing up if one wishes high resolution in $x$ for the finite-difference scheme. This is in stark contrast to the Neural Network, which can be trained on equispaced, or anyway similarly resolutions in both dimensions.
+We observe in Fig.~\ref{fig:ReLU composite figure} that both models seems to yield essentially the same performance, where in particular the smaller data set is able to produce similar accuracy to the much larger dataset, whilst being two orders of magnitude smaller in size. However, when compared to the solutions by Finite-Difference, the Neural network performs rather poorly in terms of accuracy. However, one thing to note in favor of the Neural network is that we are able to evaluate over the entirety of the domain $[0,1]\times[0,1]$, not just on the grid points we trained it on, but any other points in the domain. In contrast, for the solution provided by the finite difference method, we would have to utilize interpolation methods or redo the calculation with the desired points included in the computational grid. Significantly, we do not need the training points to obey the same constraints as the finite-difference method, that is; the stability criterion $\Delta t / \Delta x \leq 1/2$. That is, if we were to increase the resolution in $x$, the resolution in $t$ must be increased quadratically, blowing up if one wishes high resolution in $x$ for the finite-difference scheme. This is in stark contrast to the neural network, which can be trained on similar resolutions in both dimensions.
 
 It should further be noted that we are not entirely confident that our network is optimized, and one may possibly with further time and tweaking obtain a neural network yielding a higher accuracy. However, given that our network has successfully reproduced the general features of the true solution, the method seems to work for solving PDEs. 
 
@@ -372,7 +374,7 @@ Following our work on the heat equation, we used a similar approach by solving t
 \end{table}
 The predicted eigenpairs are shown in Table~\ref{tab:eigenvecs} for both the models, along with the eigenpairs produced by Numpy. We further present the full dynamics of the differential equations in Fig.~\ref{fig:eigenvector}. From this, we also computed the inner products between the eigenvector produced by Numpy and the eigenvectors produced by our neural networks, which yielded $\langle \pmb x_{np}, \pmb x_{30}\rangle = 0.995$ and $\langle \pmb x_{np}, \pmb x_{300}\rangle = 0.998$ for the 30 and 300 point neural networks respectively, where we note that the eigenvectors are normalized.
 
-As our first and most striking observation, we see in Fig.~\ref{fig:eigenvector} that the network based solution to a large degree, but not fully, mimics the solution from the Forward-Euler scheme. Where notably the results seems to be largely independent of the number of points used in the training set given a comparable amount of training in both cases. Whilst not entirely precise, the qualitative features reproduced by the models are such to suggest that given more training and tweaking of the networks, one may obtain a more accurate reproduction.
+As our first and most striking observation, we see in Fig.~\ref{fig:eigenvector} that the network based solution to a large degree, but not fully, mimics the solution from the Forward-Euler scheme. Interestingly, for the present computational domains, the results seems to be largely independent of the number of points used in the training set given a comparable amount of training in both cases. Whilst we have not been able to fully reproduce the dynamics suggested by the Forward-Euler, the qualitative reproduction of their character by the models is such as to suggest that given more training and tweaking of the networks one may obtain a more accurate reproduction.
 
 Secondly, we remark that the eigenpairs computed by both networks provide reasonable estimates of the ground truth. There is however a problem with relying solely on the solutions to the differential equations produced by the neural network to infer about the eigenpairs, namely due to the difficulty in determining whether the end of the time domain corresponds to a steady state solution. If one wishes to compute the eigenpairs, one needs to pick a time domain such that the true solutions have reached a steady state and converged to the components of the eigenvector, however, we do not in general have a method for picking a suitable time domain without prior knowledge of the dynamics. To illustrate this point; if we did not know the dynamics of the solutions a priori, the choice between time domains of $[0,3]$ and for example $[0,0.5]$ is completely arbitrary, where in the latter case one could never hope to produce the eigenvectors, as seen in Fig.~\ref{fig:eigenvector}. At the other extreme, experiments with overly large time-domains seemed to indicate an untenable slowdown in learning. Thus, we are not convinced that using neural networks to solve the differential equations (Eqn.~\ref{eq:yi_eq}) is a very useful way of computing eigenpairs.
 
@@ -395,6 +397,8 @@ We also computed the minimal eigenpairs in a completely identical manner by subs
 
 
 \section{Conclusion}
+
+We have successfully applied neural networks to the solution of both partial differential equations and systems of nonlinear ordinary differential equations.
 % - The true benefit of the may become apparent my looking at higher dimensional problems
 % - "trivial" to implement; no need to discretize, setting up finite-diff schemes is tedious for higher dimensions
 % The full "landscape" may be reproduced well by small, incomplete datasets. Also observed in terrain data previously => Neural networks may be suitable for high dimensional problems with limited sampling.
